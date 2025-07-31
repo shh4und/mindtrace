@@ -1,0 +1,22 @@
+# mindtrace-projeto/.gitignore
+
+# Dependências do Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Dependências do Backend (se houver alguma pasta de vendor)
+backend/vendor/
+
+# Binários compilados do Go
+*.exe
+backend/main
+
+# Dados do Banco de Dados
+postgres-data/
+
+# Arquivos de ambiente
+.env
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db

@@ -1,0 +1,41 @@
+# mindtrace
+
+services:
+  # PostgreSQL
+  db:
+    image: postgres:17-alpine  # Usa a imagem oficial do Postgres, versão 15, baseada em Alpine (leve)
+    container_name: mindtrace-db
+    restart: always # Sempre reinicia o container se ele parar
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}      # Usuário do banco
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}  # Senha do banco
+      - POSTGRES_DB=${POSTGRES_DB}    # Nome do banco de dados a ser criado
+    ports:
+      - "5432:5432" # Mapeia a porta 5432 do seu PC para a porta 5432 do container
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data # Persiste os dados do banco na pasta 'postgres-data' no seu PC
+    # Serviço do Backend em Go
+  backend:
+    container_name: mindtrace-backend
+    build:
+      context: ./backend # O Docker vai procurar o Dockerfile na pasta 'backend'
+    restart: always
+    ports:
+      - "8080:8080" # Mapeia a porta 8080 do PC para a 8080 do container
+    environment:
+      # Variáveis para a sua API Go se conectar ao banco
+      - DB_SOURCE="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/{POSTGRES_DB}?sslmode=disable"
+    depends_on:
+      - db # Garante que o container do 'db' inicie antes do 'backend'
+  # Serviço do Frontend em Vue.js
+  frontend:
+    container_name: mindtrace-frontend
+    build:
+      context: ./frontend
+    restart: always
+    ports:
+      - "8000:80" # Mapeia a porta 80 do PC para a 80 do container (Nginx)
+    depends_on:
+      - backend # Opcional, mas bom para garantir que a API esteja de pé
+volumes:
+  postgres-data:
