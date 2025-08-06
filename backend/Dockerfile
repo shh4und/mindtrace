@@ -23,12 +23,14 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main ./cmd/api/main.go
 
 # --- Estágio 2: Produção ---
 # Começamos uma nova imagem, muito menor, pois não precisamos mais do compilador do Go.
-FROM alpine:latest
+# DESCOMENTE PARA PRODUCAO / COMENTE PARA DESENVOLVER (CODE COMPLETIONS)
+# FROM alpine:latest
 
 WORKDIR /app
 
 # Copia apenas o executável compilado do estágio 'builder'
-COPY --from=builder /app/main .
+# DESCOMENTE PARA PRODUCAO / COMENTE PARA DESENVOLVER (CODE COMPLETIONS)
+# COPY --from=builder /app/main .
 
 # Expõe a porta que a sua API Gin vai usar (ex: 8080)
 EXPOSE 8080
