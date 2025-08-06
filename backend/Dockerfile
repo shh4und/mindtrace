@@ -30,7 +30,7 @@ WORKDIR /app
 
 # Copia apenas o executável compilado do estágio 'builder'
 # DESCOMENTE PARA PRODUCAO / COMENTE PARA DESENVOLVER (CODE COMPLETIONS)
-# COPY --from=builder /app/main 
+# COPY --from=builder /app/main .
 
 # Expõe a porta que a sua API Gin vai usar (ex: 8080)
 EXPOSE 8080
