@@ -27,7 +27,7 @@ services:
       - DB_SOURCE="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/{POSTGRES_DB}?sslmode=disable"
     depends_on:
       - db # Garante que o container do 'db' inicie antes do 'backend'
-  ## DESCOMENTE PARA PRORUCAO / COMENTE PARA DESENVOLVER
+  ## DESCOMENTE PARA PRODUCAO / COMENTE PARA DESENVOLVER
   # Serviço do Frontend em Vue.js
   # frontend:
   #   container_name: mindtrace-frontend
