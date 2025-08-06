@@ -23,7 +23,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main ./cmd/api/main.go
 
 # --- Estágio 2: Produção ---
 # Começamos uma nova imagem, muito menor, pois não precisamos mais do compilador do Go.
-# DESCOMENTE PARA PRODUCAO / COMENTE PARA DESENVOLVER (CODE COMPLETIONS)
+# DESCOMENTE PARA PRODUCAO / COMENTE PARA DESENVOLVIMENTO (CODE COMPLETIONS)
 # FROM alpine:latest
 
 WORKDIR /app
