@@ -7,7 +7,7 @@ import (
 )
 
 type UsuarioRepository interface {
-	Salvar(usuario *domain.Usuario) error
+	Save(usuario *domain.Usuario) error
 }
 
 type gormUsuarioRepository struct {
@@ -18,7 +18,7 @@ func NewGormUsuarioRepository(db *gorm.DB) UsuarioRepository {
 	return &gormUsuarioRepository{db: db}
 }
 
-func (r *gormUsuarioRepository) Salvar(usuario *domain.Usuario) error {
+func (r *gormUsuarioRepository) Save(usuario *domain.Usuario) error {
 	result := r.db.Create(usuario)
 	return result.Error
 }
