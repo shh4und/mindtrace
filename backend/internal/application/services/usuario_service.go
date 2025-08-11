@@ -5,38 +5,64 @@ import (
 	"mindtrace/backend/internal/persistence/postgres"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
+type RegisterProfissionalDTO struct {
+	Name                 string
+	Email                string
+	Password             string
+	Specialty            string
+	ProfessionalRegistry string
+}
+
 type UsuarioService interface {
-	Register(nome, email, senha string) (*domain.Usuario, error)
+	RegisterProfissional(dto RegisterProfissionalDTO) (*domain.Profissional, error)
 }
 
 type usuarioService struct {
+	db   *gorm.DB
 	repo postgres.UsuarioRepository
 }
 
-func NewUsuarioService(repo postgres.UsuarioRepository) UsuarioService {
-	return &usuarioService{repo: repo}
+func NewUsuarioService(db *gorm.DB, repo postgres.UsuarioRepository) UsuarioService {
+	return &usuarioService{db: db, repo: repo}
 }
 
-func (s *usuarioService) Register(nome, email, senha string) (*domain.Usuario, error) {
-	hashSenha, err := bcrypt.GenerateFromPassword([]byte(senha), bcrypt.DefaultCost)
+func (s *usuarioService) RegisterProfissional(dto RegisterProfissionalDTO) (*domain.Profissional, error) {
+	var registeredProfissional *domain.Profissional
 
-	if err != nil {
-		return nil, err
-	}
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
 
-	newUsuario := &domain.Usuario{
-		Nome:  nome,
-		Email: email,
-		Senha: string(hashSenha),
-	}
+		newUsuario := &domain.Usuario{
+			Name:     dto.Name,
+			Email:    dto.Email,
+			Password: string(hashedPassword),
+		}
 
-	err = s.repo.Save(newUsuario)
+		if err := s.repo.CreateUsuario(tx, newUsuario); err != nil {
+			return err
+		}
 
-	if err != nil {
-		return nil, err
-	}
+		newProfissional := &domain.Profissional{
+			Specialty:            dto.Specialty,
+			ProfessionalRegistry: dto.ProfessionalRegistry,
+			UsuarioID:            newUsuario.ID,
+		}
 
-	return newUsuario, nil
+		if err := s.repo.CreateProfissional(tx, newProfissional); err != nil {
+			return err
+		}
+
+		newProfissional.Usuario = *newUsuario
+		registeredProfissional = newProfissional
+
+		return nil
+	})
+
+	return registeredProfissional, err
 }

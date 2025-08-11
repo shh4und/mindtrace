@@ -1,19 +1,49 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+	"mindtrace/backend/internal/application/controllers"
+	"mindtrace/backend/internal/application/services"
+	"mindtrace/backend/internal/domain"
+	postgres_repo "mindtrace/backend/internal/persistence/postgres"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
 
 func main() {
-	// Cria uma instância do Gin com configurações padrão
-	r := gin.Default()
+	dsn := "host=localhost usuario=postgres password=postgres dbname=mindtrace port=5432 sslmode=disable TimeZone=America/Sao_Paulo"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("failed to connect database: %v", err)
+	}
 
-	// Define uma rota de teste. Quando alguém acessar a raiz ("/") do seu servidor...
-	r.GET("/", func(c *gin.Context) {
-		// o server respondera com:
+	err = db.AutoMigrate(&domain.Usuario{}, &domain.Profissional{}, &domain.Paciente{})
+	if err != nil {
+		log.Fatalf("failed to migrate database: %v", err)
+	}
+
+	usuarioRepo := postgres_repo.NewGormUsuarioRepository(db)
+	usuarioService := services.NewUsuarioService(db, usuarioRepo)
+	profissionalController := controllers.NewProfissionalController(usuarioService)
+
+	router := gin.Default()
+
+	api := router.Group("/api/v1")
+	{
+		professionals := api.Group("/professionals")
+		{
+			professionals.POST("/register", profissionalController.Register)
+		}
+	}
+
+	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "O backend está funcionando corretamente!",
+			"message": "Backend is running correctly!",
 		})
 	})
 
-	// Inicia o servidor na porta 8080
-	r.Run(":8080")
+	log.Println("Server is running on port 8080")
+	router.Run(":8080")
 }

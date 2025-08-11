@@ -4,24 +4,24 @@ import "gorm.io/gorm"
 
 type Usuario struct {
 	gorm.Model
-	Nome  string `json:"nome" gorm:"not null"`
-	Email string `json:"email" gorm:"not null"`
-	Senha string `json:"senha" gorm:"not null"`
+	Name     string `json:"name" gorm:"not null"`
+	Email    string `json:"email" gorm:"unique;not null"`
+	Password string `json:"-" gorm:"not null"`
 }
 
 type Profissional struct {
 	gorm.Model
-	UsuarioID            uint    `gorm:"unique;not null"`
+	UsuarioID            uint    `json:"-"`
 	Usuario              Usuario `gorm:"foreignKey:UsuarioID"`
-	Especialidade        string  `json:"especialidade"`
-	RegistroProfissional string  `json:"registro_profissional" gorm:"unique;not null"`
+	Specialty            string  `json:"specialty"`
+	ProfessionalRegistry string  `json:"professional_registry" gorm:"unique;not null"`
 }
 
 type Paciente struct {
 	gorm.Model
-	UsuarioID    uint         `gorm:"unique;not null"`
+	UsuarioID    uint         `json:"-"`
 	Usuario      Usuario      `gorm:"foreignKey:UsuarioID"`
-	Idade        int          `json:"idade" gorm:"not null"`
-	Depdendente  bool         `json:"dependente" gorm:"not null"`
+	Age          int          `json:"age" gorm:"not null"`
+	IsDependent  bool         `json:"is_dependent" gorm:"not null"`
 	Profissional Profissional `gorm:"foreignKey:ProfissionalID"`
 }

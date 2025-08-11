@@ -7,7 +7,9 @@ import (
 )
 
 type UsuarioRepository interface {
-	Save(usuario *domain.Usuario) error
+	CreateUsuario(tx *gorm.DB, usuario *domain.Usuario) error
+	CreateProfissional(tx *gorm.DB, profissional *domain.Profissional) error
+	FindByEmail(email string) (*domain.Usuario, error)
 }
 
 type gormUsuarioRepository struct {
@@ -18,7 +20,18 @@ func NewGormUsuarioRepository(db *gorm.DB) UsuarioRepository {
 	return &gormUsuarioRepository{db: db}
 }
 
-func (r *gormUsuarioRepository) Save(usuario *domain.Usuario) error {
-	result := r.db.Create(usuario)
-	return result.Error
+func (r *gormUsuarioRepository) CreateUsuario(tx *gorm.DB, usuario *domain.Usuario) error {
+	return tx.Create(usuario).Error
+}
+
+func (r *gormUsuarioRepository) CreateProfissional(tx *gorm.DB, profissional *domain.Profissional) error {
+	return tx.Create(profissional).Error
+}
+
+func (r *gormUsuarioRepository) FindByEmail(email string) (*domain.Usuario, error) {
+	var usuario domain.Usuario
+	if err := r.db.Where("email = ?", email).First(&usuario).Error; err != nil {
+		return nil, err
+	}
+	return &usuario, nil
 }
