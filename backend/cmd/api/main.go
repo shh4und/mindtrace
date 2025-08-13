@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"mindtrace/backend/internal/application/controllers"
-	"mindtrace/backend/internal/application/services"
-	"mindtrace/backend/internal/domain"
-	postgres_repo "mindtrace/backend/internal/persistence/postgres"
+	"mindtrace/backend/interno/aplicacao/controladores"
+	"mindtrace/backend/interno/aplicacao/servicos"
+	"mindtrace/backend/interno/dominio"
+	postgres_repo "mindtrace/backend/interno/persistencia/postgres"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -19,14 +19,14 @@ func main() {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
-	err = db.AutoMigrate(&domain.Usuario{}, &domain.Profissional{}, &domain.Paciente{})
+	err = db.AutoMigrate(&dominio.Usuario{}, &dominio.Profissional{}, &dominio.Paciente{})
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
 
-	usuarioRepo := postgres_repo.NewGormUsuarioRepository(db)
-	usuarioService := services.NewUsuarioService(db, usuarioRepo)
-	profissionalController := controllers.NewProfissionalController(usuarioService)
+	usuarioRepo := postgres_repo.NewGormUsuarioRepositorio(db)
+	usuarioService := servicos.NewUsuarioServico(db, usuarioRepo)
+	profissionalController := controladores.NewProfissionalController(usuarioService)
 
 	router := gin.Default()
 
@@ -34,7 +34,7 @@ func main() {
 	{
 		professionals := api.Group("/professionals")
 		{
-			professionals.POST("/register", profissionalController.Register)
+			professionals.POST("/register", profissionalController.Registrar)
 		}
 	}
 
