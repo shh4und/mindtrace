@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"mindtrace/backend/interno/aplicacao/controladores"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"mindtrace/backend/interno/dominio"
 	postgres_repo "mindtrace/backend/interno/persistencia/postgres"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -13,37 +15,64 @@ import (
 )
 
 func main() {
-	dsn := "host=localhost usuario=postgres password=postgres dbname=mindtrace port=5432 sslmode=disable TimeZone=America/Sao_Paulo"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	db_USER := os.Getenv("DB_USER")
+	db_PASS := os.Getenv("DB_PASSWORD")
+	db_NAME := os.Getenv("DB_DB")
+
+	DSN := fmt.Sprintf(
+		"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable",
+		db_USER,
+		db_PASS,
+		db_NAME,
+	)
+
+	db, err := gorm.Open(postgres.Open(DSN), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
-	err = db.AutoMigrate(&dominio.Usuario{}, &dominio.Profissional{}, &dominio.Paciente{})
+	err = db.AutoMigrate(
+		&dominio.Usuario{},
+		&dominio.Profissional{},
+		&dominio.Paciente{},
+		&dominio.ResponsavelLegal{},
+		&dominio.ProfissionalPaciente{}, // Tabela de junção
+		&dominio.RegistroHumor{},
+		&dominio.AnotacaoDiaria{},
+		&dominio.Alerta{},
+		&dominio.Notificacao{},
+	)
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
 
-	usuarioRepo := postgres_repo.NewGormUsuarioRepositorio(db)
-	usuarioService := servicos.NewUsuarioServico(db, usuarioRepo)
-	profissionalController := controladores.NewProfissionalController(usuarioService)
+	usuarioRepo := postgres_repo.NovoGormUsuarioRepositorio(db)
+	usuarioService := servicos.NovoUsuarioServico(db, usuarioRepo)
+	profissionalController := controladores.NovoProfissionalControlador(usuarioService)
+	pacienteController := controladores.NovoPacienteControlador(usuarioService)
 
-	router := gin.Default()
+	roteador := gin.Default()
 
-	api := router.Group("/api/v1")
+	api := roteador.Group("/api/v1")
 	{
-		professionals := api.Group("/professionals")
+		profissionais := api.Group("/profissionais")
 		{
-			professionals.POST("/register", profissionalController.Registrar)
+			profissionais.POST("/registrar", profissionalController.Registrar)
+		}
+
+		pacientes := api.Group("/pacientes")
+		{
+			pacientes.POST("/registrar", pacienteController.Registrar)
 		}
 	}
 
-	router.GET("/", func(c *gin.Context) {
+	roteador.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Backend is running correctly!",
 		})
 	})
 
 	log.Println("Server is running on port 8080")
-	router.Run(":8080")
+	roteador.Run(":8080")
 }

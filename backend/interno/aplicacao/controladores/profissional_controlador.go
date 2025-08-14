@@ -7,12 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ProfissionalController struct {
+type ProfissionalControlador struct {
 	usuarioServico servicos.UsuarioServico
 }
 
-func NewProfissionalController(us servicos.UsuarioServico) *ProfissionalController {
-	return &ProfissionalController{usuarioServico: us}
+func NovoProfissionalControlador(us servicos.UsuarioServico) *ProfissionalControlador {
+	return &ProfissionalControlador{usuarioServico: us}
 }
 
 type RegistrarProfissionalRequest struct {
@@ -23,7 +23,7 @@ type RegistrarProfissionalRequest struct {
 	RegistroProfissional string `json:"registro_profissional" binding:"required"`
 }
 
-func (pc *ProfissionalController) Registrar(c *gin.Context) {
+func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 	var req RegistrarProfissionalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})

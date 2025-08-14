@@ -9,14 +9,17 @@ import (
 type UsuarioRepositorio interface {
 	CriarUsuario(tx *gorm.DB, usuario *dominio.Usuario) error
 	CriarProfissional(tx *gorm.DB, profissional *dominio.Profissional) error
+	CriarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error
+	CriarResponsavelLegal(tx *gorm.DB, paciente *dominio.ResponsavelLegal) error
 	BuscarPorEmail(email string) (*dominio.Usuario, error)
+	CriarAssociacao(tx *gorm.DB, profissionalID, pacienteID uint) error
 }
 
 type gormUsuarioRepositorio struct {
 	db *gorm.DB
 }
 
-func NewGormUsuarioRepositorio(db *gorm.DB) UsuarioRepositorio {
+func NovoGormUsuarioRepositorio(db *gorm.DB) UsuarioRepositorio {
 	return &gormUsuarioRepositorio{db: db}
 }
 
@@ -28,10 +31,26 @@ func (r *gormUsuarioRepositorio) CriarProfissional(tx *gorm.DB, profissional *do
 	return tx.Create(profissional).Error
 }
 
+func (r *gormUsuarioRepositorio) CriarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error {
+	return tx.Create(paciente).Error
+}
+
+func (r *gormUsuarioRepositorio) CriarResponsavelLegal(tx *gorm.DB, responsavel *dominio.ResponsavelLegal) error {
+	return tx.Create(responsavel).Error
+}
+
 func (r *gormUsuarioRepositorio) BuscarPorEmail(email string) (*dominio.Usuario, error) {
 	var usuario dominio.Usuario
 	if err := r.db.Where("email = ?", email).First(&usuario).Error; err != nil {
 		return nil, err
 	}
 	return &usuario, nil
+}
+
+func (r *gormUsuarioRepositorio) CriarAssociacao(tx *gorm.DB, profissionalID, pacienteID uint) error {
+	associacao := dominio.ProfissionalPaciente{
+		ProfissionalID: profissionalID,
+		PacienteID:     pacienteID,
+	}
+	return tx.Create(&associacao).Error
 }
