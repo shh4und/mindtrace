@@ -12,7 +12,7 @@ type UsuarioRepositorio interface {
 	CriarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error
 	CriarResponsavelLegal(tx *gorm.DB, paciente *dominio.ResponsavelLegal) error
 	BuscarPorEmail(email string) (*dominio.Usuario, error)
-	CriarAssociacao(tx *gorm.DB, profissionalID, pacienteID uint) error
+	BuscarProfissionalPorID(tx *gorm.DB, id uint) (*dominio.Profissional, error)
 }
 
 type gormUsuarioRepositorio struct {
@@ -47,10 +47,10 @@ func (r *gormUsuarioRepositorio) BuscarPorEmail(email string) (*dominio.Usuario,
 	return &usuario, nil
 }
 
-func (r *gormUsuarioRepositorio) CriarAssociacao(tx *gorm.DB, profissionalID, pacienteID uint) error {
-	associacao := dominio.ProfissionalPaciente{
-		ProfissionalID: profissionalID,
-		PacienteID:     pacienteID,
+func (r *gormUsuarioRepositorio) BuscarProfissionalPorID(tx *gorm.DB, id uint) (*dominio.Profissional, error) {
+	var profissional dominio.Profissional
+	if err := tx.First(&profissional, id).Error; err != nil {
+		return nil, err
 	}
-	return tx.Create(&associacao).Error
+	return &profissional, nil
 }

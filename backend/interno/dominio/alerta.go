@@ -17,3 +17,7 @@ type Alerta struct {
 	Status             string       `json:"status" gorm:"type:varchar(50);not null;default:'Ativo'"`
 	DataGeracao        time.Time    `json:"data_geracao" gorm:"not null;default:now()"`
 }
+
+func (Alerta) TableName() string {
+	return "alertas"
+}

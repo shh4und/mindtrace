@@ -14,3 +14,7 @@ type RegistroHumor struct {
 	DataHoraRegistro time.Time `json:"data_hora_registro" gorm:"not null;default:now()"`
 	CreatedAt        time.Time `json:"created_at"`
 }
+
+func (RegistroHumor) TableName() string {
+	return "registros_humors"
+}

@@ -13,3 +13,8 @@ type AnotacaoDiaria struct {
 	DataHoraAnotacao time.Time `json:"data_hora_anotacao" gorm:"not null;default:now()"`
 	CreatedAt        time.Time `json:"created_at"`
 }
+
+
+func (AnotacaoDiaria) TableName() string {
+  return "anotacoes_diarias"
+}

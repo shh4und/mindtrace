@@ -37,7 +37,6 @@ func main() {
 		&dominio.Profissional{},
 		&dominio.Paciente{},
 		&dominio.ResponsavelLegal{},
-		&dominio.ProfissionalPaciente{}, // Tabela de junção
 		&dominio.RegistroHumor{},
 		&dominio.AnotacaoDiaria{},
 		&dominio.Alerta{},

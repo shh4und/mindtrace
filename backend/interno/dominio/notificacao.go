@@ -15,3 +15,7 @@ type Notificacao struct {
 	Status    string    `json:"status" gorm:"type:varchar(50);not null;default:'Não lida'"`
 	DataEnvio time.Time `json:"data_envio" gorm:"not null;default:now()"`
 }
+
+func (Notificacao) TableName() string {
+  return "notificacoes"
+}

@@ -17,6 +17,9 @@ type Usuario struct {
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
+func (Usuario) TableName() string {
+  return "usuarios"
+}
 // Profissional tem seus próprios dados e uma referência ao Usuario.
 type Profissional struct {
 	ID                   uint       `gorm:"primaryKey"`
@@ -29,6 +32,9 @@ type Profissional struct {
 	UpdatedAt            time.Time  `json:"updated_at"`
 }
 
+func (Profissional) TableName() string {
+  return "profissionais"
+}
 // Paciente tem seus próprios dados e uma referência ao Usuario.
 type Paciente struct {
 	ID                   uint           `gorm:"primaryKey"`
@@ -39,6 +45,10 @@ type Paciente struct {
 	Profissionais        []Profissional `json:"profissionais" gorm:"many2many:profissional_paciente;"`
 	CreatedAt            time.Time      `json:"created_at"`
 	UpdatedAt            time.Time      `json:"updated_at"`
+}
+
+func (Paciente) TableName() string {
+  return "pacientes"
 }
 
 // ResponsavelLegal representa a entidade de um responsável por um paciente.
@@ -54,8 +64,7 @@ type ResponsavelLegal struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
-// ProfissionalPaciente é a tabela de junção para o relacionamento N-N.
-type ProfissionalPaciente struct {
-	ProfissionalID uint `gorm:"primaryKey"`
-	PacienteID     uint `gorm:"primaryKey"`
+func (ResponsavelLegal) TableName() string {
+  return "responsaveis_legais"
 }
+
