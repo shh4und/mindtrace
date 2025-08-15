@@ -6,8 +6,11 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	golang.org/x/crypto v0.40.0
 	gorm.io/driver/postgres v1.6.0
+	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.30.1
 )
+
+require github.com/mattn/go-sqlite3 v1.14.22 // indirect
 
 require (
 	github.com/bytedance/sonic v1.14.0 // indirect
