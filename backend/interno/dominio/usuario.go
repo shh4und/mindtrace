@@ -30,6 +30,7 @@ type Profissional struct {
 	ID                   uint       `gorm:"primaryKey"`
 	UsuarioID            uint       `json:"-" gorm:"unique;not null"`
 	Usuario              Usuario    `json:"usuario" gorm:"foreignKey:UsuarioID"`
+	Idade                int8       `json:"idade"`
 	Especialidade        string     `json:"especialidade" gorm:"type:varchar(255)"`
 	RegistroProfissional string     `json:"registro_profissional" gorm:"type:varchar(12);unique;not null"`
 	Pacientes            []Paciente `json:"pacientes" gorm:"many2many:profissional_paciente;"`
@@ -74,4 +75,13 @@ type ResponsavelLegal struct {
 
 func (ResponsavelLegal) TableName() string {
 	return "responsaveis_legais"
+}
+
+type Convite struct {
+	ID             uint      `gorm:"primaryKey"`
+	ProfissionalID uint      `gorm:"not null"`
+	Token          string    `gorm:"type:varchar(32);unique;not null"`
+	DataExpiracao  time.Time `gorm:"not null"`
+	Usado          bool      `gorm:"default:false"`
+	PacienteID     *uint     // Guarda quem usou o convite
 }
