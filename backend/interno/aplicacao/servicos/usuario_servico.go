@@ -40,6 +40,10 @@ type RegistrarResponsavelDTO struct {
 	ContatoPrincipal string
 }
 
+var ErrEmailJaCadastrado = errors.New("e-mail existente")
+var ErrCrendenciaisInvalidas = errors.New("credenciais invalidas")
+var ErrUsuarioNaoEncontrado = errors.New("usuario nao encontrado")
+
 type UsuarioServico interface {
 	RegistrarProfissional(dto RegistrarProfissionalDTO) (*dominio.Profissional, error)
 	RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.Paciente, error)
@@ -62,7 +66,7 @@ func (s *usuarioServico) RegistrarProfissional(dto RegistrarProfissionalDTO) (*d
 
 		_, err := s.repositorio.BuscarPorEmail(dto.Email)
 		if err == nil {
-			return errors.New("e-mail já cadastrado")
+			return ErrEmailJaCadastrado
 		}
 
 		hashSenha, err := bcrypt.GenerateFromPassword([]byte(dto.Senha), bcrypt.DefaultCost)
@@ -106,7 +110,7 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 
 		_, err := s.repositorio.BuscarPorEmail(dto.Email)
 		if err == nil {
-			return errors.New("e-mail já cadastrado")
+			return ErrEmailJaCadastrado
 		}
 
 		hashSenha, err := bcrypt.GenerateFromPassword([]byte(dto.Senha), bcrypt.DefaultCost)
@@ -147,21 +151,21 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 	usuario, err := s.repositorio.BuscarPorEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", errors.New("credenciais inválidas")
+			return "", ErrUsuarioNaoEncontrado
 		}
 		return "", err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(senha))
 	if err != nil {
-		return "", errors.New("credenciais inválidas")
+		return "", ErrCrendenciaisInvalidas
 	}
 
 	// Gerar o token JWT
 	claims := jwt.MapClaims{
-		"sub": usuario.ID,                            // "Subject", o ID do usuário
-		"iat": time.Now().Unix(),                     // "Issued At", quando o token foi criado
-		"exp": time.Now().Add(time.Hour * 24).Unix(), // Data de expiração (24 horas)
+		"sub": usuario.ID,                           // "Subject", o ID do usuário
+		"iat": time.Now().Unix(),                    // "Issued At", quando o token foi criado
+		"exp": time.Now().Add(time.Hour * 1).Unix(), // Data de expiração (1 hora)
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
