@@ -40,7 +40,11 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 
 	profissional, err := pc.usuarioServico.RegistrarProfissional(dto)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro": "erro ao criar Profissional"})
+		if err == servicos.ErrEmailJaCadastrado {
+			c.JSON(http.StatusConflict, gin.H{"erro": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"erro": "erro ao criar Profissional"})
+		}
 		return
 	}
 
