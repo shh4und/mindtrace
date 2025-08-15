@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"mindtrace/backend/interno/aplicacao/controladores"
+	"mindtrace/backend/interno/aplicacao/middlewares"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"mindtrace/backend/interno/dominio"
 	postgres_repo "mindtrace/backend/interno/persistencia/postgres"
@@ -45,32 +46,45 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
-
 	usuarioRepo := postgres_repo.NovoGormUsuarioRepositorio(db)
 	usuarioService := servicos.NovoUsuarioServico(db, usuarioRepo)
+
 	profissionalController := controladores.NovoProfissionalControlador(usuarioService)
 	pacienteController := controladores.NovoPacienteControlador(usuarioService)
+	autController := controladores.NovoAutControlador(usuarioService) // <-- NOVO
 
 	roteador := gin.Default()
 
 	api := roteador.Group("/api/v1")
 	{
+		// --- ROTAS PÚBLICAS ---
+		auth := api.Group("/auth")
+		{
+			auth.POST("/login", autController.Login)
+		}
+
 		profissionais := api.Group("/profissionais")
 		{
+			// O registro de profissionais pode ser público
 			profissionais.POST("/registrar", profissionalController.Registrar)
 		}
 
 		pacientes := api.Group("/pacientes")
 		{
+			// O registro de pacientes também
 			pacientes.POST("/registrar", pacienteController.Registrar)
 		}
-	}
 
-	roteador.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Backend is running correctly!",
-		})
-	})
+		// --- ROTAS PROTEGIDAS ---
+		// Todas as rotas dentro deste grupo exigirão um token JWT válido
+		protegido := api.Group("/")
+		protegido.Use(middlewares.AutMiddleware())
+		{
+			// Exemplo de uma rota protegida que você criará no futuro
+			// protegida.POST("/profissionais/me/convites", conviteController.Gerar)
+			// protegida.GET("/pacientes/me/perfil", pacienteController.BuscarPerfil)
+		}
+	}
 
 	log.Println("Server is running on port 8080")
 	roteador.Run(":8080")

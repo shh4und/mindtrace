@@ -4,7 +4,10 @@ import (
 	"errors"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/postgres"
+	"os"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -14,6 +17,7 @@ type RegistrarProfissionalDTO struct {
 	Nome                 string
 	Email                string
 	Senha                string
+	Idade                int8
 	Especialidade        string
 	RegistroProfissional string
 }
@@ -22,7 +26,8 @@ type RegistrarPacienteDTO struct {
 	Nome                 string
 	Email                string
 	Senha                string
-	ProfissionalID       uint
+	EhDependente         bool
+	Idade                int8
 	DataInicioTratamento *time.Time
 	HistoricoSaude       string
 }
@@ -38,6 +43,7 @@ type RegistrarResponsavelDTO struct {
 type UsuarioServico interface {
 	RegistrarProfissional(dto RegistrarProfissionalDTO) (*dominio.Profissional, error)
 	RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.Paciente, error)
+	Login(email, senha string) (string, error)
 }
 
 type usuarioServico struct {
@@ -59,7 +65,7 @@ func (s *usuarioServico) RegistrarProfissional(dto RegistrarProfissionalDTO) (*d
 			return errors.New("e-mail já cadastrado")
 		}
 
-		senhaComHash, err := bcrypt.GenerateFromPassword([]byte(dto.Senha), bcrypt.DefaultCost)
+		hashSenha, err := bcrypt.GenerateFromPassword([]byte(dto.Senha), bcrypt.DefaultCost)
 		if err != nil {
 			return err
 		}
@@ -67,7 +73,7 @@ func (s *usuarioServico) RegistrarProfissional(dto RegistrarProfissionalDTO) (*d
 		novoUsuario := &dominio.Usuario{
 			Nome:  dto.Nome,
 			Email: dto.Email,
-			Senha: string(senhaComHash),
+			Senha: string(hashSenha),
 		}
 
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
@@ -118,25 +124,13 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 		}
 
 		novoPaciente := &dominio.Paciente{
-			UsuarioID: novoUsuario.ID,
+			UsuarioID:    novoUsuario.ID,
+			Idade:        dto.Idade,
+			EhDependente: dto.EhDependente,
 		}
 		if err := s.repositorio.CriarPaciente(tx, novoPaciente); err != nil {
 			return err
 		}
-
-		// // --- Passo 5: Criar a associação (A NOVA FORMA) ---
-
-		// // 5a. Primeiro, encontramos a instância do profissional que está fazendo o cadastro.
-		// profissional, err := s.repositorio.BuscarProfissionalPorID(tx, dto.ProfissionalID)
-		// if err != nil {
-		//     return errors.New("profissional não encontrado")
-		// }
-
-		// // 5b. Agora, usamos o método Association do GORM para adicionar o novo paciente.
-		// // O GORM vai cuidar de inserir a linha na tabela 'profissional_paciente' para nós.
-		// if err := tx.Model(profissional).Association("Pacientes").Append(novoPaciente); err != nil {
-		//     return err
-		// }
 
 		// Preparar o objeto de retorno completo
 		novoPaciente.Usuario = *novoUsuario
@@ -146,4 +140,37 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 	})
 
 	return pacienteCompleto, err
+}
+
+func (s *usuarioServico) Login(email, senha string) (string, error) {
+	// Buscar usuário pelo e-mail
+	usuario, err := s.repositorio.BuscarPorEmail(email)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", errors.New("credenciais inválidas")
+		}
+		return "", err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(senha))
+	if err != nil {
+		return "", errors.New("credenciais inválidas")
+	}
+
+	// Gerar o token JWT
+	claims := jwt.MapClaims{
+		"sub": usuario.ID,                            // "Subject", o ID do usuário
+		"iat": time.Now().Unix(),                     // "Issued At", quando o token foi criado
+		"exp": time.Now().Add(time.Hour * 24).Unix(), // Data de expiração (24 horas)
+	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tokenString, err := token.SignedString([]byte(jwtSecret))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
