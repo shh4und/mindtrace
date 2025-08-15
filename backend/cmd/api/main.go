@@ -58,7 +58,7 @@ func main() {
 	api := roteador.Group("/api/v1")
 	{
 		// --- ROTAS PÚBLICAS ---
-		auth := api.Group("/auth")
+		auth := api.Group("/entrar")
 		{
 			auth.POST("/login", autController.Login)
 		}
