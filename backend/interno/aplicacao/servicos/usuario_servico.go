@@ -40,14 +40,30 @@ type RegistrarResponsavelDTO struct {
 	ContatoPrincipal string
 }
 
+type AtualizarPerfilDTO struct {
+	Nome    string `json:"nome" binding:"required"`
+	Contato string `json:"contato"`
+	Bio     string `json:"bio"`
+}
+
+type AlterarSenhaDTO struct {
+	SenhaAtual  string `json:"senha_atual" binding:"required"`
+	NovaSenha   string `json:"nova_senha" binding:"required,min=8"`
+	NovaSenhaRe string `json:"nova_senha_re" binding:"required,min=8"`
+}
+
 var ErrEmailJaCadastrado = errors.New("e-mail existente")
 var ErrCrendenciaisInvalidas = errors.New("credenciais invalidas")
 var ErrUsuarioNaoEncontrado = errors.New("usuario nao encontrado")
+var ErrSenhaNaoConfere = errors.New("a nova senha e a senha de confirmação não conferem")
 
 type UsuarioServico interface {
 	RegistrarProfissional(dto RegistrarProfissionalDTO) (*dominio.Profissional, error)
 	RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.Paciente, error)
 	Login(email, senha string) (string, error)
+	BuscarUsuarioPorID(id uint) (*dominio.Usuario, error)
+	AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error)
+	AlterarSenha(userID uint, dto AlterarSenhaDTO) error
 }
 
 type usuarioServico struct {
@@ -177,4 +193,72 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func (s *usuarioServico) BuscarUsuarioPorID(id uint) (*dominio.Usuario, error) {
+	usuario, err := s.repositorio.BuscarUsuarioPorID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUsuarioNaoEncontrado
+		}
+		return nil, err
+	}
+	return usuario, nil
+}
+
+func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error) {
+	var usuarioAtualizado *dominio.Usuario
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrUsuarioNaoEncontrado
+			}
+			return err
+		}
+
+		usuario.Nome = dto.Nome
+		usuario.Contato = dto.Contato
+		usuario.Bio = dto.Bio
+
+		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
+			return err
+		}
+		usuarioAtualizado = usuario
+		return nil
+	})
+
+	return usuarioAtualizado, err
+}
+
+func (s *usuarioServico) AlterarSenha(userID uint, dto AlterarSenhaDTO) error {
+
+	if dto.NovaSenha != dto.NovaSenhaRe {
+		return ErrSenhaNaoConfere
+	}
+
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrUsuarioNaoEncontrado
+			}
+			return err
+		}
+
+		if err := bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(dto.SenhaAtual)); err != nil {
+			return ErrCrendenciaisInvalidas
+		}
+
+		novaSenhaHash, err := bcrypt.GenerateFromPassword([]byte(dto.NovaSenha), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+
+		usuario.Senha = string(novaSenhaHash)
+
+		return s.repositorio.Atualizar(tx, usuario)
+	})
+
+	return err
 }

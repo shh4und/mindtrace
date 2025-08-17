@@ -51,7 +51,8 @@ func main() {
 
 	profissionalController := controladores.NovoProfissionalControlador(usuarioService)
 	pacienteController := controladores.NovoPacienteControlador(usuarioService)
-	autController := controladores.NovoAutControlador(usuarioService) // <-- NOVO
+	autController := controladores.NovoAutControlador(usuarioService)
+	usuarioController := controladores.NovoUsuarioControlador(usuarioService)
 
 	roteador := gin.Default()
 
@@ -80,9 +81,12 @@ func main() {
 		protegido := api.Group("/")
 		protegido.Use(middlewares.AutMiddleware())
 		{
-			// Exemplo de uma rota protegida que você criará no futuro
-			// protegida.POST("/profissionais/me/convites", conviteController.Gerar)
-			// protegida.GET("/pacientes/me/perfil", pacienteController.BuscarPerfil)
+			usuarios := protegido.Group("/usuarios")
+			{
+				usuarios.GET("/me", usuarioController.BuscarPerfil)
+				usuarios.PUT("/me", usuarioController.AtualizarPerfil)
+				usuarios.PUT("/me/alterar-senha", usuarioController.AlterarSenha)
+			}
 		}
 	}
 
