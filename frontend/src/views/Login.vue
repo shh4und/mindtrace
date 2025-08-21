@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header com Logo -->
-    <header class="w-full p-6">
-      <router-link to="/" class="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors">MindTrace</router-link>
+      <header class="w-full p-6">
+      <router-link to="/" class="text-3xl font-bold text-emerald-600">MindTrace</router-link>
     </header>
 
     <!-- Container do Formulário de Login -->
@@ -10,20 +10,20 @@
       <div class="w-full max-w-md">
         <!-- Formulário de Login -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <h2 class="text-2xl font-semibold text-center text-gray-900 mb-8">Login</h2>
+          <h2 class="text-2xl font-semibold text-center text-gray-900 mb-8">Entrar</h2>
 
           <form @submit.prevent="handleLogin" class="space-y-6">
             <!-- Campo Email -->
             <div>
               <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                E-mail
               </label>
               <input
                 type="email"
                 id="email"
                 v-model="email"
-                placeholder="Enter your email"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-gray-900 placeholder-gray-500"
+                placeholder="Digite seu e-mail"
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900 placeholder-gray-500"
                 required
               />
             </div>
@@ -31,15 +31,15 @@
             <!-- Campo Password -->
             <div>
               <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                Password
+                Senha
               </label>
               <div class="relative">
                 <input
                   :type="passwordFieldType"
                   id="password"
                   v-model="password"
-                  placeholder="Enter your password"
-                  class="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-gray-900 placeholder-gray-500"
+                  placeholder="Digite sua senha"
+                  class="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900 placeholder-gray-500"
                   required
                 />
                 <button
@@ -48,7 +48,7 @@
                   class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <!-- Ícone de olho fechado (padrão) -->
-                  <svg v-if="passwordFieldType === 'password'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
                   </svg>
                   <!-- Ícone de olho aberto (oculto por padrão) -->
@@ -63,25 +63,25 @@
             <!-- Botão Sign In -->
             <button
               type="submit"
-              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 outline-none"
+              class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 outline-none"
             >
-              Sign In
+              Entrar
             </button>
           </form>
 
           <!-- Links do Footer -->
           <div class="mt-6 text-center space-y-3">
-            <a
-              href="#"
-              class="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
+            <router-link
+              to="/recuperar-senha"
+              class="block text-sm text-gray-600 hover:text-emerald-600 transition-colors"
             >
-              Forgot your password?
-            </a>
+              Esqueceu sua senha?
+            </router-link>
             <router-link
               to="/cadastro"
-              class="block text-sm text-gray-600 hover:text-blue-600 transition-colors"
+              class="block text-sm text-gray-600 hover:text-emerald-600 transition-colors"
             >
-              Create account
+              Criar conta
             </router-link>
           </div>
         </div>
@@ -90,24 +90,26 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      email: '',
-      password: '',
-      passwordFieldType: 'password'
-    };
-  },
-  methods: {
-    handleLogin() {
-      // Aqui você pode adicionar a lógica de autenticação
-      console.log('Tentativa de login:', { email: this.email, password: this.password });
-      alert('Login realizado com sucesso!\n\nEmail: ' + this.email);
-    },
-    togglePasswordVisibility() {
-      this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
-    }
-  }
+<script setup>
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const email = ref('');
+const password = ref('');
+const showPassword = ref(false);
+
+const passwordFieldType = computed(() => (showPassword.value ? 'text' : 'password'));
+
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
+
+const handleLogin = () => {
+  // Lógica de autenticação aqui
+  console.log('Tentativa de login:', { email: email.value, password: password.value });
+  alert('Login realizado com sucesso!\n\nEmail: ' + email.value);
+  // Redirecionar para o dashboard após o login
+  router.push('/dashboard');
 };
 </script>

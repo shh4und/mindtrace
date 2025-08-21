@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+:root {
+	/* New design tokens requested by the user */
+	--white: #ffffffff;
+	--emeral: #66ce83ff; /* user-provided spelling */
+	--aquamarine: #a5ffd6ff;
+	--melon: #ffa69eff;
+    --light-rose: oklch(71.2% 0.194 13.428);
+}
