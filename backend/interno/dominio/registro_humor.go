@@ -13,8 +13,7 @@ type RegistroHumor struct {
 	HorasSono        int16     `json:"horas_sono" gorm:"not null;check:horas_sono >= 0 and horas_sono <= 24"`
 	NivelStress      int16     `json:"nivel_stress" gorm:"not null;check:horas_sono >= 0 and horas_sono <= 10"`
 	NivelEnergia     int16     `json:"nivel_energia" gorm:"not null;check:horas_sono >= 0 and horas_sono <= 10"`
-	AtivdadeFisica   bool      `json:"atividade_fisica" gorm:"not null"`
-	AutoCuidado      bool      `json:"auto_cuidado" gorm:"not null"`
+	AutoCuidado      []string  `json:"auto_cuidado" gorm:"not null"`
 	Observacoes      string    `json:"observacoes" gorm:"type:text"`
 	DataHoraRegistro time.Time `json:"data_hora_registro" gorm:"not null;default:now()"`
 	CreatedAt        time.Time `json:"created_at"`

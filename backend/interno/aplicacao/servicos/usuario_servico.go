@@ -62,6 +62,7 @@ type UsuarioServico interface {
 	RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.Paciente, error)
 	Login(email, senha string) (string, error)
 	BuscarUsuarioPorID(id uint) (*dominio.Usuario, error)
+	BuscarPacientePorID(tx *gorm.DB, id uint) (*dominio.Paciente, error)
 	AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error)
 	AlterarSenha(userID uint, dto AlterarSenhaDTO) error
 }
@@ -204,6 +205,17 @@ func (s *usuarioServico) BuscarUsuarioPorID(id uint) (*dominio.Usuario, error) {
 		return nil, err
 	}
 	return usuario, nil
+}
+
+func (s *usuarioServico) BuscarPacientePorID(tx *gorm.DB, id uint) (*dominio.Paciente, error) {
+	paciente, err := s.repositorio.BuscarPacientePorID(tx, id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrPacienteNaoEncontrado
+		}
+		return nil, err
+	}
+	return paciente, nil
 }
 
 func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error) {

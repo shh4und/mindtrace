@@ -13,6 +13,7 @@ type UsuarioRepositorio interface {
 	CriarResponsavelLegal(tx *gorm.DB, paciente *dominio.ResponsavelLegal) error
 	BuscarPorEmail(email string) (*dominio.Usuario, error)
 	BuscarProfissionalPorID(tx *gorm.DB, id uint) (*dominio.Profissional, error)
+	BuscarPacientePorID(tx *gorm.DB, id uint) (*dominio.Paciente, error)
 	BuscarUsuarioPorID(id uint) (*dominio.Usuario, error)
 	Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error
 }
@@ -55,6 +56,14 @@ func (r *gormUsuarioRepositorio) BuscarProfissionalPorID(tx *gorm.DB, id uint) (
 		return nil, err
 	}
 	return &profissional, nil
+}
+
+func (r *gormUsuarioRepositorio) BuscarPacientePorID(tx *gorm.DB, id uint) (*dominio.Paciente, error) {
+	var paciente dominio.Paciente
+	if err := tx.First(&paciente, id).Error; err != nil {
+		return nil, err
+	}
+	return &paciente, nil
 }
 
 func (r *gormUsuarioRepositorio) BuscarUsuarioPorID(id uint) (*dominio.Usuario, error) {

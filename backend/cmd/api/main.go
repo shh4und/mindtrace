@@ -48,11 +48,14 @@ func main() {
 	}
 	usuarioRepo := postgres_repo.NovoGormUsuarioRepositorio(db)
 	usuarioService := servicos.NovoUsuarioServico(db, usuarioRepo)
-
 	profissionalController := controladores.NovoProfissionalControlador(usuarioService)
 	pacienteController := controladores.NovoPacienteControlador(usuarioService)
 	autController := controladores.NovoAutControlador(usuarioService)
 	usuarioController := controladores.NovoUsuarioControlador(usuarioService)
+
+	registroHumorRepo := postgres_repo.NovoGormRegistroHumorRepositorio(db)
+	registroHumorService := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo)
+	registroHumorController := controladores.NovoRegistroHumorControlador(registroHumorService)
 
 	roteador := gin.Default()
 
@@ -86,6 +89,12 @@ func main() {
 				usuarios.GET("/perfil", usuarioController.BuscarPerfil)
 				usuarios.PUT("/perfil", usuarioController.AtualizarPerfil)
 				usuarios.PUT("/perfil/alterar-senha", usuarioController.AlterarSenha)
+			}
+
+			registroHumor := protegido.Group("/registro-humor")
+			{
+				registroHumor.POST("/registro-humor", registroHumorController.Criar)
+
 			}
 		}
 	}
