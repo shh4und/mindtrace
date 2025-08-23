@@ -39,7 +39,6 @@ func main() {
 		&dominio.Paciente{},
 		&dominio.ResponsavelLegal{},
 		&dominio.RegistroHumor{},
-		&dominio.AnotacaoDiaria{},
 		&dominio.Alerta{},
 		&dominio.Notificacao{},
 	)
@@ -86,16 +85,24 @@ func main() {
 		{
 			usuarios := protegido.Group("/usuarios")
 			{
-				usuarios.GET("/perfil", usuarioController.BuscarPerfil)
+				usuarios.GET("/", usuarioController.BuscarPerfil)
 				usuarios.PUT("/perfil", usuarioController.AtualizarPerfil)
 				usuarios.PUT("/perfil/alterar-senha", usuarioController.AlterarSenha)
 			}
 
 			registroHumor := protegido.Group("/registro-humor")
 			{
-				registroHumor.POST("/registro-humor", registroHumorController.Criar)
+				registroHumor.POST("/", registroHumorController.Criar)
+				// registroHumor.GET("/", registroHumorController.Listar)
+				// registroHumor.GET("/:id", registroHumorController.BuscarPorID)
 
 			}
+
+			// relatorios := protegido.Group("/relatorios") ??
+			// {
+			// 	relatorios.POST("/", relatoriosController.Criar) ??
+			// 	relatorios.GET("/:id", relatoriosController.BuscarPorID) ??
+			// }
 		}
 	}
 
