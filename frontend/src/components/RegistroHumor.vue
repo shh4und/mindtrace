@@ -153,6 +153,9 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 // Core selections
 const selectedMood = ref('');
@@ -195,7 +198,7 @@ const sleepLabel = computed(() => (sleepHours.value >= sleepMax ? '12h+' : sleep
 
 const submitMood = () => {
   if (!selectedMood.value) {
-    alert('Por favor, selecione seu humor principal antes de registrar.');
+    toast.warning('Por favor, selecione seu humor principal antes de registrar.');
     return;
   }
 
@@ -218,7 +221,7 @@ const submitMood = () => {
   };
 
   console.log('Registro de Humor Enviado:', submission);
-  alert('Seu humor foi registrado com sucesso!');
+  toast.success('Seu humor foi registrado com sucesso!');
   // TODO: persistir submission via API
 };
 </script>
