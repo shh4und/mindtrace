@@ -56,6 +56,9 @@ func main() {
 	registroHumorService := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo)
 	registroHumorController := controladores.NovoRegistroHumorControlador(registroHumorService)
 
+	relatorioService := servicos.NovoRelatorioServico(registroHumorRepo)
+	relatorioController := controladores.NovoRelatorioControlador(relatorioService)
+
 	roteador := gin.Default()
 
 	api := roteador.Group("/api/v1")
@@ -98,11 +101,10 @@ func main() {
 
 			}
 
-			// relatorios := protegido.Group("/relatorios") ??
-			// {
-			// 	relatorios.POST("/", relatoriosController.Criar) ??
-			// 	relatorios.GET("/:id", relatoriosController.BuscarPorID) ??
-			// }
+			relatorios := protegido.Group("/relatorios")
+			{
+				relatorios.GET("/", relatorioController.GerarRelatorio)
+			}
 		}
 	}
 

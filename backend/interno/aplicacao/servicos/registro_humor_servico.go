@@ -10,7 +10,7 @@ import (
 )
 
 type CriarRegistroHumorDTO struct {
-	PacienteID       uint
+	UsuarioID        uint
 	NivelHumor       int16
 	HorasSono        int16
 	NivelStress      int16
@@ -41,7 +41,7 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto CriarRegistroHumorDTO) (
 	var registroHumoRealizado *dominio.RegistroHumor
 
 	err := rhs.db.Transaction(func(tx *gorm.DB) error {
-		paciente, err := rhs.usuarioRepositorio.BuscarPacientePorID(tx, dto.PacienteID)
+		paciente, err := rhs.usuarioRepositorio.BuscarPacientePorID(tx, dto.UsuarioID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrPacienteNaoEncontrado

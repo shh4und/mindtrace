@@ -38,7 +38,7 @@ func (rhc *RegistroHumorControlador) Criar(c *gin.Context) {
 		return
 	}
 	dto := servicos.CriarRegistroHumorDTO{
-		PacienteID:       userID.(uint),
+		UsuarioID:        userID.(uint),
 		NivelHumor:       req.NivelHumor,
 		HorasSono:        req.HorasSono,
 		NivelStress:      req.NivelStress,
