@@ -62,8 +62,8 @@
             <!-- Campos do Paciente -->
             <div v-if="form.userType === 'paciente'" class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
               <div>
-                <label for="dependencia" class="block text-sm font-medium text-gray-700 mb-1">É dependente?</label>
-                <input type="checkbox" id="dependendcia" v-model="form.dependencia" class="w-7 h-6  input-style"
+                <label for="dependente" class="block text-sm font-medium text-gray-700 mb-1">É dependente?</label>
+                <input type="checkbox" id="dependente" v-model="form.dependente" class="w-7 h-6  input-style"
                   required />
                 
               </div>
@@ -110,7 +110,7 @@ const form = reactive({
   especialidade: '',
   registro_profissional: '',
   // Campos do paciente
-  dependencia: false,
+  dependente: false,
   idade: '',
 });
 
@@ -126,7 +126,7 @@ const handleRegister = async () => {
         nome: form.nome,
         email: form.email,
         senha: form.senha,
-        dependente: form.dependencia,
+        dependente: form.dependente,
         idade: form.idade,
       };
       await api.registrarPaciente(pacienteDTO);

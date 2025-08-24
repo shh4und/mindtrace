@@ -66,6 +66,9 @@ const toast = useToast();
 const allData = ref([]);
 const selectedRange = ref(30);
 const isLoading = ref(true);
+const avgSleep = ref(0);
+const avgEnergy = ref(0);
+const avgStress = ref(0);
 
 const timeRanges = [
   { label: 'Últimos 7 dias', days: 7 },
@@ -79,16 +82,6 @@ const chartData = computed(() => {
   // Por agora, filtramos no frontend.
   return allData.value.slice(-selectedRange.value);
 });
-
-const avgSleep = computed(() => calculateAverage(chartData.value.map(d => d.valor_sono)));
-const avgEnergy = computed(() => calculateAverage(chartData.value.map(d => d.valor_energia)));
-const avgStress = computed(() => calculateAverage(chartData.value.map(d => d.valor_stress)));
-
-function calculateAverage(data) {
-  if (data.length === 0) return 'N/A';
-  const total = data.reduce((acc, curr) => acc + curr, 0);
-  return (total / data.length).toFixed(1);
-}
 
 // --- LÓGICA DE BUSCA DE DADOS ---
 const fetchReportData = async () => {
@@ -108,6 +101,10 @@ const fetchReportData = async () => {
       anotacao: report.grafico_sono[i].anotacao,
     }));
     allData.value = formattedData;
+
+    avgSleep.value = (report.media_sono || 0).toFixed(1);
+    avgEnergy.value = (report.media_energia || 0).toFixed(1);
+    avgStress.value = (report.media_stress || 0).toFixed(1);
 
   } catch (error) {
     toast.error("Não foi possível carregar os dados do relatório.");
