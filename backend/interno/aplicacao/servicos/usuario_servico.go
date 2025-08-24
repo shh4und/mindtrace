@@ -92,9 +92,10 @@ func (s *usuarioServico) RegistrarProfissional(dto RegistrarProfissionalDTO) (*d
 		}
 
 		novoUsuario := &dominio.Usuario{
-			Nome:  dto.Nome,
-			Email: dto.Email,
-			Senha: string(hashSenha),
+			Nome:        dto.Nome,
+			Email:       dto.Email,
+			Senha:       string(hashSenha),
+			TipoUsuario: "profissional",
 		}
 
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
@@ -136,9 +137,10 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 		}
 
 		novoUsuario := &dominio.Usuario{
-			Nome:  dto.Nome,
-			Email: dto.Email,
-			Senha: string(hashSenha),
+			Nome:        dto.Nome,
+			Email:       dto.Email,
+			Senha:       string(hashSenha),
+			TipoUsuario: "paciente",
 		}
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
@@ -180,9 +182,10 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 
 	// Gerar o token JWT
 	claims := jwt.MapClaims{
-		"sub": usuario.ID,                           // "Subject", o ID do usuário
-		"iat": time.Now().Unix(),                    // "Issued At", quando o token foi criado
-		"exp": time.Now().Add(time.Hour * 1).Unix(), // Data de expiração (1 hora)
+		"sub":  usuario.ID,                           // "Subject", o ID do usuário
+		"role": usuario.TipoUsuario,                   // Adiciona o tipo de usuário (role)
+		"iat":  time.Now().Unix(),                    // "Issued At", quando o token foi criado
+		"exp":  time.Now().Add(time.Hour * 1).Unix(), // Data de expiração (1 hora)
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")

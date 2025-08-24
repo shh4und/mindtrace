@@ -7,92 +7,76 @@
     <div class="flex items-center justify-center px-4 py-8">
       <div class="w-full max-w-2xl">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <h2 class="text-2xl font-semibold text-center text-gray-900 mb-8">Criar Conta</h2>
+          <h2 class="text-2xl font-semibold text-center text-gray-900 mb-6">Criar Conta</h2>
 
-          <form @submit.prevent="handleRegister" class="space-y-6">
-            <div class="space-y-6">
-              <h3 class="text-lg font-medium text-gray-900 border-b pb-2">Informações Pessoais</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label for="fullName" class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
-                  <input type="text" id="fullName" v-model="form.fullName" placeholder="Nome Completo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
-                <div>
-                  <label for="birthDate" class="block text-sm font-medium text-gray-700 mb-2">Data de Nascimento</label>
-                  <input type="date" id="birthDate" v-model="form.birthDate" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900" required />
-                </div>
-                <div>
-                  <label for="cpf" class="block text-sm font-medium text-gray-700 mb-2">CPF</label>
-                  <input type="text" id="cpf" v-model="form.cpf" placeholder="000.000.000-00" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
-                <div>
-                  <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Telefone</label>
-                  <input type="tel" id="phone" v-model="form.phone" placeholder="(XX) XXXXX-XXXX" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
+          <!-- Seletor de Tipo de Conta -->
+          <div class="grid grid-cols-2 gap-4 mb-8">
+            <button @click="form.userType = 'paciente'"
+              :class="['p-4 rounded-lg border-2 text-center transition', form.userType === 'paciente' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 bg-white hover:border-emerald-400']">
+              <span class="text-lg font-medium">Sou Paciente</span>
+            </button>
+            <button @click="form.userType = 'profissional'"
+              :class="['p-4 rounded-lg border-2 text-center transition', form.userType === 'profissional' ? 'border-rose-500 bg-rose-50' : 'border-gray-300 bg-white hover:border-rose-400']">
+              <span class="text-lg font-medium">Sou Profissional</span>
+            </button>
+          </div>
+
+          <form v-if="form.userType" @submit.prevent="handleRegister" class="space-y-6">
+            <!-- Campos Comuns -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                <input type="text" id="nome" v-model="form.nome" class="w-full input-style" required />
+              </div>
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="email" v-model="form.email" class="w-full input-style" required />
+              </div>
+              <div>
+                <label for="senha" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <input type="password" id="senha" v-model="form.senha" class="w-full input-style" required />
+              </div>
+              <div>
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirme sua
+                  Senha</label>
+                <input type="password" id="confirmPassword" v-model="form.confirmPassword" class="w-full input-style"
+                  required />
               </div>
             </div>
 
-            <div class="space-y-6">
-              <h3 class="text-lg font-medium text-gray-900 border-b pb-2">Informações de Endereço</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label for="cep" class="block text-sm font-medium text-gray-700 mb-2">CEP</label>
-                  <input type="text" id="cep" v-model="form.cep" placeholder="00000-000" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
-                <div>
-                  <label for="street" class="block text-sm font-medium text-gray-700 mb-2">Rua</label>
-                  <input type="text" id="street" v-model="form.street" placeholder="Rua Exemplo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
-                <div>
-                  <label for="number" class="block text-sm font-medium text-gray-700 mb-2">Número</label>
-                  <input type="text" id="number" v-model="form.number" placeholder="123" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
-                <div>
-                  <label for="neighborhood" class="block text-sm font-medium text-gray-700 mb-2">Bairro</label>
-                  <input type="text" id="neighborhood" v-model="form.neighborhood" placeholder="Bairro Exemplo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
-                <div>
-                  <label for="city" class="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
-                  <input type="text" id="city" v-model="form.city" placeholder="Cidade Exemplo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
-                <div>
-                  <label for="state" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                  <input type="text" id="state" v-model="form.state" placeholder="Estado Exemplo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
+            <!-- Campos do Profissional -->
+            <div v-if="form.userType === 'profissional'" class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
+              <div>
+                <label for="especialidade" class="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+                <input type="text" id="especialidade" v-model="form.especialidade" class="w-full input-style"
+                  required />
+              </div>
+              <div>
+                <label for="registro_profissional" class="block text-sm font-medium text-gray-700 mb-1">Nº Registro
+                  Profissional (CRP, etc)</label>
+                <input type="text" id="registro_profissional" v-model="form.registro_profissional"
+                  class="w-full input-style" required />
               </div>
             </div>
 
-            <div class="space-y-6">
-              <h3 class="text-lg font-medium text-gray-900 border-b pb-2">Informações da Conta</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <input type="email" id="email" v-model="form.email" placeholder="Digite seu e-mail" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
-                <div>
-                  <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
-                  <div class="relative">
-                    <input :type="passwordFieldType" id="password" v-model="form.password" placeholder="Crie sua senha" class="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                    <button type="button" @click="togglePasswordVisibility" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                      <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
-                      </svg>
-                      <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">Confirme sua Senha</label>
-                  <input type="password" id="confirmPassword" v-model="form.confirmPassword" placeholder="Confirme sua senha" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" required />
-                </div>
+            <!-- Campos do Paciente -->
+            <div v-if="form.userType === 'paciente'" class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
+              <div>
+                <label for="dependencia" class="block text-sm font-medium text-gray-700 mb-1">É dependente?</label>
+                <input type="checkbox" id="dependendcia" v-model="form.dependencia" class="w-7 h-6  input-style"
+                  required />
+                
+              </div>
+              <div>
+                <label for="idade" class="block text-sm font-medium text-gray-700 mb-1">Idade</label>
+                <input type="number" id="idade" v-model="form.idade"
+                  class="w-full input-style" required />
               </div>
             </div>
 
-            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 outline-none">
-              Criar Conta
+            <button type="submit"
+              class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 outline-none">
+              Criar Conta de {{ form.userType === 'paciente' ? 'Paciente' : 'Profissional' }}
             </button>
           </form>
 
@@ -108,43 +92,84 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
+import api from '../services/api';
 
 const router = useRouter();
+const toast = useToast();
 
 const form = reactive({
-  fullName: '',
-  birthDate: '',
-  cpf: '',
-  phone: '',
-  cep: '',
-  street: '',
-  number: '',
-  neighborhood: '',
-  city: '',
-  state: '',
+  userType: '', // paciente ou profissional
+  nome: '',
   email: '',
-  password: '',
-  confirmPassword: ''
+  senha: '',
+  confirmPassword: '',
+  // Campos do profissional
+  especialidade: '',
+  registro_profissional: '',
+  // Campos do paciente
+  dependencia: false,
+  idade: '',
 });
 
-const showPassword = ref(false);
-
-const passwordFieldType = computed(() => (showPassword.value ? 'text' : 'password'));
-
-const togglePasswordVisibility = () => {
-  showPassword.value = !showPassword.value;
-};
-
-const handleRegister = () => {
-  if (form.password !== form.confirmPassword) {
-    alert('As senhas não coincidem!');
+const handleRegister = async () => {
+  if (form.senha !== form.confirmPassword) {
+    toast.error('As senhas não coincidem!');
     return;
   }
 
-  console.log('Dados do formulário de cadastro:', form);
-  alert('Cadastro realizado com sucesso! Bem-vindo(a), ' + form.fullName + '!');
-  router.push('/login');
+  try {
+    if (form.userType === 'paciente') {
+      const pacienteDTO = {
+        nome: form.nome,
+        email: form.email,
+        senha: form.senha,
+        dependente: form.dependencia,
+        idade: form.idade,
+      };
+      await api.registrarPaciente(pacienteDTO);
+    } else if (form.userType === 'profissional') {
+      const profissionalDTO = {
+        nome: form.nome,
+        email: form.email,
+        senha: form.senha,
+        especialidade: form.especialidade,
+        registro_profissional: form.registro_profissional,
+      };
+      await api.registrarProfissional(profissionalDTO);
+    }
+
+    toast.success('Cadastro realizado com sucesso! Você já pode fazer o login.');
+    router.push('/login');
+
+  } catch (error) {
+    const errorMessage = error.response?.data?.erro || 'Erro desconhecido no cadastro.';
+    toast.error(errorMessage);
+    console.error('Falha no cadastro:', error);
+  }
 };
 </script>
+
+<style scoped>
+.input-style {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #D1D5DB;
+  /* gray-300 */
+  outline: none;
+  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-style:focus {
+  border-color: #10B981;
+  /* emerald-500 */
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+  /* subtle ring effect */
+}
+</style>

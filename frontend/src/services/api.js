@@ -33,6 +33,12 @@ export default {
   login(credentials) {
     return apiClient.post('/entrar/login', credentials);
   },
+  registrarPaciente(data) {
+    return apiClient.post('/pacientes/registrar', data);
+  },
+  registrarProfissional(data) {
+    return apiClient.post('/profissionais/registrar', data);
+  },
 
   // --- Usuário ---
   buscarPerfil() {

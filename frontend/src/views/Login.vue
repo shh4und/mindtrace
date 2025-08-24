@@ -47,11 +47,9 @@
                   @click="togglePasswordVisibility"
                   class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <!-- Ícone de olho fechado (padrão) -->
                   <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>
                   </svg>
-                  <!-- Ícone de olho aberto (oculto por padrão) -->
                   <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -60,7 +58,6 @@
               </div>
             </div>
 
-            <!-- Botão Sign In -->
             <button
               type="submit"
               class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 outline-none"
@@ -69,7 +66,6 @@
             </button>
           </form>
 
-          <!-- Links do Footer -->
           <div class="mt-6 text-center space-y-3">
             <router-link
               to="/recuperar-senha"
@@ -109,22 +105,38 @@ const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 };
 
+// Função para decodificar o payload do JWT
+const parseJwt = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
+};
+
 const handleLogin = async () => {
   try {
     const credentials = {
       email: email.value,
-      senha: password.value, // Padronizado para "senha"
+      senha: password.value,
     };
 
     const response = await api.login(credentials);
-    
-    // Salva o token no localStorage para ser usado pelo interceptor
-    localStorage.setItem('authToken', response.data.token);
+    const token = response.data.token;
+    localStorage.setItem('authToken', token);
 
-    toast.success('Login realizado com sucesso!');
+    const decodedToken = parseJwt(token);
 
-    // TODO: Adicionar lógica para diferenciar paciente de profissional
-    router.push('/dashboard');
+    if (decodedToken && decodedToken.role) {
+      toast.success('Login realizado com sucesso!');
+      if (decodedToken.role === 'profissional') {
+        router.push('/dashboard-profissional');
+      } else {
+        router.push('/dashboard');
+      }
+    } else {
+      toast.error('Token inválido ou tipo de usuário não encontrado.');
+    }
 
   } catch (error) {
     toast.error('Email ou senha inválidos. Tente novamente.');

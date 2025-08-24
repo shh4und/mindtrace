@@ -49,29 +49,23 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import api from '../services/api';
+import { useToast } from 'vue-toastification';
 
-// --- DADOS FICTÍCIOS ---
-const moodMapping = { 1: '😖 Muito Mal', 2: '😕 Mal', 3: '😐 Neutro', 4: '😊 Bem', 5: '😁 Muito Bem' };
-
-const generateMockData = (days) => {
-  const data = [];
-  for (let i = 0; i < days; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    data.push({
-      date: date.toISOString().split('T')[0],
-      sleep:  Math.floor(Math.random() * 9) + 3, // entre 5 e 9 horas
-      energy: Math.floor(Math.random() * 8) + 2, // entre 2 e 9
-      stress: Math.floor(Math.random() * 8) + 1, // entre 1 e 8
-      mood: moodMapping[Math.floor(Math.random() * 5) + 1],
-    });
+const props = defineProps({
+  patientId: {
+    type: Number,
+    default: null, // ID do paciente, usado pelo profissional
   }
-  return data.reverse(); // Ordem cronológica
-};
+});
 
-const allData = ref(generateMockData(90));
+const toast = useToast();
+
+// --- ESTADO DO COMPONENTE ---
+const allData = ref([]);
 const selectedRange = ref(30);
+const isLoading = ref(true);
 
 const timeRanges = [
   { label: 'Últimos 7 dias', days: 7 },
@@ -79,29 +73,56 @@ const timeRanges = [
   { label: 'Últimos 90 dias', days: 90 },
 ];
 
+// --- DADOS PROCESSADOS PARA OS GRÁFICOS ---
 const chartData = computed(() => {
+  // No futuro, a API poderia retornar os dados já filtrados.
+  // Por agora, filtramos no frontend.
   return allData.value.slice(-selectedRange.value);
 });
 
-// --- ESTATÍSTICAS ---
-const calculateAverage = (key) => {
-  if (chartData.value.length === 0) return 'N/A';
-  const total = chartData.value.reduce((acc, curr) => acc + curr[key], 0);
-  return (total / chartData.value.length).toFixed(1);
+const avgSleep = computed(() => calculateAverage(chartData.value.map(d => d.valor_sono)));
+const avgEnergy = computed(() => calculateAverage(chartData.value.map(d => d.valor_energia)));
+const avgStress = computed(() => calculateAverage(chartData.value.map(d => d.valor_stress)));
+
+function calculateAverage(data) {
+  if (data.length === 0) return 'N/A';
+  const total = data.reduce((acc, curr) => acc + curr, 0);
+  return (total / data.length).toFixed(1);
+}
+
+// --- LÓGICA DE BUSCA DE DADOS ---
+const fetchReportData = async () => {
+  isLoading.value = true;
+  try {
+    // TODO: A API de relatório precisa aceitar um ID de paciente para o profissional
+    const response = await api.buscarRelatorio(selectedRange.value);
+    const report = response.data;
+
+    // Transforma os dados da API para o formato que os gráficos precisam
+    const formattedData = report.grafico_sono.map((_, i) => ({
+      date: report.grafico_sono[i].data,
+      valor_sono: report.grafico_sono[i].valor,
+      valor_energia: report.grafico_energia[i].valor,
+      valor_stress: report.grafico_stress[i].valor,
+      humor: report.grafico_sono[i].humor, // Assumindo que o humor é o mesmo para todos os pontos do dia
+      anotacao: report.grafico_sono[i].anotacao,
+    }));
+    allData.value = formattedData;
+
+  } catch (error) {
+    toast.error("Não foi possível carregar os dados do relatório.");
+    console.error("Erro ao buscar relatório:", error);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
-const avgSleep = computed(() => calculateAverage('sleep'));
-const avgEnergy = computed(() => calculateAverage('energy'));
-const avgStress = computed(() => calculateAverage('stress'));
+onMounted(fetchReportData);
+watch(selectedRange, fetchReportData);
 
 
-// --- OPÇÕES DOS GRÁFICOS ---
-const xAxisTitle = computed(() => {
-  const rangeInfo = timeRanges.find(r => r.days === selectedRange.value);
-  return rangeInfo ? `Tempo (${rangeInfo.label})` : 'Tempo';
-});
-
-const baseChartOptions = computed(() => ({
+// --- OPÇÕES DOS GRÁFICOS (adaptado para reatividade com ref) ---
+const getChartOptions = (title) => ({
   chart: {
     type: 'area',
     height: 350,
@@ -113,65 +134,44 @@ const baseChartOptions = computed(() => ({
   xaxis: {
     type: 'datetime',
     categories: chartData.value.map(d => d.date),
-    labels: {
-      show: false, // Esconde as labels individuais do eixo X
-    },
-    title: {
-      text: xAxisTitle.value, // Adiciona o título dinâmico
-      style: {
-        fontSize: '14px',
-        fontWeight: 400,
-        color: '#6B7280'
-      }
-    },
-    tooltip: {
-      enabled: false, // Desativa o tooltip do eixo X para não ser redundante
-    }
+    labels: { show: false },
+    title: { text: `Tempo (${timeRanges.find(r => r.days === selectedRange.value)?.label})`, style: { fontSize: '14px', fontWeight: 400, color: '#6B7280' } },
+    tooltip: { enabled: false },
   },
+  yaxis: { title: { text: title } },
+  markers: { size: 5, hover: { size: 7 } },
+  grid: { borderColor: '#e7e7e7', row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
   tooltip: {
     custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-      const pointData = chartData.value[dataPointIndex];
-      if (!pointData) return '';
-
-      const value = series[seriesIndex][dataPointIndex];
-      const seriesName = w.globals.seriesNames[seriesIndex];
-
-      // Retorna um bloco HTML autossuficiente com estilos inline
-      return `
-        <div style="padding: 10px 14px; background: #FFF; border: 1px solid #DDD; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border-radius: 6px;">
-          <div style="font-weight: 600; color: #333; margin-bottom: 6px;">
-            ${new Date(pointData.date).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+        const pointData = chartData.value[dataPointIndex];
+        if (!pointData) return '';
+        const seriesName = w.globals.seriesNames[seriesIndex];
+        return `
+          <div style="padding: 10px 14px; background: #FFF; border: 1px solid #DDD; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border-radius: 6px;">
+            <div style="font-weight: 600; color: #333; margin-bottom: 6px;">
+              ${new Date(pointData.date).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </div>
+            <div style="font-size: 13px; color: #555;">
+              <span style="display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; background-color: ${w.globals.colors[seriesIndex]};"></span>
+              <span>${seriesName}: <strong>${series[seriesIndex][dataPointIndex]}</strong></span>
+            </div>
+            <div style="font-size: 13px; color: #555; margin-top: 5px;">
+              <span style="display: inline-block; width: 10px; height: 10px; margin-right: 6px;"></span>
+              <span>Humor: <strong>${pointData.humor}</strong></span>
+            </div>
           </div>
-          <div style="font-size: 13px; color: #555;">
-            <span style="display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; background-color: ${w.globals.colors[seriesIndex]};"></span>
-            <span>${seriesName}: <strong>${value}</strong></span>
-          </div>
-          <div style="font-size: 13px; color: #555; margin-top: 5px;">
-            <span style="display: inline-block; width: 10px; height: 10px; margin-right: 6px;"></span>
-            <span>Humor: <strong>${pointData.mood}</strong></span>
-          </div>
-        </div>
-      `;
+        `;
     }
   },
-  markers: {
-    size: 5,
-    hover: { size: 7 }
-  },
-  grid: {
-    borderColor: '#e7e7e7',
-    row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 },
-  },
-}));
+});
 
-// Opções e Séries para cada gráfico
-const sleepChartOptions = computed(() => ({ ...baseChartOptions.value, yaxis: { title: { text: 'Horas' } }, colors: ['#3B82F6'] }));
-const sleepSeries = computed(() => [{ name: 'Horas de Sono', data: chartData.value.map(d => d.sleep) }]);
+const sleepChartOptions = computed(() => ({ ...getChartOptions('Horas'), colors: ['#3B82F6'] }));
+const sleepSeries = computed(() => [{ name: 'Horas de Sono', data: chartData.value.map(d => d.valor_sono) }]);
 
-const energyChartOptions = computed(() => ({ ...baseChartOptions.value, yaxis: { title: { text: 'Nível (0-10)' } }, colors: ['#F59E0B'] }));
-const energySeries = computed(() => [{ name: 'Nível de Energia', data: chartData.value.map(d => d.energy) }]);
+const energyChartOptions = computed(() => ({ ...getChartOptions('Nível (0-10)'), colors: ['#F59E0B'] }));
+const energySeries = computed(() => [{ name: 'Nível de Energia', data: chartData.value.map(d => d.valor_energia) }]);
 
-const stressChartOptions = computed(() => ({ ...baseChartOptions.value, yaxis: { title: { text: 'Nível (0-10)' } }, colors: ['#EF4444'] }));
-const stressSeries = computed(() => [{ name: 'Nível de Stress', data: chartData.value.map(d => d.stress) }]);
+const stressChartOptions = computed(() => ({ ...getChartOptions('Nível (0-10)'), colors: ['#EF4444'] }));
+const stressSeries = computed(() => [{ name: 'Nível de Stress', data: chartData.value.map(d => d.valor_stress) }]);
 
 </script>

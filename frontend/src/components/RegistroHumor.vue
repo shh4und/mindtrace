@@ -158,8 +158,6 @@ import api from '../services/api';
 
 const toast = useToast();
 
-const toast = useToast();
-
 // Core selections
 const selectedMood = ref('');
 const sleepHours = ref(0);

@@ -61,6 +61,9 @@ func main() {
 
 	roteador := gin.Default()
 
+	// Adiciona o middleware de CORS
+	roteador.Use(middlewares.CORSMiddleware())
+
 	api := roteador.Group("/api/v1")
 	{
 		// --- ROTAS PÚBLICAS ---

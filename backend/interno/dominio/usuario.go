@@ -8,8 +8,9 @@ import (
 
 // Usuario é a base para todos os tipos de usuários.
 type Usuario struct {
-	ID        uint           `gorm:"primaryKey"`
-	Nome      string         `json:"nome" gorm:"type:varchar(255);not null"`
+	ID          uint           `gorm:"primaryKey"`
+	TipoUsuario string         `json:"tipo_usuario" gorm:"type:varchar(50);not null"`
+	Nome        string         `json:"nome" gorm:"type:varchar(255);not null"`
 	Email     string         `json:"email" gorm:"type:varchar(255);unique;not null"`
 	Senha     string         `json:"-" gorm:"type:text;not null"`
 	Contato   string         `json:"contato" gorm:"not null"`
