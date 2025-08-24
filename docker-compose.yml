@@ -1,95 +1,68 @@
 version: '3.8'
 
-############################################################
-# docker-compose para PRODUÇÃO (EC2)
-# - Por padrão usa imagens publicadas (substitua por seu registry)
-# - NÃO expõe a porta 5432 do Postgres publicamente
-# - Usa arquivo `.env` para variáveis sensíveis (JWT, credenciais DB)
-############################################################
-
 services:
-	db:
-		image: postgres:17-alpine
-		container_name: mindtrace-db
-		restart: unless-stopped
-		environment:
-			- POSTGRES_USER=${POSTGRES_USER}
-			- POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-			- POSTGRES_DB=${POSTGRES_DB}
-		# Em produção, NÃO exponha o Postgres publicamente. Use apenas volume local e rede interna.
-		# Se precisar conectar externamente (somente para debug), remova o comentário abaixo com cautela e restrinja o SG da EC2.
-		# ports:
-		#   - "5432:5432"
-		volumes:
-			- ./postgres-data:/var/lib/postgresql/data
-		healthcheck:
-			test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-			interval: 10s
-			timeout: 5s
-			retries: 5
+  db:
+    image: postgres:17-alpine
+    container_name: mindtrace-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-	backend:
-		container_name: mindtrace-backend
-		# Padrão: usar imagem pré-construída de um registry (Docker Hub, ECR, etc.).
-		# Substitua por: your-registry/your-namespace/mindtrace-backend:tag
-		# image: shh4und/mindtrace-backend:latest
-		# Alternativa: se você quiser construir na EC2 (não recomendado em instâncias pequenas),
-		# descomente o bloco abaixo e comente a linha `image:` acima.
-		build:
-		  context: ./backend
-		  dockerfile: Dockerfile
-		restart: unless-stopped
-		env_file:
-			- ./.env
-		ports:
-			- "8080:8080"
-		depends_on:
-			db:
-				condition: service_healthy
-		logging:
-			driver: "json-file"
-			options:
-				max-size: "10m"
-				max-file: "3"
+  backend:
+    container_name: mindtrace-backend
+    # Padrão: usar imagem pré-construída de um registry (Docker Hub, ECR, etc.).
+    # Substitua por: your-registry/your-namespace/mindtrace-backend:tag
+    # image: shh4und/mindtrace-backend:latest
+    # Alternativa: se você quiser construir na EC2 (não recomendado em instâncias pequenas),
+    # descomente o bloco abaixo e comente a linha `image:` acima.
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-	frontend:
-		container_name: mindtrace-frontend
-		# Padrão: imagem estática (Nginx) publicada no registry. Substitua conforme necessário.
-		image: shh4und/mindtrace-frontend:latest
-		# Para construir localmente (ex: em CI ou se preferir), descomente o bloco abaixo.
-		# build:
-		#   context: ./frontend
-		#   dockerfile: Dockerfile
-		restart: unless-stopped
-		ports:
-			- "80:80"
-		depends_on:
-			- backend
-		logging:
-			driver: "json-file"
-			options:
-				max-size: "5m"
-				max-file: "2"
+  frontend:
+    container_name: mindtrace-frontend
+    # Padrão: imagem estática (Nginx) publicada no registry. Substitua conforme necessário.
+    image: shh4und/mindtrace-frontend:latest
+    # Para construir localmente (ex: em CI ou se preferir), descomente o bloco abaixo.
+    # build:
+    #   context: ./frontend
+    #   dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
 
 networks:
-	default:
-		driver: bridge
+  default:
+    driver: bridge
 
 volumes:
-	postgres-data:
-
-############################################################
-# Notas de uso (rápido):
-# 1) Crie um arquivo `.env` na raiz com: POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, JWT_SECRET
-# 2) Substitua as imagens `shh4und/...` pelo seu registry (Docker Hub / ECR). Exemplo Docker Hub:
-#      image: yourusername/mindtrace-backend:latest
-# 3) Na EC2, configure Security Group para permitir:
-#      - 80 (HTTP) e/ou 443 (HTTPS) para frontend
-#      - 8080 apenas se você precisa expor a API diretamente (recomendo usar 80+reverse proxy)
-#    NÃO abra 5432 para o mundo.
-# 4) Deploy na EC2 (após ajustar imagens/.env):
-#      docker compose pull
-#      docker compose up -d
-# 5) Recomendado: usar CI (GitHub Actions) para buildar e publicar imagens em vez de compilar na EC2.
-############################################################
-
+  postgres-data:
