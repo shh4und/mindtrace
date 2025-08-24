@@ -6,10 +6,7 @@
       <Resumo v-if="activeView === 'resumo'" />
       <RegistroHumor v-if="activeView === 'humor'" />
       <Relatorio v-if="activeView === 'relatorios'" />
-      <div v-if="activeView === 'perfil'" class="text-center mt-10">
-        <h2 class="text-2xl font-bold">Página de Perfil</h2>
-        <p class="text-gray-600">Em construção...</p>
-      </div>
+      <Perfil v-if="activeView === 'perfil'" user-type="paciente" />
 
     </main>
   </div>
@@ -21,6 +18,7 @@ import Navbar from '../components/Navbar.vue';
 import RegistroHumor from '../components/RegistroHumor.vue';
 import Resumo from '../components/Resumo.vue';
 import Relatorio from '../components/Relatorio.vue';
+import Perfil from '../components/Perfil.vue';
 import '../assets/paciente_dashboard.css';
 
 const activeView = ref('resumo');

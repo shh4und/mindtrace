@@ -154,6 +154,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useToast } from "vue-toastification";
+import api from '../services/api';
+
+const toast = useToast();
 
 const toast = useToast();
 
@@ -196,33 +199,43 @@ const selfCareActivities = ['Leitura', 'Exercício', 'Medicação', 'Yoga', 'Med
 
 const sleepLabel = computed(() => (sleepHours.value >= sleepMax ? '12h+' : sleepHours.value + 'h'));
 
-const submitMood = () => {
+const moodLevelMapping = {
+  'very_bad': 1,
+  'bad': 2,
+  'neutral': 3,
+  'cheerful': 4,
+  'very_good': 5
+};
+
+const submitMood = async () => {
   if (!selectedMood.value) {
     toast.warning('Por favor, selecione seu humor principal antes de registrar.');
     return;
   }
 
-  const finalEmotions = [...selectedEmotions.value];
-  if (otherEmotion.value) finalEmotions.push(otherEmotion.value);
-
   let finalActivities = [...selectedActivities.value];
   if (otherActivity.value) finalActivities.push(otherActivity.value);
   if (finalActivities.includes('Nenhuma Atividade')) finalActivities = ['Nenhuma Atividade'];
 
+  // Objeto padronizado para corresponder ao DTO do backend
   const submission = {
-    date: new Date().toISOString().slice(0, 10),
-    mood: selectedMood.value,
-    sleep: sleepHours.value,
-    energy: energyLevel.value,
-    stress: stressLevel.value,
-    emotions: finalEmotions,
-    activities: finalActivities,
-    notes: notes.value,
+    nivel_humor: moodLevelMapping[selectedMood.value],
+    horas_sono: sleepHours.value,
+    nivel_energia: energyLevel.value,
+    nivel_stress: stressLevel.value,
+    auto_cuidado: finalActivities,
+    observacoes: notes.value,
+    data_hora_registro: new Date().toISOString(),
   };
 
-  console.log('Registro de Humor Enviado:', submission);
-  toast.success('Seu humor foi registrado com sucesso!');
-  // TODO: persistir submission via API
+  try {
+    await api.registrarHumor(submission);
+    toast.success('Seu humor foi registrado com sucesso!');
+    // Opcional: limpar o formulário ou navegar para outra página
+  } catch (error) {
+    toast.error('Houve um erro ao registrar seu humor.');
+    console.error("Erro ao registrar humor:", error);
+  }
 };
 </script>
 

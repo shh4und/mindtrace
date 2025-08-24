@@ -93,8 +93,12 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
+import api from '../services/api';
 
 const router = useRouter();
+const toast = useToast();
+
 const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
@@ -105,11 +109,26 @@ const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 };
 
-const handleLogin = () => {
-  // Lógica de autenticação aqui
-  console.log('Tentativa de login:', { email: email.value, password: password.value });
-  alert('Login realizado com sucesso!\n\nEmail: ' + email.value);
-  // Redirecionar para o dashboard após o login
-  router.push('/dashboard');
+const handleLogin = async () => {
+  try {
+    const credentials = {
+      email: email.value,
+      senha: password.value, // Padronizado para "senha"
+    };
+
+    const response = await api.login(credentials);
+    
+    // Salva o token no localStorage para ser usado pelo interceptor
+    localStorage.setItem('authToken', response.data.token);
+
+    toast.success('Login realizado com sucesso!');
+
+    // TODO: Adicionar lógica para diferenciar paciente de profissional
+    router.push('/dashboard');
+
+  } catch (error) {
+    toast.error('Email ou senha inválidos. Tente novamente.');
+    console.error('Falha no login:', error);
+  }
 };
 </script>
