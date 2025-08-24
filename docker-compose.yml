@@ -44,11 +44,11 @@ services:
   frontend:
     container_name: mindtrace-frontend
     # Padrão: imagem estática (Nginx) publicada no registry. Substitua conforme necessário.
-    image: shh4und/mindtrace-frontend:latest
-    # Para construir localmente (ex: em CI ou se preferir), descomente o bloco abaixo.
-    # build:
-    #   context: ./frontend
-    #   dockerfile: Dockerfile
+    # image: shh4und/mindtrace-frontend:latest
+    # # Para construir localmente (ex: em CI ou se preferir), descomente o bloco abaixo.
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     restart: unless-stopped
     ports:
       - "80:80"
