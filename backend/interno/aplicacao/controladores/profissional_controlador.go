@@ -32,7 +32,12 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 		return
 	}
 
-	passwordRegex := `^[a-zA-Z0-9!@#$%^&*]{8,}
+	if len(req.Senha) < 8 {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "Senha inválida. Use 8 ou mais caracteres com letras, números e os símbolos: !@#$%^&*"})
+		return
+	}
+
+	passwordRegex := `^[a-zA-Z0-9!@#$%^&*].{8,}$`
 	if match, _ := regexp.MatchString(passwordRegex, req.Senha); !match {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Senha inválida. Use 8 ou mais caracteres com letras, números e os símbolos: !@#$%^&*"})
 		return
