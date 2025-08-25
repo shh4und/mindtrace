@@ -16,7 +16,6 @@ type Usuario struct {
 	Contato   string         `json:"contato" gorm:"not null"`
 	Bio       string         `json:"bio" gorm:"type:text"`
 	CPF       string         `json:"cpf" gorm:"type:varchar(20);unique"`
-	CNPJ      string         `json:"cnpj" gorm:"type:varchar(20);unique"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
@@ -49,7 +48,7 @@ type Paciente struct {
 	UsuarioID            uint           `json:"-" gorm:"unique;not null"`
 	Usuario              Usuario        `json:"usuario" gorm:"foreignKey:UsuarioID"`
 	Idade                int8           `json:"idade" gorm:"not null"`
-	EhDependente         bool           `json:"eh_dependente" gorm:"not null"`
+	EhDependente         bool           `json:"dependente" gorm:"not null"`
 	DataInicioTratamento *time.Time     `json:"data_inicio_tratamento"`
 	HistoricoSaude       string         `json:"historico_saude" gorm:"type:text"`
 	Profissionais        []Profissional `json:"profissionais" gorm:"many2many:profissional_paciente;"`

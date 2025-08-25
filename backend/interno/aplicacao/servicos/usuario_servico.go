@@ -20,6 +20,7 @@ type RegistrarProfissionalDTO struct {
 	Idade                int8
 	Especialidade        string
 	RegistroProfissional string
+	CPF                 string
 }
 
 type RegistrarPacienteDTO struct {
@@ -30,6 +31,7 @@ type RegistrarPacienteDTO struct {
 	Idade                int8
 	DataInicioTratamento *time.Time
 	HistoricoSaude       string
+	CPF                  string
 }
 
 type RegistrarResponsavelDTO struct {
@@ -96,6 +98,7 @@ func (s *usuarioServico) RegistrarProfissional(dto RegistrarProfissionalDTO) (*d
 			Email:       dto.Email,
 			Senha:       string(hashSenha),
 			TipoUsuario: "profissional",
+			CPF:        dto.CPF,
 		}
 
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
@@ -141,6 +144,7 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 			Email:       dto.Email,
 			Senha:       string(hashSenha),
 			TipoUsuario: "paciente",
+			CPF:         dto.CPF,
 		}
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err

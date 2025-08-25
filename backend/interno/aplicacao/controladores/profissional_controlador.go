@@ -21,6 +21,7 @@ type RegistrarProfissionalRequest struct {
 	Senha                string `json:"senha" binding:"required,min=8"`
 	Especialidade        string `json:"especialidade" binding:"required"`
 	RegistroProfissional string `json:"registro_profissional" binding:"required"`
+	CPF 				 string `json:"cpf" binding:"required"`
 }
 
 func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
@@ -36,6 +37,7 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 		Senha:                req.Senha,
 		Especialidade:        req.Especialidade,
 		RegistroProfissional: req.RegistroProfissional,
+		CPF:				  req.CPF,
 	}
 
 	profissional, err := pc.usuarioServico.RegistrarProfissional(dto)
@@ -43,7 +45,7 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 		if err == servicos.ErrEmailJaCadastrado {
 			c.JSON(http.StatusConflict, gin.H{"erro": err.Error()})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"erro": "erro ao criar Profissional"})
+			c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
 		}
 		return
 	}
