@@ -56,7 +56,7 @@ func main() {
 	registroHumorService := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo)
 	registroHumorController := controladores.NovoRegistroHumorControlador(registroHumorService)
 
-	relatorioService := servicos.NovoRelatorioServico(registroHumorRepo)
+	relatorioService := servicos.NovoRelatorioServico(db, registroHumorRepo, usuarioRepo)
 	relatorioController := controladores.NovoRelatorioControlador(relatorioService)
 
 	roteador := gin.Default()

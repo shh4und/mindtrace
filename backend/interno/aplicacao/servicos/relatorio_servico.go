@@ -25,28 +25,46 @@ type RelatorioPacienteDTO struct {
 }
 
 type RelatorioServico interface {
-	GerarRelatorioPaciente(pacienteID uint, filtroPeriodo int64) (*RelatorioPacienteDTO, error)
+	GerarRelatorioPaciente(userID uint, filtroPeriodo int64) (*RelatorioPacienteDTO, error)
 }
 
 type relatorioServico struct {
+	db                       *gorm.DB
 	registroHumorRepositorio postgres.RegistroHumorRepositorio
+	usuarioRepositorio       postgres.UsuarioRepositorio
 }
 
-func NovoRelatorioServico(registroHumorRepo postgres.RegistroHumorRepositorio) *relatorioServico {
-	return &relatorioServico{registroHumorRepositorio: registroHumorRepo}
+func NovoRelatorioServico(db *gorm.DB, registroHumorRepo postgres.RegistroHumorRepositorio, usuarioRepo postgres.UsuarioRepositorio) RelatorioServico {
+	return &relatorioServico{
+		db:                       db,
+		registroHumorRepositorio: registroHumorRepo,
+		usuarioRepositorio:       usuarioRepo,
+	}
 }
 
-func (rs *relatorioServico) GerarRelatorioPaciente(pacienteID uint, filtroPeriodo int64) (*RelatorioPacienteDTO, error) {
-	relatorioPacienteFeito := &RelatorioPacienteDTO{}
-	periodoDeTempoDias := time.Duration(filtroPeriodo) * 24 * time.Hour
-	now := time.Now()
-	dataFim := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
-	dataInicio := dataFim.AddDate(0, 0, -int(periodoDeTempoDias))
+func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo int64) (*RelatorioPacienteDTO, error) {
+	relatorioPacienteFeito := &RelatorioPacienteDTO{
+		GraficoSono:    make([]PontoDeDadosDTO, 0),
+		GraficoEnergia: make([]PontoDeDadosDTO, 0),
+		GraficoStress:  make([]PontoDeDadosDTO, 0),
+	}
 
-	registrosHumor, err := rs.registroHumorRepositorio.BuscarPorPacienteEPeriodo(pacienteID, dataInicio, dataFim)
+	paciente, err := rs.usuarioRepositorio.BuscarPacientePorID(rs.db, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
+			return relatorioPacienteFeito, nil
+		}
+		return nil, err
+	}
+
+	now := time.Now()
+	dataFim := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+	dataInicio := dataFim.AddDate(0, 0, -int(filtroPeriodo))
+
+	registrosHumor, err := rs.registroHumorRepositorio.BuscarPorPacienteEPeriodo(paciente.ID, dataInicio, dataFim)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return relatorioPacienteFeito, nil
 		}
 		return nil, err
 	}
