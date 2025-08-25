@@ -132,7 +132,7 @@ const handleLogin = async () => {
       if (decodedToken.role === 'profissional') {
         router.push('/dashboard-profissional');
       } else {
-        router.push('/dashboard');
+        router.push('/dashboard-paciente');
       }
     } else {
       toast.error('Token inválido ou tipo de usuário não encontrado.');

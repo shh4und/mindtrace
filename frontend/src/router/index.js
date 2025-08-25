@@ -30,8 +30,8 @@ const router = createRouter({
       component: ForgotPassword
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
+      path: '/dashboard-paciente',
+      name: 'dashboard-paciente',
       component: PacienteDashboard
     },
     {
