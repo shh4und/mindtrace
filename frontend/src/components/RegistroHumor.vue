@@ -218,9 +218,9 @@ const submitMood = async () => {
   // Objeto padronizado para corresponder ao DTO do backend
   const submission = {
     nivel_humor: moodLevelMapping[selectedMood.value],
-    horas_sono: sleepHours.value,
-    nivel_energia: energyLevel.value,
-    nivel_stress: stressLevel.value,
+    horas_sono: sleepHours.value > sleepMax ? sleepMax : sleepHours.value,
+    nivel_energia: energyLevel.value > energyMax ? energyMax : energyLevel.value,
+    nivel_stress: stressLevel.value > stressMax ? stressMax : stressLevel.value,
     auto_cuidado: finalActivities,
     observacoes: notes.value,
     data_hora_registro: new Date().toISOString(),
