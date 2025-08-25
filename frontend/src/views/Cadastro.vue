@@ -25,19 +25,23 @@
             <!-- Campos Comuns -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                <label for="nome" class="block text-base font-medium text-gray-700 mb-1">Nome Completo</label>
                 <input type="text" id="nome" v-model="form.nome" class="w-full input-style" required />
               </div>
               <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label for="cpf" class="block text-base font-medium text-gray-700 mb-1">CPF</label>
+                <input type="text" id="cpf" v-model="form.cpf" class="w-full input-style" required />
+              </div>
+              <div>
+                <label for="email" class="block text-base font-medium text-gray-700 mb-1">Email</label>
                 <input type="email" id="email" v-model="form.email" class="w-full input-style" required />
               </div>
               <div>
-                <label for="senha" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <label for="senha" class="block text-base font-medium text-gray-700 mb-1">Senha</label>
                 <input type="password" id="senha" v-model="form.senha" class="w-full input-style" required />
               </div>
               <div>
-                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirme sua
+                <label for="confirmPassword" class="block text-base font-medium text-gray-700 mb-1">Confirme sua
                   Senha</label>
                 <input type="password" id="confirmPassword" v-model="form.confirmPassword" class="w-full input-style"
                   required />
@@ -45,14 +49,15 @@
             </div>
 
             <!-- Campos do Profissional -->
-            <div v-if="form.userType === 'profissional'" class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
+            <div v-if="form.userType === 'profissional'"
+              class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
               <div>
-                <label for="especialidade" class="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+                <label for="especialidade" class="block text-base font-medium text-gray-700 mb-1">Especialidade</label>
                 <input type="text" id="especialidade" v-model="form.especialidade" class="w-full input-style"
                   required />
               </div>
               <div>
-                <label for="registro_profissional" class="block text-sm font-medium text-gray-700 mb-1">Nº Registro
+                <label for="registro_profissional" class="block text-base font-medium text-gray-700 mb-1">Nº Registro
                   Profissional (CRP, etc)</label>
                 <input type="text" id="registro_profissional" v-model="form.registro_profissional"
                   class="w-full input-style" required />
@@ -60,19 +65,19 @@
             </div>
 
             <!-- Campos do Paciente -->
-            <div v-if="form.userType === 'paciente'" class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
+            <div v-if="form.userType === 'paciente'"
+              class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
               <div>
-                <label for="dependente" class="block text-sm font-medium text-gray-700 mb-1">É dependente?</label>
-                <input type="checkbox" id="dependente" v-model="form.dependente" class="w-7 h-6  input-style"
-                  required />
-                
+                <label for="idade" class="block text-base font-medium text-gray-700 mb-1">Idade</label>
+                <input type="number" id="idade" v-model="form.idade" class="w-full input-style" required />
               </div>
-              <div>
-                <label for="idade" class="block text-sm font-medium text-gray-700 mb-1">Idade</label>
-                <input type="number" id="idade" v-model="form.idade"
-                  class="w-full input-style" required />
+              <div class="flex flex-row gap-3">
+                <label for="dependente" class="text-base font-medium text-gray-700 mb-1">É dependente?</label>
+                <input type="checkbox" id="dependente" v-model="form.dependente" class="w-6 h-6" required />
+
               </div>
             </div>
+
 
             <button type="submit"
               class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 outline-none">
