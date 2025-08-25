@@ -38,28 +38,43 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useClipboard } from '@vueuse/core'; // Usando uma lib moderna para clipboard
+import { useClipboard } from '@vueuse/core';
 import { useToast } from 'vue-toastification';
+import api from '../services/api'; // Importando a API
 
 const token = ref(null);
 const expiryDate = ref(null);
 const copied = ref(false);
+const isLoading = ref(false);
 
 const { copy } = useClipboard({ source: token });
 const toast = useToast();
 
-const generateInvite = () => {
-  // Lógica para chamar a API de geração de token viria aqui
-  // Por enquanto, vamos simular
-  token.value = Math.random().toString(36).substring(2, 12).toUpperCase();
-  const expiry = new Date();
-  expiry.setHours(expiry.getHours() + 24);
-  expiryDate.value = expiry.toLocaleString('pt-BR', { dateStyle: 'medium', timeStyle: 'short' });
+const generateInvite = async () => {
+  isLoading.value = true;
   copied.value = false;
+  try {
+    const response = await api.gerarConvite();
+    token.value = response.data.token;
+    const expiry = new Date(response.data.data_expiracao);
+    expiryDate.value = expiry.toLocaleString('pt-BR', { dateStyle: 'full', timeStyle: 'short' });
+    toast.success("Novo convite gerado!");
+  } catch (error) {
+    const errorMessage = error.response?.data?.erro || 'Falha ao gerar o convite.';
+    toast.error(errorMessage);
+    console.error("Erro ao gerar convite:", error);
+    token.value = null;
+    expiryDate.value = null;
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const copyToken = () => {
+  if (!token.value) return;
   copy(token.value);
   toast.success("Token copiado!");
+  copied.value = true;
+  setTimeout(() => (copied.value = false), 3000); // Resetar a mensagem após 3 segundos
 }
 </script>

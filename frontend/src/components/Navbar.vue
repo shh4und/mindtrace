@@ -33,6 +33,12 @@
           </a>
         </li>
         <li>
+          <a href="#" @click.prevent="$emit('navigate', 'vincular')" class="sidebar-item">
+            <i class="fa-solid fa-chart-line fa-fw mr-3"></i>
+            <span>Vincular um Profissional</span>
+          </a>
+        </li>
+        <li>
           <a href="#" @click.prevent="$emit('navigate', 'perfil')" class="sidebar-item">
             <i class="fa-solid fa-user fa-fw mr-3"></i>
             <span>Perfil</span>
