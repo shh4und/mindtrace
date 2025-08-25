@@ -76,6 +76,14 @@ const timeRanges = [
   { label: 'Últimos 90 dias', days: 90 },
 ];
 
+const moodOptions = [
+  {label: 'Muito Mal', emoji: '😖' },
+  {label: 'Aborrecido', emoji: '😕' },
+  {label: 'Neutro', emoji: '😐' },
+  {label: 'Animado', emoji: '😊' },
+  {label: 'Muito Bem', emoji: '😁' },
+];
+
 // --- DADOS PROCESSADOS PARA OS GRÁFICOS ---
 const chartData = computed(() => {
   // No futuro, a API poderia retornar os dados já filtrados.
@@ -117,6 +125,9 @@ const fetchReportData = async () => {
 onMounted(fetchReportData);
 watch(selectedRange, fetchReportData);
 
+const sortedChartData = computed(() =>
+  [...chartData.value].sort((a, b) => new Date(a.date) - new Date(b.date))
+);
 
 // --- OPÇÕES DOS GRÁFICOS (adaptado para reatividade com ref) ---
 const getChartOptions = (title) => ({
@@ -130,7 +141,7 @@ const getChartOptions = (title) => ({
   stroke: { curve: 'smooth', width: 3 },
   xaxis: {
     type: 'datetime',
-    categories: chartData.value.map(d => d.date),
+    categories: sortedChartData.value.map(d => d.date),
     labels: { show: false },
     title: { text: `Tempo (${timeRanges.find(r => r.days === selectedRange.value)?.label})`, style: { fontSize: '14px', fontWeight: 400, color: '#6B7280' } },
     tooltip: { enabled: false },
@@ -140,7 +151,7 @@ const getChartOptions = (title) => ({
   grid: { borderColor: '#e7e7e7', row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
   tooltip: {
     custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-        const pointData = chartData.value[dataPointIndex];
+        const pointData = sortedChartData.value[dataPointIndex];
         if (!pointData) return '';
         const seriesName = w.globals.seriesNames[seriesIndex];
         return `
@@ -154,7 +165,7 @@ const getChartOptions = (title) => ({
             </div>
             <div style="font-size: 13px; color: #555; margin-top: 5px;">
               <span style="display: inline-block; width: 10px; height: 10px; margin-right: 6px;"></span>
-              <span>Humor: <strong>${pointData.humor}</strong></span>
+              <span>Humor: <strong>${moodOptions[pointData.humor-1].label} - ${moodOptions[pointData.humor-1].emoji}</strong></span>
             </div>
           </div>
         `;
@@ -163,12 +174,12 @@ const getChartOptions = (title) => ({
 });
 
 const sleepChartOptions = computed(() => ({ ...getChartOptions('Horas'), colors: ['#3B82F6'] }));
-const sleepSeries = computed(() => [{ name: 'Horas de Sono', data: chartData.value.map(d => d.valor_sono) }]);
+const sleepSeries = computed(() => [{ name: 'Horas de Sono', data: sortedChartData.value.map(d => d.valor_sono) }]);
 
 const energyChartOptions = computed(() => ({ ...getChartOptions('Nível (0-10)'), colors: ['#F59E0B'] }));
-const energySeries = computed(() => [{ name: 'Nível de Energia', data: chartData.value.map(d => d.valor_energia) }]);
+const energySeries = computed(() => [{ name: 'Nível de Energia', data: sortedChartData.value.map(d => d.valor_energia) }]);
 
 const stressChartOptions = computed(() => ({ ...getChartOptions('Nível (0-10)'), colors: ['#EF4444'] }));
-const stressSeries = computed(() => [{ name: 'Nível de Stress', data: chartData.value.map(d => d.valor_stress) }]);
+const stressSeries = computed(() => [{ name: 'Nível de Stress', data: sortedChartData.value.map(d => d.valor_stress) }]);
 
 </script>
