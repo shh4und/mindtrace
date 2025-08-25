@@ -1,6 +1,7 @@
 package servicos
 
 import (
+	"encoding/json"
 	"errors"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/postgres"
@@ -48,6 +49,12 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto CriarRegistroHumorDTO) (
 			}
 			return err
 		}
+
+		autoCuidadoJSON, err := json.Marshal(dto.AutoCuidado)
+		if err != nil {
+			return err // Retorna erro de marshaling
+		}
+
 		novoRegistroHumor := &dominio.RegistroHumor{
 			PacienteID:       paciente.ID,
 			Paciente:         *paciente,
@@ -55,7 +62,7 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto CriarRegistroHumorDTO) (
 			HorasSono:        dto.HorasSono,
 			NivelEnergia:     dto.NivelEnergia,
 			NivelStress:      dto.NivelStress,
-			AutoCuidado:      dto.AutoCuidado,
+			AutoCuidado:      string(autoCuidadoJSON),
 			Observacoes:      dto.Observacoes,
 			DataHoraRegistro: dto.DataHoraRegistro,
 		}

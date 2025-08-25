@@ -17,10 +17,10 @@ func NovoRegistroHumorControlador(us servicos.RegistroHumorServico) *RegistroHum
 }
 
 type CriarRegistroHumorRequest struct {
-	NivelHumor       int16     `json:"nivel_humor" binding:"required"`
-	HorasSono        int16     `json:"horas_sono" binding:"required"`
-	NivelStress      int16     `json:"nivel_stress" binding:"required"`
-	NivelEnergia     int16     `json:"nivel_energia" binding:"required"`
+	NivelHumor       int16     `json:"nivel_humor" binding:"required,gte=1"`
+	HorasSono        int16     `json:"horas_sono" binding:"gte=0"`
+	NivelStress      int16     `json:"nivel_stress" binding:"required,gte=1"`
+	NivelEnergia     int16     `json:"nivel_energia" binding:"required,gte=1"`
 	AutoCuidado      []string  `json:"auto_cuidado" binding:"required"`
 	Observacoes      string    `json:"observacoes"`
 	DataHoraRegistro time.Time `json:"data_hora_registro"`
