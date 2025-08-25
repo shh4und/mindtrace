@@ -3,6 +3,7 @@ package controladores
 import (
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,12 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 	var req RegistrarPacienteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		return
+	}
+
+	passwordRegex := `^[a-zA-Z0-9!@#$%^&*]{8,}
+	if match, _ := regexp.MatchString(passwordRegex, req.Senha); !match {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "Senha inválida. Use 8 ou mais caracteres com letras, números e os símbolos: !@#$%^&*"})
 		return
 	}
 

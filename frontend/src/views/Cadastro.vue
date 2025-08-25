@@ -38,7 +38,9 @@
               </div>
               <div>
                 <label for="senha" class="block text-base font-medium text-gray-700 mb-1">Senha</label>
-                <input type="password" id="senha" v-model="form.senha" class="w-full input-style" required />
+                <input type="password" id="senha" v-model="form.senha" @input="validatePassword" class="w-full input-style" required />
+                 <p v-if="passwordError" class="text-sm text-red-600 mt-1">{{ passwordError }}</p>
+                 <p class="text-sm text-gray-500 mt-1">Use 8+ caracteres com letras, números e símbolos como !@#$%^&*</p>
               </div>
               <div>
                 <label for="confirmPassword" class="block text-base font-medium text-gray-700 mb-1">Confirme sua
@@ -80,7 +82,9 @@
 
 
             <button type="submit"
-              class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 outline-none">
+              :disabled="isSubmitDisabled"
+              class="w-full font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-offset-2 outline-none"
+              :class="isSubmitDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white'">
               Criar Conta de {{ form.userType === 'paciente' ? 'Paciente' : 'Profissional' }}
             </button>
           </form>
@@ -97,7 +101,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import api from '../services/api';
@@ -111,6 +115,7 @@ const form = reactive({
   email: '',
   senha: '',
   confirmPassword: '',
+  cpf: '',
   // Campos do profissional
   especialidade: '',
   registro_profissional: '',
@@ -119,27 +124,59 @@ const form = reactive({
   idade: '',
 });
 
+const passwordError = ref('');
+
+const isPasswordValid = computed(() => {
+    if (!form.senha) return false;
+    const regex = /^[a-zA-Z0-9!@#$%^&*]{8,}$/;
+    return regex.test(form.senha);
+});
+
+const isSubmitDisabled = computed(() => {
+    return !isPasswordValid.value || form.senha !== form.confirmPassword;
+});
+
+const validatePassword = () => {
+    if (!form.senha) {
+        passwordError.value = '';
+        return;
+    }
+    const regex = /^[a-zA-Z0-9!@#$%^&*]{8,}$/;
+    if (!regex.test(form.senha)) {
+        passwordError.value = 'A senha não atende aos critérios de segurança.';
+    } else {
+        passwordError.value = '';
+    }
+};
+
 const handleRegister = async () => {
   if (form.senha !== form.confirmPassword) {
     toast.error('As senhas não coincidem!');
     return;
   }
+  if (!isPasswordValid.value) {
+      toast.error('Por favor, use uma senha válida.');
+      return;
+  }
 
   try {
-    if (form.userType === 'paciente') {
-      const pacienteDTO = {
+    const commonData = {
         nome: form.nome,
         email: form.email,
         senha: form.senha,
+        cpf: form.cpf,
+    };
+
+    if (form.userType === 'paciente') {
+      const pacienteDTO = {
+        ...commonData,
         dependente: form.dependente,
-        idade: form.idade,
+        idade: parseInt(form.idade, 10),
       };
       await api.registrarPaciente(pacienteDTO);
     } else if (form.userType === 'profissional') {
       const profissionalDTO = {
-        nome: form.nome,
-        email: form.email,
-        senha: form.senha,
+        ...commonData,
         especialidade: form.especialidade,
         registro_profissional: form.registro_profissional,
       };
