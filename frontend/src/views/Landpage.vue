@@ -29,7 +29,7 @@
           <li><a href="#knowledge" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Conteúdo</a></li>
           <li><a href="#testimonials" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Depoimentos</a></li>
           <li><a href="#contact" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Contato</a></li>
-          <li><router-link to="/login" @click="closeMenu" class="block bg-emerald-600 text-white p-3 rounded-lg mt-4 font-semibold hover:bg-emerald-700">Login</router-link></li>
+          <li><router-link to="/login" @click="closeMenu" class="block bg-emerald-600 text-white p-3 rounded-lg mt-4 font-semibold hover:bg-emerald-700">Entrar ou Criar Conta</router-link></li>
         </ul>
       </div>
     </header>
