@@ -11,14 +11,14 @@ type Usuario struct {
 	ID          uint           `gorm:"primaryKey"`
 	TipoUsuario string         `json:"tipo_usuario" gorm:"type:varchar(50);not null"`
 	Nome        string         `json:"nome" gorm:"type:varchar(255);not null"`
-	Email     string         `json:"email" gorm:"type:varchar(255);unique;not null"`
-	Senha     string         `json:"-" gorm:"type:text;not null"`
-	Contato   string         `json:"contato" gorm:"not null"`
-	Bio       string         `json:"bio" gorm:"type:text"`
-	CPF       string         `json:"cpf" gorm:"type:varchar(20);unique"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	Email       string         `json:"email" gorm:"type:varchar(255);unique;not null"`
+	Senha       string         `json:"-" gorm:"type:text;not null"`
+	Contato     string         `json:"contato" gorm:"not null"`
+	Bio         string         `json:"bio" gorm:"type:text"`
+	CPF         string         `json:"cpf" gorm:"type:varchar(20);unique"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 func (Usuario) TableName() string {
@@ -75,13 +75,4 @@ type ResponsavelLegal struct {
 
 func (ResponsavelLegal) TableName() string {
 	return "responsaveis_legais"
-}
-
-type Convite struct {
-	ID             uint      `gorm:"primaryKey"`
-	ProfissionalID uint      `gorm:"not null"`
-	Token          string    `gorm:"type:varchar(32);unique;not null"`
-	DataExpiracao  time.Time `gorm:"not null"`
-	Usado          bool      `gorm:"default:false"`
-	PacienteID     *uint     // Guarda quem usou o convite
 }

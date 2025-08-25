@@ -61,15 +61,11 @@ export default {
     return apiClient.get(`/relatorios/?periodo=${periodo}`);
   },
 
-  // --- Convites (Exemplo futuro) ---
+  // --- Convites ---
   gerarConvite() {
-    // return apiClient.post('/profissionais/convite');
-    // Simulação por enquanto
-    return Promise.resolve({
-      data: {
-        token: Math.random().toString(36).substring(2, 12).toUpperCase(),
-        data_expiracao: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-      }
-    });
+    return apiClient.post('/convites/gerar');
+  },
+  vincularComToken(token) {
+    return apiClient.post('/convites/vincular', { token });
   },
 };

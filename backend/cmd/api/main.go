@@ -41,6 +41,7 @@ func main() {
 		&dominio.RegistroHumor{},
 		&dominio.Alerta{},
 		&dominio.Notificacao{},
+		&dominio.Convite{},
 	)
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
@@ -58,6 +59,10 @@ func main() {
 
 	relatorioService := servicos.NovoRelatorioServico(db, registroHumorRepo, usuarioRepo)
 	relatorioController := controladores.NovoRelatorioControlador(relatorioService)
+
+	conviteRepo := postgres_repo.NovoGormConviteRepositorio(db)
+	conviteService := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo)
+	conviteController := controladores.NovoConviteControlador(conviteService)
 
 	roteador := gin.Default()
 
@@ -107,6 +112,12 @@ func main() {
 			relatorios := protegido.Group("/relatorios")
 			{
 				relatorios.GET("/", relatorioController.GerarRelatorio)
+			}
+
+			convites := protegido.Group("/convites")
+			{
+				convites.POST("/gerar", conviteController.GerarConvite)
+				convites.POST("/vincular", conviteController.VincularPaciente)
 			}
 		}
 	}

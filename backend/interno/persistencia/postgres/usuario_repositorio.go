@@ -6,15 +6,17 @@ import (
 	"gorm.io/gorm"
 )
 
+// UsuarioRepositorio define a interface para as operações de persistência de usuário.
 type UsuarioRepositorio interface {
 	CriarUsuario(tx *gorm.DB, usuario *dominio.Usuario) error
 	CriarProfissional(tx *gorm.DB, profissional *dominio.Profissional) error
 	CriarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error
-	CriarResponsavelLegal(tx *gorm.DB, paciente *dominio.ResponsavelLegal) error
 	BuscarPorEmail(email string) (*dominio.Usuario, error)
+	BuscarUsuarioPorID(id uint) (*dominio.Usuario, error)
 	BuscarProfissionalPorID(tx *gorm.DB, id uint) (*dominio.Profissional, error)
 	BuscarPacientePorID(tx *gorm.DB, id uint) (*dominio.Paciente, error)
-	BuscarUsuarioPorID(id uint) (*dominio.Usuario, error)
+	BuscarProfissionalPorUsuarioID(tx *gorm.DB, usuarioID uint) (*dominio.Profissional, error)
+	BuscarPacientePorUsuarioID(tx *gorm.DB, usuarioID uint) (*dominio.Paciente, error)
 	Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error
 }
 
@@ -22,6 +24,7 @@ type gormUsuarioRepositorio struct {
 	db *gorm.DB
 }
 
+// NovoGormUsuarioRepositorio cria uma nova instância do repositório de usuário com GORM.
 func NovoGormUsuarioRepositorio(db *gorm.DB) UsuarioRepositorio {
 	return &gormUsuarioRepositorio{db: db}
 }
@@ -38,10 +41,6 @@ func (r *gormUsuarioRepositorio) CriarPaciente(tx *gorm.DB, paciente *dominio.Pa
 	return tx.Create(paciente).Error
 }
 
-func (r *gormUsuarioRepositorio) CriarResponsavelLegal(tx *gorm.DB, responsavel *dominio.ResponsavelLegal) error {
-	return tx.Create(responsavel).Error
-}
-
 func (r *gormUsuarioRepositorio) BuscarPorEmail(email string) (*dominio.Usuario, error) {
 	var usuario dominio.Usuario
 	if err := r.db.Where("email = ?", email).First(&usuario).Error; err != nil {
@@ -50,9 +49,17 @@ func (r *gormUsuarioRepositorio) BuscarPorEmail(email string) (*dominio.Usuario,
 	return &usuario, nil
 }
 
+func (r *gormUsuarioRepositorio) BuscarUsuarioPorID(id uint) (*dominio.Usuario, error) {
+	var usuario dominio.Usuario
+	if err := r.db.First(&usuario, id).Error; err != nil {
+		return nil, err
+	}
+	return &usuario, nil
+}
+
 func (r *gormUsuarioRepositorio) BuscarProfissionalPorID(tx *gorm.DB, id uint) (*dominio.Profissional, error) {
 	var profissional dominio.Profissional
-	if err := tx.Where("usuario_id = ?", id).First(&profissional).Error; err != nil {
+	if err := tx.First(&profissional, id).Error; err != nil {
 		return nil, err
 	}
 	return &profissional, nil
@@ -60,18 +67,26 @@ func (r *gormUsuarioRepositorio) BuscarProfissionalPorID(tx *gorm.DB, id uint) (
 
 func (r *gormUsuarioRepositorio) BuscarPacientePorID(tx *gorm.DB, id uint) (*dominio.Paciente, error) {
 	var paciente dominio.Paciente
-	if err := tx.Where("usuario_id = ?", id).First(&paciente).Error; err != nil {
+	if err := tx.First(&paciente, id).Error; err != nil {
 		return nil, err
 	}
 	return &paciente, nil
 }
 
-func (r *gormUsuarioRepositorio) BuscarUsuarioPorID(id uint) (*dominio.Usuario, error) {
-	var usuario dominio.Usuario
-	if err := r.db.First(&usuario, id).Error; err != nil {
+func (r *gormUsuarioRepositorio) BuscarProfissionalPorUsuarioID(tx *gorm.DB, usuarioID uint) (*dominio.Profissional, error) {
+	var profissional dominio.Profissional
+	if err := tx.Where("usuario_id = ?", usuarioID).First(&profissional).Error; err != nil {
 		return nil, err
 	}
-	return &usuario, nil
+	return &profissional, nil
+}
+
+func (r *gormUsuarioRepositorio) BuscarPacientePorUsuarioID(tx *gorm.DB, usuarioID uint) (*dominio.Paciente, error) {
+	var paciente dominio.Paciente
+	if err := tx.Where("usuario_id = ?", usuarioID).First(&paciente).Error; err != nil {
+		return nil, err
+	}
+	return &paciente, nil
 }
 
 func (r *gormUsuarioRepositorio) Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error {
