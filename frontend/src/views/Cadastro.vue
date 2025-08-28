@@ -1,7 +1,10 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <header class="w-full p-6">
-      <router-link to="/" class="text-3xl font-bold text-emerald-600">MindTrace</router-link>
+      <router-link to="/" class="items-center space-x-2 border-0 border-gray-200 rounded-lg p-2">
+        <font-awesome-icon :icon="faBrain" class="text-rose-300 text-2xl" />
+        <span class="text-3xl font-bold text-emerald-600 whitespace-nowrap">MindTrace</span>
+      </router-link>
     </header>
 
     <div class="flex items-center justify-center px-4 py-8">
@@ -68,15 +71,14 @@
 
             <!-- Campos do Paciente -->
             <div v-if="form.userType === 'paciente'"
-              class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
+              class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-300 items-end">
               <div>
                 <label for="idade" class="block text-base font-medium text-gray-700 mb-1">Idade</label>
                 <input type="number" id="idade" v-model="form.idade" class="w-full input-style" required />
               </div>
-              <div class="flex flex-row gap-3">
-                <label for="dependente" class="text-base font-medium text-gray-700 mb-1">É dependente?</label>
-                <input type="checkbox" id="dependente" v-model="form.dependente" class="w-6 h-6" required />
-
+              <div class="flex flex-row items-center gap-2">
+                <label for="dependente" class="text-base font-medium text-gray-700">É dependente?</label>
+                <input id="dependente" v-model="form.dependente" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
               </div>
             </div>
 
@@ -105,6 +107,7 @@ import { reactive, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import api from '../services/api';
+import { faBrain, faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
 const toast = useToast();

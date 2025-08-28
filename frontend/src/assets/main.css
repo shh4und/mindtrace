@@ -1,4 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,200..800;1,200..800&display=swap');
 @import "tailwindcss";
+
 
 :root {
 	/* New design tokens requested by the user */
@@ -7,4 +9,6 @@
 	--aquamarine: #a5ffd6ff;
 	--melon: #ffa69eff;
     --light-rose: oklch(71.2% 0.194 13.428);
+	font-family: "Atkinson Hyperlegible Next", sans-serif;
+	font-weight: 300;
 }

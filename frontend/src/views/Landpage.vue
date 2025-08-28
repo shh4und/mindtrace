@@ -1,143 +1,144 @@
 <template>
   <div class="bg-gray-50 text-gray-800">
+    <!-- Header -->
     <header class="bg-white shadow-md sticky top-0 z-50">
-      <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-  <router-link to="/" class="text-3xl font-bold text-emerald-600">MindTrace</router-link>
+      <nav class="px-6 py-4 flex justify-between items-center">
+        <!-- Left side: Logo and nav links -->
+        <div class="flex items-center">
+          <router-link to="/">
+            <div class="inline-flex items-center space-x-2 border-0 border-gray-200 rounded-lg p-2">
+              <font-awesome-icon :icon="faBrain" class="text-rose-300 text-2xl" />
+              <span class="text-3xl font-bold text-emerald-600 whitespace-nowrap">MindTrace</span>
+            </div>
+          </router-link>
 
-        <div class="md:hidden">
-          <button @click="toggleMenu" class="text-gray-600 focus:outline-none">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-            </svg>
-          </button>
         </div>
 
-        <ul class="hidden md:flex space-x-8 items-center text-lg">
-          <li><a href="#hero" class="hover:text-emerald-600 transition duration-300">Início</a></li>
-          <li><a href="#features" class="hover:text-emerald-600 transition duration-300">Recursos</a></li>
-          <li><a href="#knowledge" class="hover:text-emerald-600 transition duration-300">Conteúdo</a></li>
-          <li><a href="#testimonials" class="hover:text-emerald-600 transition duration-300">Depoimentos</a></li>
-          <li><a href="#contact" class="hover:text-emerald-600 transition duration-300">Contato</a></li>
-          <li><router-link to="/login" class="bg-emerald-600 text-white px-6 py-1 rounded-full hover:bg-emerald-700 transition duration-300 font-semibold shadow-lg">Login</router-link></li>
-        </ul>
+        <!-- Right side: CTA and mobile menu toggle -->
+        <div class="flex items-center space-x-4">
+          <ul class="hidden md:flex space-x-8 items-center text-lg">
+            <li><a href="#hero" class="hover:text-emerald-600 transition duration-300">Início</a></li>
+            <li><a href="#features" class="hover:text-emerald-600 transition duration-300">Recursos</a></li>
+            <li><a href="#about" class="hover:text-emerald-600 transition duration-300">Sobre</a></li>
+            <li><a href="#contact" class="hover:text-emerald-600 transition duration-300">Contato</a></li>
+          </ul>
+          <router-link to="/login"
+            class="hidden md:block bg-emerald-600 text-white px-6 py-1 rounded-full hover:bg-emerald-700 transition duration-300 font-semibold shadow-lg">Acessar</router-link>
+          <div class="md:hidden">
+            <button @click="toggleMenu" class="text-gray-600 focus:outline-none">
+              <font-awesome-icon :icon="isMenuOpen ? faCaretUp : faCaretDown" class="w-7 h-7" />
+            </button>
+          </div>
+        </div>
       </nav>
-
       <div :class="['md:hidden', { 'hidden': !isMenuOpen, 'active': isMenuOpen }]" class="bg-white shadow-lg">
         <ul class="px-6 py-4 space-y-4 text-center">
-          <li><a href="#hero" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Início</a></li>
-          <li><a href="#features" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Recursos</a></li>
-          <li><a href="#knowledge" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Conteúdo</a></li>
-          <li><a href="#testimonials" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Depoimentos</a></li>
-          <li><a href="#contact" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Contato</a></li>
-          <li><router-link to="/login" @click="closeMenu" class="block bg-emerald-600 text-white p-3 rounded-lg mt-4 font-semibold hover:bg-emerald-700">Entrar ou Criar Conta</router-link></li>
+          <li><a href="#hero" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Início</a>
+          </li>
+          <li><a href="#features" @click="closeMenu"
+              class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Recursos</a></li>
+          <li><a href="#about" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Sobre</a>
+          </li>
+          <li><a href="#contact" @click="closeMenu"
+              class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Contato</a></li>
+          <li><router-link to="/login" @click="closeMenu"
+              class="block bg-emerald-600 text-white p-3 rounded-lg mt-4 font-semibold hover:bg-emerald-700">Acessar</router-link>
+          </li>
         </ul>
       </div>
     </header>
 
     <main>
-      <section id="hero" class="relative py-24 md:py-40">
-        <div class="hero-carousel">
-          <div v-for="(image, index) in heroImages" :key="index" :class="['hero-image', { 'active': index === currentImageIndex }]" :style="{ backgroundImage: 'url(' + image + ')' }"></div>
-        </div>
-
-        <div class="hero-content">
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-wide">
-            Cuidar da sua saúde mental é o primeiro passo para uma vida plena.
+      <!-- Hero Section -->
+      <section id="hero" class="relative py-24 md:py-40 bg-gradient-to-br from-emerald-100 to-rose-100">
+        <div class="container mx-auto px-6 text-center">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-wide text-gray-900">
+            Sua mente é um universo. <span class="text-emerald-600">Explore-o.</span>
           </h1>
-          <p class="mt-6 md:mt-8 text-lg md:text-xl max-w-4xl mx-auto opacity-90">
-            MindTrace é a sua ferramenta para monitorar emoções, conectar-se com profissionais e construir hábitos mais saudáveis.
+          <p class="mt-6 md:mt-8 text-lg md:text-xl max-w-3xl mx-auto text-gray-700">
+            Um diário emocional para te ajudar a se entender melhor e a se conectar com quem pode te ajudar.
           </p>
-          <a href="#features" class="mt-10 inline-block bg-white text-emerald-600 font-bold py-4 px-10 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105">
+          <a href="#features"
+            class="mt-10 inline-block bg-emerald-600 text-white font-bold py-4 px-10 rounded-full shadow-lg hover:bg-emerald-700 transition duration-300 transform hover:scale-105">
             Comece sua Jornada
           </a>
         </div>
       </section>
 
-      <section id="features" class="py-24">
+      <!-- Features Section -->
+      <section id="features" class="py-24 bg-white">
         <div class="container mx-auto px-6 text-center">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Como o MindTrace te Ajuda</h2>
           <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Ferramentas intuitivas e personalizadas para te ajudar a entender e melhorar seu bem-estar emocional.
+            Ferramentas intuitivas e divertidas para o seu bem-estar emocional.
           </p>
-
           <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div class="bg-white p-8 rounded-2xl shadow-xl transform transition duration-300 hover:scale-105 hover:shadow-2xl">
-              <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-emerald-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15s-2-1.5-2-3 2-2 2-2 2 .5 2 2-2 3-2 3zm4 0s-2-1.5-2-3 2-2 2-2 2 .5 2 2-2 3-2 3z"></path>
+            <!-- Feature 1 -->
+            <div
+              class="feature-card bg-gray-50 p-8 rounded-2xl shadow-lg transform transition duration-500 hover:scale-105 hover:shadow-2xl">
+              <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <h3 class="text-xl font-bold text-gray-900">Monitoramento de Humor</h3>
               <p class="mt-2 text-gray-600">
-                Registre seus sentimentos diariamente e entenda os padrões do seu estado emocional.
+                Anote como você se sente, de forma rápida e fácil. Com o tempo, você vai descobrir padrões e gatilhos
+                emocionais.
               </p>
             </div>
-
-            <div class="bg-white p-8 rounded-2xl shadow-xl transform transition duration-300 hover:scale-105 hover:shadow-2xl">
-              <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"></path>
+            <!-- Feature 2 -->
+            <div
+              class="feature-card bg-gray-50 p-8 rounded-2xl shadow-lg transform transition duration-500 hover:scale-105 hover:shadow-2xl">
+              <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-rose-600" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
               <h3 class="text-xl font-bold text-gray-900">Análises e Relatórios</h3>
               <p class="mt-2 text-gray-600">
-                Gráficos e relatórios detalhados para ajudar você e seu profissional a tomar decisões informadas.
+                Veja sua jornada em gráficos intuitivos. Informação valiosa para você e para seu terapeuta.
               </p>
             </div>
-
-            <div class="bg-white p-8 rounded-2xl shadow-xl transform transition duration-300 hover:scale-105 hover:shadow-2xl">
-              <div class="w-16 h-16 bg-rose-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-rose-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+            <!-- Feature 3 -->
+            <div
+              class="feature-card bg-gray-50 p-8 rounded-2xl shadow-lg transform transition duration-500 hover:scale-105 hover:shadow-2xl">
+              <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2V7a2 2 0 012-2h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H17z" />
                 </svg>
               </div>
               <h3 class="text-xl font-bold text-gray-900">Conexão com Profissionais</h3>
               <p class="mt-2 text-gray-600">
-                Encontre e conecte-se com terapeutas qualificados que podem te ajudar em sua jornada.
+                Conecte-se com profissionais da psicologia de forma segura e descomplicada.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="knowledge" class="knowledge-section bg-gray-100">
-        <div class="knowledge-container">
-          <div class="knowledge-text">
-            <h2 class="knowledge-title"> Aqui a prioridade é sua saúde mental!</h2>
-            <p class="knowledge-paragraph">Com o MindTrace você não terá somente apoio, mas toda uma estrutura e ambiente que te juda a se tornar mentalmente mais saudável.</p>
-          </div>
-          <div class="knowledge-image-container">
-            <img src="https://images.unsplash.com/photo-1753454116483-417bbc0a975c?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Ambiente de trabalho moderno" class="knowledge-image">
-          </div>
-        </div>
-      </section>
-
-      <section id="testimonials" class="bg-gray-100 py-24">
-        <div class="container mx-auto px-6 text-center">
-          <h2 class="text-3xl md:text-4xl font-bold text-gray-900">O que nossos usuários dizem</h2>
-          <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Histórias reais de pessoas que transformaram suas vidas com MindTrace.
-          </p>
-
-          <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div class="bg-white p-8 rounded-2xl shadow-xl">
-              <p class="text-gray-700 italic">"MindTrace me ajudou a entender melhor meus padrões de pensamento e a me conectar com uma terapeuta incrível. Minha ansiedade diminuiu significativamente."</p>
-              <div class="mt-6 flex items-center justify-center">
-                <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop&crop=face" alt="Avatar Usuário" class="w-14 h-14 rounded-full mr-4 object-cover">
-                <div class="text-left">
-                  <p class="font-semibold text-gray-900">Ana Souza</p>
-                  <p class="text-sm text-gray-500">Usuário MindTrace</p>
-                </div>
-              </div>
+      <!-- About Section -->
+      <section id="about" class="py-24 bg-gray-100">
+        <div class="container mx-auto px-6">
+          <div class="flex flex-col md:flex-row items-center justify-between">
+            <div class="md:w-1/2 mb-10 md:mb-0 text-center md:text-left">
+              <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Sua mente, seu universo.</h2>
+              <p class="mt-4 text-lg text-gray-600">
+                MindTrace nasceu da ideia de que a tecnologia pode ser uma grande aliada no caminho do autoconhecimento.
+                Nossa missão é oferecer um espaço seguro e acolhedor para que você possa explorar seus sentimentos,
+                entender suas emoções e cuidar da sua saúde mental com leveza e curiosidade.
+              </p>
             </div>
-
-            <div class="bg-white p-8 rounded-2xl shadow-xl">
-              <p class="text-gray-700 italic">"O MindTrace me ajudou a entender melhor como funciona minha mente, agora me sinto mais presente e consciente dos meus sentimentos a cada dia. Recomendo muito!"</p>
-              <div class="mt-6 flex items-center justify-center">
-                <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop&crop=face" alt="Avatar Usuário" class="w-14 h-14 rounded-full mr-4 object-cover">
-                <div class="text-left">
-                  <p class="font-semibold text-gray-900">João Silva</p>
-                  <p class="text-sm text-gray-500">Usuário MindTrace</p>
+            <div class="md:w-1/2 flex justify-center">
+              <div
+                class="w-80 h-80 bg-gradient-to-br from-emerald-300 to-rose-300 rounded-full flex items-center justify-center shadow-2xl">
+                <div class="w-72 h-72 bg-gray-50 rounded-full flex items-center justify-center">
+                  <font-awesome-icon :icon="faBrain" class="text-[1000%] text-rose-300" />
                 </div>
               </div>
             </div>
@@ -145,13 +146,15 @@
         </div>
       </section>
 
-  <section id="contact" class="bg-emerald-600 text-white py-24">
+      <!-- Contact Section -->
+      <section id="contact" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white py-24">
         <div class="container mx-auto px-6 text-center">
           <h2 class="text-3xl md:text-4xl font-bold">Pronto para começar sua jornada?</h2>
           <p class="mt-4 text-lg max-w-2xl mx-auto opacity-90">
-            Junte-se a pessoas que estão priorizando sua saúde mental. É fácil, seguro e o primeiro passo para uma nova você.
+            Crie sua conta e comece a trilhar um caminho de autoconhecimento e bem-estar. É gratuito para começar.
           </p>
-          <router-link to="/cadastro" class="mt-10 inline-block bg-white text-emerald-600 font-bold py-4 px-10 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105">
+          <router-link to="/cadastro"
+            class="mt-10 inline-block bg-white text-emerald-600 font-bold py-4 px-10 rounded-full shadow-lg hover:bg-gray-100 transition duration-300 transform hover:scale-105">
             Crie sua conta gratuita
           </router-link>
         </div>
@@ -171,8 +174,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import '../assets/landpage.css';
+import { ref } from 'vue';
+import { faBrain, faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
 
 const isMenuOpen = ref(false);
 
@@ -183,28 +186,54 @@ const toggleMenu = () => {
 const closeMenu = () => {
   isMenuOpen.value = false;
 };
-
-const heroImages = [
-  'https://images.unsplash.com/photo-1754215683705-ee0a731d7288?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDEyfDZzTVZqVExTa2VRfHxlbnwwfHx8fHw%3D',
-  'https://images.unsplash.com/photo-1497373637916-e47a55e22d0a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fENhbmFkJUMzJUExfGVufDB8fDB8fHww',
-  'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8bGFuZHNjYXBlfGVufDB8fDB8fHww',
-  'https://images.unsplash.com/photo-1617718295766-0f839c2853e7?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fERvbWluaWNhbiUyMFJlcHVibGljfGVufDB8MHwwfHx8MA%3D%3D',
-  'https://images.unsplash.com/photo-1708598660454-4011df6397f0?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-];
-
-const currentImageIndex = ref(0);
-let intervalId = null;
-
-const nextImage = () => {
-  currentImageIndex.value = (currentImageIndex.value + 1) % heroImages.length;
-};
-
-onMounted(() => {
-  intervalId = setInterval(nextImage, 5000);
-});
-
-onUnmounted(() => {
-  clearInterval(intervalId);
-});
-
 </script>
+
+<style>
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Estilos para o menu de navegação responsivo */
+#mobile-menu {
+  transition: all 0.3s ease-in-out;
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+#mobile-menu.active {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Animação para os cards de feature */
+.feature-card {
+  animation: fadeInUp 0.6s ease-in-out forwards;
+  opacity: 0;
+}
+
+.feature-card:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+.feature-card:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.feature-card:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+</style>

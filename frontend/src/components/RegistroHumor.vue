@@ -32,13 +32,13 @@
       <!-- Sleep slider with discrete moon icons (0..12) -->
       <div class="bg-rose-100 rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">Horas de Sono</h2>
-        <div class="flex items-center space-x-4">
+        <div class="flex flex-col md:flex-row items-center md:space-x-4">
           <div class="w-full">
             <div class="mb-3">
               <div class="icon-row">
-                <button v-for="step in sleepSteps" :key="step" type="button" class="icon-step"
+                <button v-for="step in sleepSteps" :key="step" type="button" class="icon-step "
                   :class="[{ 'active': step <= sleepHours }, '']" @click="sleepHours = step">
-                  <span class="step-emoji" aria-hidden="true">🌜</span>
+                  <span class="step-emoji hidden md:block" aria-hidden="true">🌜</span>
                 </button>
               </div>
             </div>
@@ -50,7 +50,7 @@
               <span>12h+</span>
             </div>
           </div>
-          <div class="w-36 text-center display-area">
+          <div class="w-full md:w-36 text-center display-area mt-6 md:mt-0">
             <div class="display-emoji">🌜</div>
             <div class="font-semibold display-value">{{ sleepLabel }}</div>
           </div>
@@ -60,13 +60,13 @@
       <!-- Energy slider with battery icons -->
       <div class="bg-amber-50 rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">Nível de Energia</h2>
-        <div class="flex items-center space-x-4">
+        <div class="flex flex-col md:flex-row items-center md:space-x-4">
           <div class="w-full">
             <div class="mb-3">
               <div class="icon-row">
                 <button v-for="step in energySteps" :key="step" type="button" class="icon-step"
                   :class="{ 'active': step < energyLevel }" @click="energyLevel = step+1">
-                  <span class="step-emoji" aria-hidden="true">🔋</span>
+                  <span class="step-emoji  hidden md:block" aria-hidden="true">🔋</span>
                 </button>
               </div>
             </div>
@@ -77,7 +77,7 @@
               <span>Alta</span>
             </div>
           </div>
-          <div class="w-36 text-center display-area">
+          <div class="w-full md:w-36 text-center display-area mt-6 md:mt-0">
             <div class="display-emoji">🔋</div>
             <div class="font-semibold display-value">{{ energyLevel }} / {{ energyMax }}</div>
           </div>
@@ -87,13 +87,13 @@
       <!-- Stress slider with alert icons -->
       <div class="bg-yellow-50 rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">Nível de Stress</h2>
-        <div class="flex items-center space-x-4">
+        <div class="flex flex-col md:flex-row items-center md:space-x-4">
           <div class="w-full">
             <div class="mb-3">
               <div class="icon-row">
                 <button v-for="step in stressSteps" :key="step" type="button" class="icon-step"
                   :class="{ 'active': step < stressLevel }" @click="stressLevel = step+1">
-                  <span class="step-emoji" aria-hidden="true">😤</span>
+                  <span class="step-emoji  hidden md:block" aria-hidden="true">😤</span>
                 </button>
               </div>
             </div>
@@ -104,7 +104,7 @@
               <span>Alto</span>
             </div>
           </div>
-          <div class="w-36 text-center display-area">
+          <div class="w-full md:w-36 text-center display-area mt-6 md:mt-0">
             <div class="display-emoji">😤</div>
             <div class="font-semibold display-value">{{ stressLevel }} / {{ stressMax }}</div>
           </div>
