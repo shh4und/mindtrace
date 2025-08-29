@@ -37,7 +37,6 @@ func main() {
 		&dominio.Usuario{},
 		&dominio.Profissional{},
 		&dominio.Paciente{},
-		&dominio.ResponsavelLegal{},
 		&dominio.RegistroHumor{},
 		&dominio.Alerta{},
 		&dominio.Notificacao{},

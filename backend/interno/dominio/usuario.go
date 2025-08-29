@@ -49,6 +49,8 @@ type Paciente struct {
 	Usuario              Usuario        `json:"usuario" gorm:"foreignKey:UsuarioID"`
 	Idade                int8           `json:"idade" gorm:"not null"`
 	EhDependente         bool           `json:"dependente" gorm:"not null"`
+	NomeResponsavel      string         `json:"nome_responsavel,omitempty" gorm:"type:varchar(255)"`
+	ContatoResponsavel   string         `json:"contato_responsavel,omitempty" gorm:"type:varchar(100)"`
 	DataInicioTratamento *time.Time     `json:"data_inicio_tratamento"`
 	HistoricoSaude       string         `json:"historico_saude" gorm:"type:text"`
 	Profissionais        []Profissional `json:"profissionais" gorm:"many2many:profissional_paciente;"`
@@ -58,21 +60,4 @@ type Paciente struct {
 
 func (Paciente) TableName() string {
 	return "pacientes"
-}
-
-// ResponsavelLegal representa a entidade de um responsável por um paciente.
-type ResponsavelLegal struct {
-	ID               uint      `gorm:"primaryKey"`
-	UsuarioID        uint      `json:"-" gorm:"unique;not null"`
-	Usuario          Usuario   `json:"usuario" gorm:"foreignKey:UsuarioID"`
-	PacienteID       uint      `json:"-" gorm:"unique;not null"`
-	Paciente         Paciente  `json:"paciente" gorm:"foreignKey:PacienteID"`
-	Parentesco       string    `json:"parentesco" gorm:"type:varchar(100)"`
-	ContatoPrincipal string    `json:"contato_principal" gorm:"type:varchar(100)"`
-	CreatedAt        time.Time `json:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at"`
-}
-
-func (ResponsavelLegal) TableName() string {
-	return "responsaveis_legais"
 }

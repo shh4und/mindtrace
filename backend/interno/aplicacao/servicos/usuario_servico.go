@@ -20,7 +20,7 @@ type RegistrarProfissionalDTO struct {
 	Idade                int8
 	Especialidade        string
 	RegistroProfissional string
-	CPF                 string
+	CPF                  string
 }
 
 type RegistrarPacienteDTO struct {
@@ -32,14 +32,8 @@ type RegistrarPacienteDTO struct {
 	DataInicioTratamento *time.Time
 	HistoricoSaude       string
 	CPF                  string
-}
-
-type RegistrarResponsavelDTO struct {
-	Nome             string
-	Email            string
-	Senha            string
-	Parentesco       string
-	ContatoPrincipal string
+	NomeResponsavel      string
+	ContatoResponsavel   string
 }
 
 type AtualizarPerfilDTO struct {
@@ -98,7 +92,7 @@ func (s *usuarioServico) RegistrarProfissional(dto RegistrarProfissionalDTO) (*d
 			Email:       dto.Email,
 			Senha:       string(hashSenha),
 			TipoUsuario: "profissional",
-			CPF:        dto.CPF,
+			CPF:         dto.CPF,
 		}
 
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
@@ -151,9 +145,11 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 		}
 
 		novoPaciente := &dominio.Paciente{
-			UsuarioID:    novoUsuario.ID,
-			Idade:        dto.Idade,
-			EhDependente: dto.EhDependente,
+			UsuarioID:          novoUsuario.ID,
+			Idade:              dto.Idade,
+			EhDependente:       dto.EhDependente,
+			NomeResponsavel:    dto.NomeResponsavel,
+			ContatoResponsavel: dto.ContatoResponsavel,
 		}
 		if err := s.repositorio.CriarPaciente(tx, novoPaciente); err != nil {
 			return err
@@ -187,7 +183,7 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 	// Gerar o token JWT
 	claims := jwt.MapClaims{
 		"sub":  usuario.ID,                           // "Subject", o ID do usuário
-		"role": usuario.TipoUsuario,                   // Adiciona o tipo de usuário (role)
+		"role": usuario.TipoUsuario,                  // Adiciona o tipo de usuário (role)
 		"iat":  time.Now().Unix(),                    // "Issued At", quando o token foi criado
 		"exp":  time.Now().Add(time.Hour * 1).Unix(), // Data de expiração (1 hora)
 	}

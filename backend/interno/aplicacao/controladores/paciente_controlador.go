@@ -26,6 +26,8 @@ type RegistrarPacienteRequest struct {
 	DataInicioTratamento *time.Time `json:"data_inicio_tratamento"`
 	HistoricoSaude       string     `json:"historico_saude"`
 	CPF                  string     `json:"cpf" binding:"required"`
+	NomeResponsavel      string     `json:"nome_responsavel"`
+	ContatoResponsavel   string     `json:"contato_responsavel"`
 }
 
 func (pc *PacienteControlador) Registrar(c *gin.Context) {
@@ -55,6 +57,8 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 		DataInicioTratamento: req.DataInicioTratamento,
 		HistoricoSaude:       req.HistoricoSaude,
 		CPF:                  req.CPF,
+		NomeResponsavel:      req.NomeResponsavel,
+		ContatoResponsavel:   req.ContatoResponsavel,
 	}
 
 	paciente, err := pc.usuarioServico.RegistrarPaciente(dto)
