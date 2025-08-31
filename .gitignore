@@ -13,7 +13,7 @@ backend/main
 
 # Dados do Banco de Dados
 postgres-data/
-
+pgadmin-data/
 # Arquivos de ambiente
 .env
 
