@@ -1,70 +1,79 @@
-# mindtrace
 
 services:
-  # PostgreSQL
   db:
-    image: postgres:17-alpine  # Usa a imagem oficial do Postgres, versão 15, baseada em Alpine (leve)
+    image: postgres:17-alpine
     container_name: mindtrace-db
-    restart: always # Sempre reinicia o container se ele parar
+    restart: always
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}      # Usuário do banco
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}  # Senha do banco
-      - POSTGRES_DB=${POSTGRES_DB}    # Nome do banco de dados a ser criado
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
-      - "5432:5432" # Mapeia a porta 5432 do seu PC para a porta 5432 do container
+      - "5432:5432"
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data # Persiste os dados do banco na pasta 'postgres-data' no seu PC
+      - ./postgres-data:/var/lib/postgresql/data
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin-server
     ports:
       - "8001:80"
     environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
       - PGADMIN_LISTEN_ADDRESS=0.0.0.0
+    volumes:
+      - ./pgadmin-data:/var/lib/pgadmin
     depends_on:
       - db
-    # Serviço do Backend em Go
+
   backend:
     container_name: mindtrace-backend
-    build:
-      context: ./backend # O Docker vai procurar o Dockerfile na pasta 'backend'
-    restart: always
+    # Dev: use golang image, mount source and run with hot reload / go run
+    image: golang:1.24.5-alpine
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - /app/pkg/mod
     ports:
-      - "8080:8080" # Mapeia a porta 8080 do PC para a 8080 do container
+      - "8080:8080"
     environment:
-      # Variáveis para a sua API Go se conectar ao banco
-      - DB_USER=${POSTGRES_USER}      # Usuário do banco
-      - DB_PASSWORD=${POSTGRES_PASSWORD}  # Senha do banco
-      - DB_DB=${POSTGRES_DB} 
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_DB=${POSTGRES_DB}
       - JWT_SECRET=${JWT_SECRET}
+    command: sh -c "apk add --no-cache git && go mod download && go run ./cmd/api/main.go"
     depends_on:
-      - db # Garante que o container do 'db' inicie antes do 'backend'
-  ## DESCOMENTE PARA PRODUCAO / COMENTE PARA DESENVOLVIMENTO
-  # Serviço do Frontend em Vue.js
+      - db
+    restart: unless-stopped
+
+    # Production build (uncomment to use):
+    # build:
+    #   context: ./backend
+
   frontend:
     container_name: mindtrace-frontend
-    build:
-      context: ./frontend
-    restart: always
+    # Dev: use node image, mount source and run Vite dev server (hot reload)
+    image: node:22.17.1-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: sh -c "npm install --silent && npm run dev -- --host 0.0.0.0"
     ports:
-      - "8000:80" # Mapeia a porta 80 do PC para a 80 do container (Nginx)
+      - "5173:5173"
     depends_on:
-      - backend # Opcional, mas bom para garantir que a API esteja de pé
-  ## COMENTE PARA PRODUCAO / DESCOMENTE PARA DESENVOLVIMENTO (HOT RELOAD)
-  # frontend:
-  #   container_name: mindtrace-frontend
-  #   image: node:22.17.1-alpine
-  #   working_dir: /app
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #   ports:
-  #     - "5173:5173" # Porta padrão do Vite
-  #   command: sh -c "npm install && npm run dev -- --host"
-  #   depends_on:
-  #     - backend
+      - backend
+    restart: unless-stopped
+
+    # Production build (uncomment to use):
+    # build:
+    #   context: ./frontend
+    #   ports:
+    #     - "8000:80"
 
 volumes:
   postgres-data:
+  pgadmin-data:

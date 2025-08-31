@@ -1,0 +1,20 @@
+# Dockerfile.dev for backend (Go with air for live reload)
+FROM golang:1.24.5-alpine
+
+WORKDIR /app
+
+# Install git for dependencies
+RUN apk add --no-cache git
+
+# Copy go.mod and go.sum first for better caching
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Install air for live reload
+RUN go install github.com/air-verse/air@latest
+
+# Copy the rest of the code
+COPY . .
+
+# Run air for development with hot reload
+CMD ["air"]
