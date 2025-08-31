@@ -32,9 +32,12 @@
         </div>
         <div class="space-y-2 text-sm mb-4">
           <p><strong class="font-medium">CPF:</strong> {{ userStore.user.cpf || 'Não informado' }}</p>
-          <p v-if="userStore.user.paciente"><strong class="font-medium">Idade:</strong> {{ userStore.user.paciente.idade
+          <p><strong class="font-medium">Idade:</strong> {{ userStore.user.idade
             }}</p>
         </div>
+        <button @click="editProfile" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+          Editar Perfil
+        </button>
       </div>
     </div>
 
@@ -62,6 +65,12 @@
           <a href="#" @click.prevent="$emit('navigate', 'vincular')" class="sidebar-item">
             <i class="fa-solid fa-link fa-fw mr-3"></i>
             <span>Vincular um Profissional</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" @click.prevent="$emit('navigate', 'editar-perfil')" class="sidebar-item">
+            <i class="fa-solid fa-user-pen fa-fw mr-3"></i>
+            <span>Editar Perfil</span>
           </a>
         </li>
       </ul>
@@ -95,9 +104,9 @@ onMounted(() => {
 });
 
 const performLogout = () => {
-  // 4. Chamar a ação de logout
-  userStore.logout();
-  // A ação de logout já redireciona, então o router.push aqui não é mais necessário.
+  if (confirm('Tem certeza que deseja sair?')) {
+    userStore.logout();
+  }
 };
 
 const editProfile = () => {

@@ -93,11 +93,12 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-import api from '../services/api';
+import { useUserStore } from '../store/user';
 import { faBrain, faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
 const toast = useToast();
+const userStore = useUserStore();
 
 const email = ref('');
 const password = ref('');
@@ -119,20 +120,13 @@ const parseJwt = (token) => {
 };
 
 const handleLogin = async () => {
-  try {
-    const credentials = {
-      email: email.value,
-      senha: password.value,
-    };
-
-    const response = await api.login(credentials);
-    const token = response.data.token;
-    localStorage.setItem('token', token);
-
+  const result = await userStore.login({ email: email.value, senha: password.value });
+  if (result.success) {
+    toast.success('Login realizado com sucesso!');
+    // O redirecionamento é baseado no role, que já foi determinado no store
+    const token = localStorage.getItem('token');
     const decodedToken = parseJwt(token);
-
     if (decodedToken && decodedToken.role) {
-      toast.success('Login realizado com sucesso!');
       if (decodedToken.role === 'profissional') {
         router.push('/dashboard-profissional');
       } else {
@@ -141,10 +135,8 @@ const handleLogin = async () => {
     } else {
       toast.error('Token inválido ou tipo de usuário não encontrado.');
     }
-
-  } catch (error) {
-    toast.error('Email ou senha inválidos. Tente novamente.');
-    console.error('Falha no login:', error);
+  } else {
+    toast.error(result.error);
   }
 };
 </script>

@@ -6,8 +6,8 @@
         class="flex items-center space-x-3 w-full text-left p-2 rounded-lg hover:bg-gray-100 transition-colors">
         <font-awesome-icon :icon="['fas', 'user-doctor']" class="w-8 h-8 rounded-full p-2 bg-gray-200 text-gray-600" />
         <div v-if="userStore.user" class="flex-1">
-          <h2 class="font-semibold text-gray-900 truncate">{{ userStore.user.nome }}</h2>
-          <p class="text-sm text-gray-500">{{ userStore.user.profissional.especialidade || 'Profissional' }}</p>
+          <h2 class="font-semibold text-gray-900 truncate">{{ userStore.user.nome || 'Profissional'}}</h2>
+          <p class="text-sm text-gray-500">{{ userStore.user.especialidade || 'Profissional'}}</p>
         </div>
         <div v-else class="flex-1">
           <div class="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
@@ -17,8 +17,8 @@
 
       <!-- Profile Pop-up Card -->
       <div v-if="userStore.user" class="flex-1">
-        <h2 class="font-semibold text-gray-900 truncate">{{ userStore.user.nome }}</h2>
-        <p class="text-sm text-gray-500">{{ userStore.user.profissional.especialidade || 'Profissional' }}</p>
+        <h2 class="font-semibold text-gray-900 truncate">{{ userStore.user.nome || 'Profissional' }}</h2>
+        <p class="text-sm text-gray-500">{{ userStore.user.registro_profissional || 'Profissional' }}</p>
       </div>
       <div v-if="isProfileCardVisible && userStore.user"
         class="absolute z-20 bottom-full mb-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 p-4">
@@ -31,9 +31,12 @@
           </div>
         </div>
         <div class="space-y-2 text-sm mb-4">
-          <p><strong class="font-medium">Especialidade:</strong> {{ userStore.user.profissional.especialidade || 'Não informado' }}</p>
-          <p><strong class="font-medium">Registro:</strong> {{ userStore.user.profissional.registro_profissional || 'Não informado' }}</p>
+          <p><strong class="font-medium">Especialidade:</strong> {{ userStore.user.especialidade || 'Não informado' }}</p>
+          <p><strong class="font-medium">Registro:</strong> {{ userStore.user.registro_profissional || 'Não informado' }}</p>
         </div>
+        <button @click="editProfile" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+          Editar Perfil
+        </button>
       </div>
     </div>
 
@@ -49,6 +52,12 @@
           <a href="#" @click.prevent="$emit('navigate', 'convite')" class="sidebar-item">
             <i class="fa-solid fa-ticket fa-fw mr-3"></i>
             <span>Gerar Convite</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" @click.prevent="$emit('navigate', 'editar-perfil')" class="sidebar-item">
+            <i class="fa-solid fa-user-pen fa-fw mr-3"></i>
+            <span>Editar Perfil</span>
           </a>
         </li>
       </ul>
@@ -82,8 +91,9 @@ onMounted(() => {
 });
 
 const performLogout = () => {
-  // 4. Chamar a ação de logout
-  userStore.logout();
+  if (confirm('Tem certeza que deseja sair?')) {
+    userStore.logout();
+  }
 };
 
 const editProfile = () => {

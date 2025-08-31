@@ -41,6 +41,50 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /**
+   * Realiza o registro de um novo usuário.
+   * @param {Object} data - Dados do registro.
+   * @param {string} userType - Tipo de usuário ('paciente' ou 'profissional').
+   */
+  async function register(data, userType) {
+    try {
+      let response;
+      if (userType === 'paciente') {
+        response = await api.registrarPaciente(data);
+      } else if (userType === 'profissional') {
+        response = await api.registrarProfissional(data);
+      } else {
+        throw new Error('Tipo de usuário inválido para registro.');
+      }
+      return { success: true, message: response.data.mensagem || 'Registro realizado com sucesso!' };
+    } catch (error) {
+      console.error('Falha no registro:', error);
+      return { success: false, error: error.response?.data?.erro || 'Erro no registro' };
+    }
+  }
+
+  /**
+   * Realiza o login do usuário.
+   * @param {Object} credentials - Credenciais de login (email e senha).
+   */
+  async function login(credentials) {
+    try {
+      const response = await api.login(credentials);
+      const token = response.data.token;
+      localStorage.setItem('token', token);
+      isAuthenticated.value = true;
+      // Opcional: Buscar dados do usuário após login
+      const decodedToken = JSON.parse(atob(token.split('.')[1]));
+      if (decodedToken && decodedToken.role) {
+        await fetchUser(decodedToken.role === 'profissional' ? 'profissional' : 'paciente');
+      }
+      return { success: true };
+    } catch (error) {
+      console.error('Falha no login:', error);
+      return { success: false, error: error.response?.data?.erro || 'Erro no login' };
+    }
+  }
+
+  /**
    * Realiza o logout do usuário.
    */
   function logout() {
@@ -51,15 +95,13 @@ export const useUserStore = defineStore('user', () => {
     router.push('/login');
   }
 
-  // É importante notar que a ação de LOGIN (que define o token)
-  // deve ser tratada no seu componente de Login. Após o login bem-sucedido,
-  // você deve salvar o token no localStorage e atualizar `isAuthenticated.value = true;`.
-
   return {
     user,
     isAuthenticated,
     isLoggedIn,
     fetchUser,
+    login,
+    register,
     logout,
   };
 });

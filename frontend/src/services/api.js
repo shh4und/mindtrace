@@ -17,7 +17,7 @@ apiClient.interceptors.request.use(
       return config;
     }
 
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -48,7 +48,7 @@ export default {
     return apiClient.get('/usuarios/paciente');
   },
   proprioPerfilProfissional() {
-    return apiClient.get('/usuarios/profissional/');
+    return apiClient.get('/usuarios/profissional');
   },
   atualizarPerfil(data) {
     return apiClient.put('/usuarios/perfil', data);

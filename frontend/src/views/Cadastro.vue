@@ -127,11 +127,12 @@
 import { reactive, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-import api from '../services/api';
+import { useUserStore } from '../store/user';
 import { faBrain, faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
 const toast = useToast();
+const userStore = useUserStore();
 
 const form = reactive({
   userType: '', // paciente ou profissional
@@ -194,30 +195,32 @@ const handleRegister = async () => {
       cpf: form.cpf,
     };
 
+    let data;
     if (form.userType === 'paciente') {
-      const pacienteDTO = {
+      data = {
         ...commonData,
+        contato: form.contato,
         dependente: form.dependente,
-        idade: parseInt(form.idade, 10),
+        idade: form.idade,
+        nomeResponsavel: form.nomeResponsavel,
+        contatoResponsavel: form.conatoResponsavel,
       };
-
-      if (form.dependente) {
-        pacienteDTO.nome_responsavel = form.nomeResponsavel;
-        pacienteDTO.contato_responsavel = form.contatoResponsavel;
-      }
-
-      await api.registrarPaciente(pacienteDTO);
     } else if (form.userType === 'profissional') {
-      const profissionalDTO = {
+      data = {
         ...commonData,
         especialidade: form.especialidade,
         registro_profissional: form.registro_profissional,
       };
-      await api.registrarProfissional(profissionalDTO);
     }
 
-    toast.success('Cadastro realizado com sucesso! Você já pode fazer o login.');
-    router.push('/login');
+    const result = await userStore.register(data, form.userType);
+
+    if (result.success) {
+      toast.success(result.message);
+      router.push('/login');
+    } else {
+      toast.error(result.error);
+    }
 
   } catch (error) {
     const errorMessage = error.response?.data?.erro || 'Erro desconhecido no cadastro.';
