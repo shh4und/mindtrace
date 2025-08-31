@@ -73,17 +73,19 @@ func (r *gormUsuarioRepositorio) BuscarPacientePorID(tx *gorm.DB, id uint) (*dom
 	return &paciente, nil
 }
 
-func (r *gormUsuarioRepositorio) BuscarProfissionalPorUsuarioID(tx *gorm.DB, usuarioID uint) (*dominio.Profissional, error) {
+func (r *gormUsuarioRepositorio) BuscarProfissionalPorUsuarioID(tx *gorm.DB, id uint) (*dominio.Profissional, error) {
 	var profissional dominio.Profissional
-	if err := tx.Where("usuario_id = ?", usuarioID).First(&profissional).Error; err != nil {
+	err := tx.Preload("Usuario").Where("usuario_id = ?", id).First(&profissional).Error
+	if err != nil {
 		return nil, err
 	}
 	return &profissional, nil
 }
 
-func (r *gormUsuarioRepositorio) BuscarPacientePorUsuarioID(tx *gorm.DB, usuarioID uint) (*dominio.Paciente, error) {
+func (r *gormUsuarioRepositorio) BuscarPacientePorUsuarioID(tx *gorm.DB, id uint) (*dominio.Paciente, error) {
 	var paciente dominio.Paciente
-	if err := tx.Where("usuario_id = ?", usuarioID).First(&paciente).Error; err != nil {
+	err := tx.Preload("Usuario").Where("usuario_id = ?", id).First(&paciente).Error
+	if err != nil {
 		return nil, err
 	}
 	return &paciente, nil

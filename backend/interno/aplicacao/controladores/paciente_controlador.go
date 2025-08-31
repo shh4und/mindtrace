@@ -30,6 +30,18 @@ type RegistrarPacienteRequest struct {
 	ContatoResponsavel   string     `json:"contato_responsavel"`
 }
 
+type ProprioPacienteRequest struct {
+	Nome                 string     `json:"nome"`
+	Email                string     `json:"email"`
+	EhDependente         *bool      `json:"dependente"`
+	Idade                int8       `json:"idade"`
+	DataInicioTratamento *time.Time `json:"data_inicio_tratamento"`
+	HistoricoSaude       string     `json:"historico_saude"`
+	CPF                  string     `json:"cpf"`
+	NomeResponsavel      string     `json:"nome_responsavel"`
+	ContatoResponsavel   string     `json:"contato_responsavel"`
+}
+
 func (pc *PacienteControlador) Registrar(c *gin.Context) {
 	var req RegistrarPacienteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -87,5 +99,17 @@ func (uc *PacienteControlador) ProprioPerfilPaciente(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, paciente)
+	proprioPaciente := ProprioPacienteRequest{
+		Nome:                 paciente.Usuario.Nome,
+		Email:                paciente.Usuario.Email,
+		EhDependente:         &paciente.EhDependente,
+		Idade:                paciente.Idade,
+		DataInicioTratamento: paciente.DataInicioTratamento,
+		HistoricoSaude:       paciente.HistoricoSaude,
+		CPF:                  paciente.Usuario.CPF,
+		NomeResponsavel:      paciente.NomeResponsavel,
+		ContatoResponsavel:   paciente.ContatoResponsavel,
+	}
+
+	c.JSON(http.StatusOK, proprioPaciente)
 }

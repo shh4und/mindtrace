@@ -219,7 +219,7 @@ func (s *usuarioServico) ProprioPerfilPaciente(id uint) (*dominio.Paciente, erro
 		paciente, err := s.repositorio.BuscarPacientePorUsuarioID(tx, id)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrPacienteNaoEncontrado
+				return ErrUsuarioNaoEncontrado
 			}
 			return err
 		}
@@ -237,7 +237,7 @@ func (s *usuarioServico) ProprioPerfilProfissional(id uint) (*dominio.Profission
 		profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, id)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrPacienteNaoEncontrado
+				return ErrUsuarioNaoEncontrado
 			}
 			return err
 		}

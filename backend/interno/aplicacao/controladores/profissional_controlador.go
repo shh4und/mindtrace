@@ -25,6 +25,14 @@ type RegistrarProfissionalRequest struct {
 	CPF                  string `json:"cpf" binding:"required"`
 }
 
+type ProprioProfissionalRequest struct {
+	Nome                 string `json:"nome"`
+	Email                string `json:"email" `
+	Especialidade        string `json:"especialidade" `
+	RegistroProfissional string `json:"registro_profissional" `
+	CPF                  string `json:"cpf"`
+}
+
 func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 	var req RegistrarProfissionalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -78,5 +86,13 @@ func (uc *ProfissionalControlador) ProprioPerfilProfissional(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, profissional)
+	proprioProfissional := ProprioProfissionalRequest{
+		Nome:                 profissional.Usuario.Nome,
+		Email:                profissional.Usuario.Email,
+		CPF:                  profissional.Usuario.CPF,
+		Especialidade:        profissional.Especialidade,
+		RegistroProfissional: profissional.RegistroProfissional,
+	}
+
+	c.JSON(http.StatusOK, proprioProfissional)
 }
