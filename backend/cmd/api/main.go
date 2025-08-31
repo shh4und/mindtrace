@@ -96,6 +96,8 @@ func main() {
 			usuarios := protegido.Group("/usuarios")
 			{
 				usuarios.GET("/", usuarioController.BuscarPerfil)
+				usuarios.GET("/paciente", pacienteController.ProprioPerfilPaciente)
+				usuarios.GET("/profissional", profissionalController.ProprioPerfilProfissional)
 				usuarios.PUT("/perfil", usuarioController.AtualizarPerfil)
 				usuarios.PUT("/perfil/alterar-senha", usuarioController.AlterarSenha)
 			}

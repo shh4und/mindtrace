@@ -1,13 +1,39 @@
 <template>
   <aside class="w-full lg:w-64 bg-white shadow-lg lg:shadow-none lg:border-r border-gray-200 flex flex-col">
-    <div class="flex items-center justify-between p-6 border-b border-gray-200">
-      <div class="flex items-center space-x-3">
-        <img
-          src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGFuZHNjYXBlfGVufDB8fDB8fHww"
-          alt="Usuário Paciente" class="w-10 h-10 rounded-full object-cover">
-        <div>
-          <h2 class="font-semibold text-gray-900">João</h2>
+    <!-- Profile Section -->
+    <div class="p-6 border-b border-gray-200 relative">
+      <button @click="isProfileCardVisible = !isProfileCardVisible"
+        class="flex items-center space-x-3 w-full text-left p-2 rounded-lg hover:bg-gray-100 transition-colors">
+        <font-awesome-icon :icon="['fas', 'user']" class="w-8 h-8 rounded-full p-2 bg-gray-200 text-gray-600" />
+        <div v-if="userStore.user" class="flex-1">
+          <h2 class="font-semibold text-gray-900 truncate">{{ userStore.user.nome }}</h2>
           <p class="text-sm text-gray-500">Paciente</p>
+        </div>
+        <div v-else class="flex-1">
+          <div class="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
+          <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </button>
+
+      <!-- Profile Pop-up Card -->
+      <div v-if="userStore.user" class="flex-1">
+        <h2 class="font-semibold text-gray-900 truncate">{{ userStore.user.nome }}</h2>
+        <p class="text-sm text-gray-500">Paciente</p>
+      </div>
+      <div v-if="isProfileCardVisible && userStore.user"
+        class="absolute z-20 bottom-full mb-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 p-4">
+        <div class="flex items-center mb-4">
+          <font-awesome-icon :icon="['fas', 'user']"
+            class="w-10 h-10 rounded-full p-2 mr-3 bg-gray-200 text-gray-600" />
+          <div>
+            <h3 class="font-bold text-lg">{{ userStore.user.nome }}</h3>
+            <p class="text-sm text-gray-600">{{ userStore.user.email }}</p>
+          </div>
+        </div>
+        <div class="space-y-2 text-sm mb-4">
+          <p><strong class="font-medium">CPF:</strong> {{ userStore.user.cpf || 'Não informado' }}</p>
+          <p v-if="userStore.user.paciente"><strong class="font-medium">Idade:</strong> {{ userStore.user.paciente.idade
+            }}</p>
         </div>
       </div>
     </div>
@@ -34,21 +60,15 @@
         </li>
         <li>
           <a href="#" @click.prevent="$emit('navigate', 'vincular')" class="sidebar-item">
-            <i class="fa-solid fa-chart-line fa-fw mr-3"></i>
+            <i class="fa-solid fa-link fa-fw mr-3"></i>
             <span>Vincular um Profissional</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" @click.prevent="$emit('navigate', 'perfil')" class="sidebar-item">
-            <i class="fa-solid fa-user fa-fw mr-3"></i>
-            <span>Perfil</span>
           </a>
         </li>
       </ul>
     </nav>
 
     <div class="p-4 border-t border-gray-200">
-      <a href="#" @click.prevent="logout" class="sidebar-item">
+      <a href="#" @click.prevent="performLogout" class="sidebar-item">
         <i class="fa-solid fa-right-from-bracket fa-fw mr-3"></i>
         <span>Sair</span>
       </a>
@@ -57,16 +77,32 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useUserStore } from '../store/user'; // 1. Importar o store Pinia
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faUser, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { library } from '@fortawesome/fontawesome-svg-core';
 
-defineEmits(['navigate']);
+library.add(faUser, faPenToSquare);
 
-const router = useRouter();
+const emit = defineEmits(['navigate']);
+const userStore = useUserStore(); // 2. Inicializar o store
+const isProfileCardVisible = ref(false);
 
-const logout = () => {
-  // Lógica de logout aqui
-  console.log('Usuário deslogado');
-  router.push('/login');
+onMounted(() => {
+  // 3. Chamar a ação do store
+  userStore.fetchUser('paciente');
+});
+
+const performLogout = () => {
+  // 4. Chamar a ação de logout
+  userStore.logout();
+  // A ação de logout já redireciona, então o router.push aqui não é mais necessário.
+};
+
+const editProfile = () => {
+  emit('navigate', 'editar-perfil');
+  isProfileCardVisible.value = false;
 };
 </script>
 
@@ -88,8 +124,12 @@ const logout = () => {
 
 .sidebar-item.active {
   background-color: #DBF7E9;
-  /* soft emerald-ish background */
   color: #166534;
-  /* darker emerald */
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

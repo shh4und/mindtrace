@@ -73,3 +73,19 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, paciente)
 }
+
+func (uc *PacienteControlador) ProprioPerfilPaciente(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
+		return
+	}
+
+	paciente, err := uc.usuarioServico.ProprioPerfilPaciente(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"erro": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, paciente)
+}

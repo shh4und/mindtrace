@@ -127,7 +127,7 @@ const handleLogin = async () => {
 
     const response = await api.login(credentials);
     const token = response.data.token;
-    localStorage.setItem('authToken', token);
+    localStorage.setItem('token', token);
 
     const decodedToken = parseJwt(token);
 

@@ -58,7 +58,8 @@ type UsuarioServico interface {
 	RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.Paciente, error)
 	Login(email, senha string) (string, error)
 	BuscarUsuarioPorID(id uint) (*dominio.Usuario, error)
-	BuscarPacientePorID(tx *gorm.DB, id uint) (*dominio.Paciente, error)
+	ProprioPerfilPaciente(id uint) (*dominio.Paciente, error)
+	ProprioPerfilProfissional(id uint) (*dominio.Profissional, error)
 	AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error)
 	AlterarSenha(userID uint, dto AlterarSenhaDTO) error
 }
@@ -210,15 +211,40 @@ func (s *usuarioServico) BuscarUsuarioPorID(id uint) (*dominio.Usuario, error) {
 	return usuario, nil
 }
 
-func (s *usuarioServico) BuscarPacientePorID(tx *gorm.DB, id uint) (*dominio.Paciente, error) {
-	paciente, err := s.repositorio.BuscarPacientePorID(tx, id)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrPacienteNaoEncontrado
+func (s *usuarioServico) ProprioPerfilPaciente(id uint) (*dominio.Paciente, error) {
+	var pacienteEncontado *dominio.Paciente
+
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+
+		paciente, err := s.repositorio.BuscarPacientePorUsuarioID(tx, id)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrPacienteNaoEncontrado
+			}
+			return err
 		}
-		return nil, err
-	}
-	return paciente, nil
+		pacienteEncontado = paciente
+		return nil
+	})
+	return pacienteEncontado, err
+}
+
+func (s *usuarioServico) ProprioPerfilProfissional(id uint) (*dominio.Profissional, error) {
+	var profissionalEncontrado *dominio.Profissional
+
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+
+		profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, id)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrPacienteNaoEncontrado
+			}
+			return err
+		}
+		profissionalEncontrado = profissional
+		return nil
+	})
+	return profissionalEncontrado, err
 }
 
 func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error) {

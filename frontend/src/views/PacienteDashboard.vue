@@ -7,7 +7,7 @@
       <RegistroHumor v-if="activeView === 'humor'" />
       <Relatorio v-if="activeView === 'relatorios'" />
       <VincularProfissional v-if="activeView === 'vincular'"/>
-      <Perfil v-if="activeView === 'perfil'" user-type="paciente" />
+      <EditarPerfil v-if="activeView === 'editar-perfil'" user-type="paciente" />
 
     </main>
   </div>
@@ -19,7 +19,7 @@ import Navbar from '../components/Navbar.vue';
 import RegistroHumor from '../components/RegistroHumor.vue';
 import Resumo from '../components/Resumo.vue';
 import Relatorio from '../components/Relatorio.vue';
-import Perfil from '../components/Perfil.vue';
+import EditarPerfil from '../components/EditarPerfil.vue';
 import VincularProfissional from '@/components/VincularProfissional.vue';
 
 const activeView = ref('resumo');

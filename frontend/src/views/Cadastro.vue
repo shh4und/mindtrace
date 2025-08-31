@@ -54,8 +54,8 @@
               </div>
               <div>
                 <label for="contato" class="block text-base font-medium text-gray-700 mb-1">Número para Contato
-                  (opcional)</label>
-                <input type="tel" id="contato" v-model="form.contato" class="w-full input-style" required />
+                  (Opcional)</label>
+                <input type="tel" id="contato" v-model="form.contato" class="w-full input-style" />
               </div>
             </div>
 
@@ -200,6 +200,12 @@ const handleRegister = async () => {
         dependente: form.dependente,
         idade: parseInt(form.idade, 10),
       };
+
+      if (form.dependente) {
+        pacienteDTO.nome_responsavel = form.nomeResponsavel;
+        pacienteDTO.contato_responsavel = form.contatoResponsavel;
+      }
+
       await api.registrarPaciente(pacienteDTO);
     } else if (form.userType === 'profissional') {
       const profissionalDTO = {

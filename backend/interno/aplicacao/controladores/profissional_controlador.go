@@ -64,3 +64,19 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, profissional)
 }
+
+func (uc *ProfissionalControlador) ProprioPerfilProfissional(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
+		return
+	}
+
+	profissional, err := uc.usuarioServico.ProprioPerfilProfissional(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"erro": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, profissional)
+}

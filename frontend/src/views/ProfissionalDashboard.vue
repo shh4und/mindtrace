@@ -17,7 +17,7 @@
 
       <!-- Mostra outras views -->
       <GerarConvite v-if="activeView === 'convite'" />
-      <Perfil v-if="activeView === 'perfil'" user-type="profissional" />
+      <EditarPerfil v-if="activeView === 'editar-perfil'" user-type="profissional" />
 
     </main>
   </div>
@@ -29,7 +29,7 @@ import NavbarProfissional from '../components/NavbarProfissional.vue';
 import ListaPacientes from '../components/ListaPacientes.vue';
 import Relatorio from '../components/Relatorio.vue';
 import GerarConvite from '../components/GerarConvite.vue';
-import Perfil from '../components/Perfil.vue';
+import EditarPerfil from '../components/EditarPerfil.vue';
 
 const activeView = ref('pacientes'); // Visão inicial
 const selectedPatientId = ref(null);
@@ -49,3 +49,4 @@ const showPatientList = () => {
 };
 
 </script>
+

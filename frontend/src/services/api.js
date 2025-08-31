@@ -44,6 +44,12 @@ export default {
   buscarPerfil() {
     return apiClient.get('/usuarios/');
   },
+  proprioPerfilPaciente() {
+    return apiClient.get('/usuarios/paciente');
+  },
+  proprioPerfilProfissional() {
+    return apiClient.get('/usuarios/profissional/');
+  },
   atualizarPerfil(data) {
     return apiClient.put('/usuarios/perfil', data);
   },
