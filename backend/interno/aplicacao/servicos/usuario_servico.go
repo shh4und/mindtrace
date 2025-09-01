@@ -71,6 +71,7 @@ type UsuarioServico interface {
 	BuscarUsuarioPorID(id uint) (*dominio.Usuario, error)
 	ProprioPerfilPaciente(id uint) (*dominio.Paciente, error)
 	ProprioPerfilProfissional(id uint) (*dominio.Profissional, error)
+	ListarPacientesDoProfissional(userID uint) ([]dominio.Paciente, error)
 	AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error)
 	AlterarSenha(userID uint, dto AlterarSenhaDTO) error
 	DeletarPerfil(userID uint) error
@@ -349,6 +350,22 @@ func (s *usuarioServico) AlterarSenha(userID uint, dto AlterarSenhaDTO) error {
 	})
 
 	return err
+}
+
+func (s *usuarioServico) ListarPacientesDoProfissional(userID uint) ([]dominio.Paciente, error) {
+	var pacientes []dominio.Paciente
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, userID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrUsuarioNaoEncontrado
+			}
+			return err
+		}
+		pacientes, err = s.repositorio.BuscarPacientesDoProfissional(tx, profissional.ID)
+		return err
+	})
+	return pacientes, err
 }
 
 func (s *usuarioServico) DeletarPerfil(userID uint) error {

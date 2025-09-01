@@ -98,6 +98,7 @@ func main() {
 				usuarios.GET("/", usuarioController.BuscarPerfil)
 				usuarios.GET("/paciente", pacienteController.ProprioPerfilPaciente)
 				usuarios.GET("/profissional", profissionalController.ProprioPerfilProfissional)
+				usuarios.GET("/profissional/pacientes", usuarioController.ListarPacientesDoProfissional)
 				usuarios.PUT("/perfil", usuarioController.AtualizarPerfil)
 				usuarios.PUT("/perfil/alterar-senha", usuarioController.AlterarSenha) // CONSERTAR
 				// PARA FAZER - URGENTE

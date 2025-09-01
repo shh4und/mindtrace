@@ -17,6 +17,7 @@ type UsuarioRepositorio interface {
 	BuscarPacientePorID(tx *gorm.DB, id uint) (*dominio.Paciente, error)
 	BuscarProfissionalPorUsuarioID(tx *gorm.DB, usuarioID uint) (*dominio.Profissional, error)
 	BuscarPacientePorUsuarioID(tx *gorm.DB, usuarioID uint) (*dominio.Paciente, error)
+	BuscarPacientesDoProfissional(tx *gorm.DB, profissionalID uint) ([]dominio.Paciente, error)
 	Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error
 	AtualizarProfissional(tx *gorm.DB, profissional *dominio.Profissional) error
 	AtualizarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error
@@ -92,6 +93,15 @@ func (r *gormUsuarioRepositorio) BuscarPacientePorUsuarioID(tx *gorm.DB, id uint
 		return nil, err
 	}
 	return &paciente, nil
+}
+
+func (r *gormUsuarioRepositorio) BuscarPacientesDoProfissional(tx *gorm.DB, profissionalID uint) ([]dominio.Paciente, error) {
+	var profissional dominio.Profissional
+	err := tx.Preload("Pacientes").Preload("Pacientes.Usuario").Where("id = ?", profissionalID).First(&profissional).Error
+	if err != nil {
+		return nil, err
+	}
+	return profissional.Pacientes, nil
 }
 
 func (r *gormUsuarioRepositorio) Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error {

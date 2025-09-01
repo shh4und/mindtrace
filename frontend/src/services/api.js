@@ -50,6 +50,9 @@ export default {
   proprioPerfilProfissional() {
     return apiClient.get('/usuarios/profissional');
   },
+  listarPacientesDoProfissional() {
+    return apiClient.get('/usuarios/profissional/pacientes');
+  },
   atualizarPerfil(data) {
     return apiClient.put('/usuarios/perfil', data);
   },
