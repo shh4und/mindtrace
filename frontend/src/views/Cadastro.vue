@@ -47,9 +47,9 @@
                 <p class="text-sm text-gray-500 mt-1">Use 8+ caracteres com letras, números e símbolos como !@#$%^&*</p>
               </div>
               <div>
-                <label for="confirmPassword" class="block text-base font-medium text-gray-700 mb-1">Confirme sua
+                <label for="confirm_password" class="block text-base font-medium text-gray-700 mb-1">Confirme sua
                   Senha</label>
-                <input type="password" id="confirmPassword" v-model="form.confirmPassword" class="w-full input-style"
+                <input type="password" id="confirm_password" v-model="form.confirm_password" class="w-full input-style"
                   required />
               </div>
               <div>
@@ -89,15 +89,15 @@
               </div>
 
               <div v-if="form.dependente === true">
-                <label for="nomeResponsavel" class="block text-base font-medium text-gray-700 mb-1">Nome do
+                <label for="nome_responsavel" class="block text-base font-medium text-gray-700 mb-1">Nome do
                   Responsável</label>
-                <input type="text" id="nomeResponsavel" v-model="form.nomeResponsavel" class="w-full input-style"
+                <input type="text" id="nome_responsavel" v-model="form.nome_responsavel" class="w-full input-style"
                   required />
               </div>
               <div v-if="form.dependente === true">
-                <label for="contatoResponsavel" class="block text-base font-medium text-gray-700 mb-1">Contato do
+                <label for="contato_responsavel" class="block text-base font-medium text-gray-700 mb-1">Contato do
                   Responsável</label>
-                <input id="contatoResponsavel" v-model="form.conatoResponsavel" type="tel" class="w-full input-style"
+                <input id="contato_responsavel" v-model="form.contato_responsavel" type="tel" class="w-full input-style"
                   required />
               </div>
 
@@ -139,7 +139,7 @@ const form = reactive({
   nome: '',
   email: '',
   senha: '',
-  confirmPassword: '',
+  confirm_password: '',
   cpf: '',
   contato: '',
   // Campos do profissional
@@ -148,8 +148,8 @@ const form = reactive({
   // Campos do paciente
   dependente: false,
   idade: '',
-  nomeResponsavel: '',
-  conatoResponsavel: '',
+  nome_responsavel: '',
+  contato_responsavel: '',
 });
 
 const passwordError = ref('');
@@ -161,7 +161,7 @@ const isPasswordValid = computed(() => {
 });
 
 const isSubmitDisabled = computed(() => {
-  return !isPasswordValid.value || form.senha !== form.confirmPassword;
+  return !isPasswordValid.value || form.senha !== form.confirm_password;
 });
 
 const validatePassword = () => {
@@ -178,7 +178,7 @@ const validatePassword = () => {
 };
 
 const handleRegister = async () => {
-  if (form.senha !== form.confirmPassword) {
+  if (form.senha !== form.confirm_password) {
     toast.error('As senhas não coincidem!');
     return;
   }
@@ -193,17 +193,17 @@ const handleRegister = async () => {
       email: form.email,
       senha: form.senha,
       cpf: form.cpf,
+      contato: form.contato,
     };
 
     let data;
     if (form.userType === 'paciente') {
       data = {
         ...commonData,
-        contato: form.contato,
         dependente: form.dependente,
         idade: form.idade,
-        nomeResponsavel: form.nomeResponsavel,
-        contatoResponsavel: form.conatoResponsavel,
+        nome_responsavel: form.nome_responsavel,
+        contato_responsavel: form.contato_responsavel,
       };
     } else if (form.userType === 'profissional') {
       data = {
