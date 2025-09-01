@@ -32,7 +32,7 @@
           <!-- (Apenas para Profissional) -->
           <div v-if="props.userType === 'paciente'">
             <label for="dependente" class="block text-sm font-medium text-gray-700">Dependente</label>
-            <input type="checkbox" id="dependente" v-model="profile.dependente" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+            <input type="checkbox" id="dependente" v-model="profile.dependente" class="w-5 h-5 mt-3 px-4 py-5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
           </div>
           <div v-if="props.userType === 'paciente'">
             <label for="nome_responsavel" class="block text-sm font-medium text-gray-700">Nome Responsável</label>
