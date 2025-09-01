@@ -18,6 +18,8 @@ type UsuarioRepositorio interface {
 	BuscarProfissionalPorUsuarioID(tx *gorm.DB, usuarioID uint) (*dominio.Profissional, error)
 	BuscarPacientePorUsuarioID(tx *gorm.DB, usuarioID uint) (*dominio.Paciente, error)
 	Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error
+	AtualizarProfissional(tx *gorm.DB, profissional *dominio.Profissional) error
+	AtualizarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error
 }
 
 type gormUsuarioRepositorio struct {
@@ -93,4 +95,11 @@ func (r *gormUsuarioRepositorio) BuscarPacientePorUsuarioID(tx *gorm.DB, id uint
 
 func (r *gormUsuarioRepositorio) Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error {
 	return tx.Save(usuario).Error
+}
+
+func (r *gormUsuarioRepositorio) AtualizarProfissional(tx *gorm.DB, profissional *dominio.Profissional) error {
+	return tx.Save(profissional).Error
+}
+func (r *gormUsuarioRepositorio) AtualizarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error {
+	return tx.Save(paciente).Error
 }

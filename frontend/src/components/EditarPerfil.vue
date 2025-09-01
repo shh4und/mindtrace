@@ -19,10 +19,28 @@
             <input type="email" id="email" v-model="profile.email" class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-100 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900" readonly>
           </div>
 
-          <!-- Especialidade (Apenas para Profissional) -->
+          <!-- (Apenas para Profissional) -->
           <div v-if="props.userType === 'profissional'">
             <label for="especialidade" class="block text-sm font-medium text-gray-700">Especialidade</label>
             <input type="text" id="especialidade" v-model="profile.especialidade" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+          </div>
+          <div v-if="props.userType === 'profissional'">
+            <label for="registro_profissional" class="block text-sm font-medium text-gray-700">Registro Profissional</label>
+            <input type="text" id="registro_profissional" v-model="profile.registro_profissional" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+          </div>
+
+          <!-- (Apenas para Profissional) -->
+          <div v-if="props.userType === 'paciente'">
+            <label for="dependente" class="block text-sm font-medium text-gray-700">Dependente</label>
+            <input type="checkbox" id="dependente" v-model="profile.dependente" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+          </div>
+          <div v-if="props.userType === 'paciente'">
+            <label for="nome_responsavel" class="block text-sm font-medium text-gray-700">Nome Responsável</label>
+            <input type="text" id="nome_responsavel" v-model="profile.nome_responsavel" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+          </div>
+          <div v-if="props.userType === 'paciente'">
+            <label for="contato_responsavel" class="block text-sm font-medium text-gray-700">Contato Responsável</label>
+            <input type="text" id="contato_responsavel" v-model="profile.contato_responsavel" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
           </div>
 
           <!-- Bio -->
@@ -105,28 +123,42 @@ onMounted(async () => {
     profile.value.contato = userData.contato;
     profile.value.bio = userData.bio;
 
-    // TODO: Adicionar lógica para buscar dados específicos do profissional se necessário
-    // if (props.userType === 'profissional') { ... }
+    if (props.userType === 'profissional') {
+      const profResponse = await api.proprioPerfilProfissional();
+      profile.value.especialidade = profResponse.data.especialidade;
+      profile.value.registro_profissional = profResponse.data.registro_profissional;
+      // profile.value.idade_profissional = profResponse.data.idade; TODO
+    } else if (props.userType === 'paciente') {
+      const pacResponse = await api.proprioPerfilPaciente();
+      profile.value.idade = pacResponse.data.idade;
+      profile.value.dependente = pacResponse.data.dependente;
+      profile.value.nome_responsavel = pacResponse.data.nome_responsavel;
+      profile.value.contato_responsavel = pacResponse.data.contato_responsavel;
+    }
 
+    toast.success('Dados alterados com sucesso!');
   } catch (error) {
-    toast.error('Não foi possível carregar os dados do perfil.');
-    console.error("Erro ao buscar perfil:", error);
+    toast.error('Erro ao carregar perfil.');
   }
 });
 
 const saveProfile = async () => {
-  try {
-    const profileData = {
-      nome: profile.value.nome,
-      contato: profile.value.contato,
-      bio: profile.value.bio,
-    };
-    await api.atualizarPerfil(profileData);
-    toast.success('Perfil atualizado com sucesso!');
-  } catch (error) {
-    toast.error('Erro ao atualizar o perfil.');
-    console.error("Erro ao salvar perfil:", error);
+  const profileData = {
+    nome: profile.value.nome,
+    contato: profile.value.contato,
+    bio: profile.value.bio,
+  };
+  if (props.userType === 'profissional') {
+    profileData.especialidade = profile.value.especialidade;
+    profileData.registro_profissional = profile.value.registro_profissional;
+    // profileData.idade_profissional = profile.value.idade_profissional; TODO 
+  } else if (props.userType === 'paciente') {
+    profileData.idade = profile.value.idade;
+    profileData.dependente = profile.value.dependente;
+    profileData.nome_responsavel = profile.value.nome_responsavel;
+    profileData.contato_responsavel = profile.value.contato_responsavel;
   }
+  await api.atualizarPerfil(profileData);
 };
 
 const changePassword = async () => {

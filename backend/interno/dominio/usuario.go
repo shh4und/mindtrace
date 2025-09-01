@@ -48,7 +48,7 @@ type Paciente struct {
 	UsuarioID            uint           `json:"-" gorm:"unique;not null"`
 	Usuario              Usuario        `json:"usuario" gorm:"foreignKey:UsuarioID"`
 	Idade                int8           `json:"idade" gorm:"not null"`
-	EhDependente         bool           `json:"dependente" gorm:"not null"`
+	Dependente           bool           `json:"dependente" gorm:"not null"`
 	NomeResponsavel      string         `json:"nome_responsavel,omitempty" gorm:"type:varchar(255)"`
 	ContatoResponsavel   string         `json:"contato_responsavel,omitempty" gorm:"type:varchar(100)"`
 	DataInicioTratamento *time.Time     `json:"data_inicio_tratamento"`

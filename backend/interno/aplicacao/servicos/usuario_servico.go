@@ -28,7 +28,7 @@ type RegistrarPacienteDTO struct {
 	Nome                 string
 	Email                string
 	Senha                string
-	EhDependente         bool
+	Dependente           bool
 	Idade                int8
 	DataInicioTratamento *time.Time
 	HistoricoSaude       string
@@ -42,6 +42,15 @@ type AtualizarPerfilDTO struct {
 	Nome    string `json:"nome" binding:"required"`
 	Contato string `json:"contato"`
 	Bio     string `json:"bio"`
+	// Campos para Profissional
+	Especialidade        string `json:"especialidade,omitempty"`
+	RegistroProfissional string `json:"registro_profissional,omitempty"`
+	// IdadeProfissional    *int8  `json:"idade_profissional,omitempty"` // Se aplicável
+	// Campos para Paciente
+	Idade              *int8  `json:"idade,omitempty"`
+	Dependente         *bool  `json:"dependente,omitempty"`
+	NomeResponsavel    string `json:"nome_responsavel,omitempty"`
+	ContatoResponsavel string `json:"contato_responsavel,omitempty"`
 }
 
 type AlterarSenhaDTO struct {
@@ -150,7 +159,7 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 		novoPaciente := &dominio.Paciente{
 			UsuarioID:          novoUsuario.ID,
 			Idade:              dto.Idade,
-			EhDependente:       dto.EhDependente,
+			Dependente:         dto.Dependente,
 			NomeResponsavel:    dto.NomeResponsavel,
 			ContatoResponsavel: dto.ContatoResponsavel,
 		}
@@ -254,23 +263,56 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
 		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrUsuarioNaoEncontrado
-			}
 			return err
 		}
-
 		usuario.Nome = dto.Nome
 		usuario.Contato = dto.Contato
 		usuario.Bio = dto.Bio
-
 		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
 			return err
+		}
+		// Atualizar específico baseado no TipoUsuario
+		if usuario.TipoUsuario == "profissional" {
+			profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, userID)
+			if err != nil {
+				return err
+			}
+			if dto.Especialidade != "" {
+				profissional.Especialidade = dto.Especialidade
+			}
+			if dto.RegistroProfissional != "" {
+				profissional.RegistroProfissional = dto.RegistroProfissional
+			}
+			// if dto.IdadeProfissional != nil {
+			// 	profissional.Idade = *dto.IdadeProfissional
+			// } TODO - adicionar idade do profissional back-front
+			if err := s.repositorio.AtualizarProfissional(tx, profissional); err != nil {
+				return err
+			}
+		} else if usuario.TipoUsuario == "paciente" {
+			paciente, err := s.repositorio.BuscarPacientePorUsuarioID(tx, userID)
+			if err != nil {
+				return err
+			}
+			if dto.Idade != nil {
+				paciente.Idade = *dto.Idade
+			}
+			if dto.Dependente != nil {
+				paciente.Dependente = *dto.Dependente
+			}
+			if dto.NomeResponsavel != "" {
+				paciente.NomeResponsavel = dto.NomeResponsavel
+			}
+			if dto.ContatoResponsavel != "" {
+				paciente.ContatoResponsavel = dto.ContatoResponsavel
+			}
+			if err := s.repositorio.AtualizarPaciente(tx, paciente); err != nil {
+				return err
+			}
 		}
 		usuarioAtualizado = usuario
 		return nil
 	})
-
 	return usuarioAtualizado, err
 }
 
