@@ -21,6 +21,7 @@ type RegistrarProfissionalDTO struct {
 	Especialidade        string
 	RegistroProfissional string
 	CPF                  string
+	Contato              string
 }
 
 type RegistrarPacienteDTO struct {
@@ -34,6 +35,7 @@ type RegistrarPacienteDTO struct {
 	CPF                  string
 	NomeResponsavel      string
 	ContatoResponsavel   string
+	Contato              string
 }
 
 type AtualizarPerfilDTO struct {

@@ -23,6 +23,7 @@ type RegistrarProfissionalRequest struct {
 	Especialidade        string `json:"especialidade" binding:"required"`
 	RegistroProfissional string `json:"registro_profissional" binding:"required"`
 	CPF                  string `json:"cpf" binding:"required"`
+	Contato              string `json:"contato"`
 }
 
 type ProprioProfissionalRequest struct {
@@ -31,6 +32,7 @@ type ProprioProfissionalRequest struct {
 	Especialidade        string `json:"especialidade" `
 	RegistroProfissional string `json:"registro_profissional" `
 	CPF                  string `json:"cpf"`
+	Contato              string `json:"contato"`
 }
 
 func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
@@ -58,6 +60,7 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 		Especialidade:        req.Especialidade,
 		RegistroProfissional: req.RegistroProfissional,
 		CPF:                  req.CPF,
+		Contato:              req.Contato,
 	}
 
 	profissional, err := pc.usuarioServico.RegistrarProfissional(dto)
@@ -92,6 +95,7 @@ func (uc *ProfissionalControlador) ProprioPerfilProfissional(c *gin.Context) {
 		CPF:                  profissional.Usuario.CPF,
 		Especialidade:        profissional.Especialidade,
 		RegistroProfissional: profissional.RegistroProfissional,
+		Contato:              profissional.Usuario.Contato,
 	}
 
 	c.JSON(http.StatusOK, proprioProfissional)

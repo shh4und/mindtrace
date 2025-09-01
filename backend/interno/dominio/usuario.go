@@ -13,7 +13,7 @@ type Usuario struct {
 	Nome        string         `json:"nome" gorm:"type:varchar(255);not null"`
 	Email       string         `json:"email" gorm:"type:varchar(255);unique;not null"`
 	Senha       string         `json:"-" gorm:"type:text;not null"`
-	Contato     string         `json:"contato" gorm:"not null"`
+	Contato     string         `json:"contato,omitempty" gorm:"type:varchar(100)"`
 	Bio         string         `json:"bio" gorm:"type:text"`
 	CPF         string         `json:"cpf" gorm:"type:varchar(20);unique"`
 	CreatedAt   time.Time      `json:"created_at"`
@@ -52,7 +52,6 @@ type Paciente struct {
 	NomeResponsavel      string         `json:"nome_responsavel,omitempty" gorm:"type:varchar(255)"`
 	ContatoResponsavel   string         `json:"contato_responsavel,omitempty" gorm:"type:varchar(100)"`
 	DataInicioTratamento *time.Time     `json:"data_inicio_tratamento"`
-	HistoricoSaude       string         `json:"historico_saude" gorm:"type:text"`
 	Profissionais        []Profissional `json:"profissionais" gorm:"many2many:profissional_paciente;"`
 	CreatedAt            time.Time      `json:"created_at"`
 	UpdatedAt            time.Time      `json:"updated_at"`

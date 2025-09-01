@@ -24,10 +24,10 @@ type RegistrarPacienteRequest struct {
 	EhDependente         *bool      `json:"dependente" binding:"required"`
 	Idade                int8       `json:"idade" binding:"required"`
 	DataInicioTratamento *time.Time `json:"data_inicio_tratamento"`
-	HistoricoSaude       string     `json:"historico_saude"`
 	CPF                  string     `json:"cpf" binding:"required"`
 	NomeResponsavel      string     `json:"nome_responsavel"`
 	ContatoResponsavel   string     `json:"contato_responsavel"`
+	Contato              string     `json:"contato"`
 }
 
 type ProprioPacienteRequest struct {
@@ -36,10 +36,10 @@ type ProprioPacienteRequest struct {
 	EhDependente         *bool      `json:"dependente"`
 	Idade                int8       `json:"idade"`
 	DataInicioTratamento *time.Time `json:"data_inicio_tratamento"`
-	HistoricoSaude       string     `json:"historico_saude"`
 	CPF                  string     `json:"cpf"`
 	NomeResponsavel      string     `json:"nome_responsavel"`
 	ContatoResponsavel   string     `json:"contato_responsavel"`
+	Contato              string     `json:"contato"`
 }
 
 func (pc *PacienteControlador) Registrar(c *gin.Context) {
@@ -67,10 +67,10 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 		EhDependente:         *req.EhDependente,
 		Idade:                req.Idade,
 		DataInicioTratamento: req.DataInicioTratamento,
-		HistoricoSaude:       req.HistoricoSaude,
 		CPF:                  req.CPF,
 		NomeResponsavel:      req.NomeResponsavel,
 		ContatoResponsavel:   req.ContatoResponsavel,
+		Contato:              req.Contato,
 	}
 
 	paciente, err := pc.usuarioServico.RegistrarPaciente(dto)
@@ -105,10 +105,10 @@ func (uc *PacienteControlador) ProprioPerfilPaciente(c *gin.Context) {
 		EhDependente:         &paciente.EhDependente,
 		Idade:                paciente.Idade,
 		DataInicioTratamento: paciente.DataInicioTratamento,
-		HistoricoSaude:       paciente.HistoricoSaude,
 		CPF:                  paciente.Usuario.CPF,
 		NomeResponsavel:      paciente.NomeResponsavel,
 		ContatoResponsavel:   paciente.ContatoResponsavel,
+		Contato:              paciente.Usuario.Contato,
 	}
 
 	c.JSON(http.StatusOK, proprioPaciente)
