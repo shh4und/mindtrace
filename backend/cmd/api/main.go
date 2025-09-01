@@ -99,14 +99,14 @@ func main() {
 				usuarios.GET("/paciente", pacienteController.ProprioPerfilPaciente)
 				usuarios.GET("/profissional", profissionalController.ProprioPerfilProfissional)
 				usuarios.PUT("/perfil", usuarioController.AtualizarPerfil)
-				usuarios.PUT("/perfil/alterar-senha", usuarioController.AlterarSenha)
+				usuarios.PUT("/perfil/alterar-senha", usuarioController.AlterarSenha) // CONSERTAR
+				// PARA FAZER - URGENTE
+				usuarios.DELETE("/perfil/apagar-conta", usuarioController.DeletarPerfil)
 			}
 
 			registroHumor := protegido.Group("/registro-humor")
 			{
 				registroHumor.POST("/", registroHumorController.Criar)
-				// registroHumor.GET("/", registroHumorController.Listar)
-				// registroHumor.GET("/:id", registroHumorController.BuscarPorID)
 
 			}
 

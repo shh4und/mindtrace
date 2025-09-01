@@ -39,7 +39,16 @@ export const useUserStore = defineStore('user', () => {
       }
     }
   }
-
+  async function deleteAccount() {
+      try {
+        await api.deletarConta();
+        logout(); // Logout após exclusão
+        return { success: true };
+      } catch (error) {
+        console.error('Falha ao deletar conta:', error);
+        return { success: false, error: error.response?.data?.erro || 'Erro ao deletar conta' };
+      }
+    }
   /**
    * Realiza o registro de um novo usuário.
    * @param {Object} data - Dados do registro.
@@ -103,5 +112,6 @@ export const useUserStore = defineStore('user', () => {
     login,
     register,
     logout,
+    deleteAccount,
   };
 });

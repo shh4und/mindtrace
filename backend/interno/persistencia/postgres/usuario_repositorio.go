@@ -20,6 +20,7 @@ type UsuarioRepositorio interface {
 	Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error
 	AtualizarProfissional(tx *gorm.DB, profissional *dominio.Profissional) error
 	AtualizarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error
+	DeletarUsuario(tx *gorm.DB, id uint) error
 }
 
 type gormUsuarioRepositorio struct {
@@ -102,4 +103,26 @@ func (r *gormUsuarioRepositorio) AtualizarProfissional(tx *gorm.DB, profissional
 }
 func (r *gormUsuarioRepositorio) AtualizarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error {
 	return tx.Save(paciente).Error
+}
+
+func (r *gormUsuarioRepositorio) DeletarUsuario(tx *gorm.DB, id uint) error {
+    // Buscar o usuário para determinar o tipo
+    usuario, err := r.BuscarUsuarioPorID(id)
+    if err != nil {
+        return err
+    }
+
+    // Deletar registros específicos baseados no tipo
+    if usuario.TipoUsuario == "profissional" {
+        if err := tx.Where("usuario_id = ?", id).Delete(&dominio.Profissional{}).Error; err != nil {
+            return err
+        }
+    } else if usuario.TipoUsuario == "paciente" {
+        if err := tx.Where("usuario_id = ?", id).Delete(&dominio.Paciente{}).Error; err != nil {
+            return err
+        }
+    }
+
+    // Deletar o usuário (hard delete, ignorando soft delete)
+    return tx.Unscoped().Delete(&dominio.Usuario{}, id).Error
 }

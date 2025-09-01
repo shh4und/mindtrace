@@ -73,6 +73,7 @@ type UsuarioServico interface {
 	ProprioPerfilProfissional(id uint) (*dominio.Profissional, error)
 	AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error)
 	AlterarSenha(userID uint, dto AlterarSenhaDTO) error
+	DeletarPerfil(userID uint) error
 }
 
 type usuarioServico struct {
@@ -105,6 +106,7 @@ func (s *usuarioServico) RegistrarProfissional(dto RegistrarProfissionalDTO) (*d
 			Senha:       string(hashSenha),
 			TipoUsuario: "profissional",
 			CPF:         dto.CPF,
+			Contato: 	 dto.Contato,
 		}
 
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
@@ -151,6 +153,7 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 			Senha:       string(hashSenha),
 			TipoUsuario: "paciente",
 			CPF:         dto.CPF,
+			Contato: 	 dto.Contato,
 		}
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
@@ -346,4 +349,17 @@ func (s *usuarioServico) AlterarSenha(userID uint, dto AlterarSenhaDTO) error {
 	})
 
 	return err
+}
+
+func (s *usuarioServico) DeletarPerfil(userID uint) error {
+    return s.db.Transaction(func(tx *gorm.DB) error {
+        _, err := s.repositorio.BuscarUsuarioPorID(userID)
+        if err != nil {
+            if errors.Is(err, gorm.ErrRecordNotFound) {
+                return ErrUsuarioNaoEncontrado
+            }
+            return err
+        }
+        return s.repositorio.DeletarUsuario(tx, userID)
+    })
 }

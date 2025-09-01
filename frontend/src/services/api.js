@@ -56,6 +56,9 @@ export default {
   alterarSenha(passwords) {
     return apiClient.put('/usuarios/perfil/alterar-senha', passwords);
   },
+  deletarConta() {
+    return apiClient.delete('/usuarios/perfil/apagar-conta');
+  },
 
   // --- Registro de Humor ---
   registrarHumor(data) {

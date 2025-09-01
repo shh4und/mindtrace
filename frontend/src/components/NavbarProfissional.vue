@@ -33,6 +33,8 @@
         <div class="space-y-2 text-sm mb-4">
           <p><strong class="font-medium">Especialidade:</strong> {{ userStore.user.especialidade || 'Não informado' }}</p>
           <p><strong class="font-medium">Registro:</strong> {{ userStore.user.registro_profissional || 'Não informado' }}</p>
+          <!-- Novo Campo: Contato -->
+          <p><strong class="font-medium">Contato:</strong> {{ userStore.user.contato || 'Não informado' }}</p>
         </div>
         <button @click="editProfile" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
           <font-awesome-icon :icon="['fas', 'pen-to-square']" />
