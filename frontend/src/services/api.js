@@ -72,6 +72,9 @@ export default {
   buscarRelatorio(periodo) {
     return apiClient.get(`/relatorios/?periodo=${periodo}`);
   },
+  buscarRelatorioPacienteDoProfissional(periodo, pacienteID) {
+    return apiClient.get(`/relatorios/paciente-lista?periodo=${periodo}&pacienteID=${pacienteID}`);
+  },
 
   // --- Convites ---
   gerarConvite() {

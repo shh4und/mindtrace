@@ -96,17 +96,17 @@ func (uc *UsuarioControlador) ListarPacientesDoProfissional(c *gin.Context) {
 }
 
 func (uc *UsuarioControlador) DeletarPerfil(c *gin.Context) {
-    userID, exists := c.Get("userID")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
-        return
-    }
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
+		return
+	}
 
-    err := uc.usuarioServico.DeletarPerfil(userID.(uint))
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
-        return
-    }
+	err := uc.usuarioServico.DeletarPerfil(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
+		return
+	}
 
-    c.JSON(http.StatusOK, gin.H{"mensagem": "Conta deletada com sucesso"})
+	c.JSON(http.StatusOK, gin.H{"mensagem": "Conta deletada com sucesso"})
 }

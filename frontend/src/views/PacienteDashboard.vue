@@ -5,7 +5,7 @@
     <main class="flex-1 p-8 overflow-y-auto">
       <Resumo v-if="activeView === 'resumo'" />
       <RegistroHumor v-if="activeView === 'humor'" />
-      <Relatorio v-if="activeView === 'relatorios'" />
+      <Relatorio v-if="activeView === 'relatorios'" user-type="paciente"/>
       <VincularProfissional v-if="activeView === 'vincular'"/>
       <EditarPerfil v-if="activeView === 'editar-perfil'" user-type="paciente" />
 

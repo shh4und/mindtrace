@@ -11,7 +11,7 @@
             <i class="fa-solid fa-arrow-left mr-2"></i>
             Voltar para a lista de pacientes
           </button>
-          <Relatorio :patient-id="selectedPatientId" />
+          <Relatorio @view-relatorios="showPatientReport" user-type="profissional" :patient-id="selectedPatientId" />
         </div>
       </div>
 

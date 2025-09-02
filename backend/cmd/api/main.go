@@ -114,6 +114,7 @@ func main() {
 			relatorios := protegido.Group("/relatorios")
 			{
 				relatorios.GET("/", relatorioController.GerarRelatorio)
+				relatorios.GET("/paciente-lista", relatorioController.GerarRelatorioPacienteDoProfissional)
 			}
 
 			convites := protegido.Group("/convites")

@@ -52,6 +52,12 @@
           </a>
         </li>
         <li>
+          <a href="#" @click.prevent="$emit('navigate', 'relatorios')" class="sidebar-item">
+            <i class="fa-solid fa-users fa-fw mr-3"></i>
+            <span>Relatórios</span>
+          </a>
+        </li>
+        <li>
           <a href="#" @click.prevent="$emit('navigate', 'convite')" class="sidebar-item">
             <i class="fa-solid fa-ticket fa-fw mr-3"></i>
             <span>Gerar Convite</span>

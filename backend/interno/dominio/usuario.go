@@ -44,7 +44,7 @@ func (Profissional) TableName() string {
 
 // Paciente tem seus próprios dados e uma referência ao Usuario.
 type Paciente struct {
-	ID                   uint           `gorm:"primaryKey"`
+	ID                   uint           `json:"id" gorm:"primaryKey"`
 	UsuarioID            uint           `json:"-" gorm:"unique;not null"`
 	Usuario              Usuario        `json:"usuario" gorm:"foreignKey:UsuarioID"`
 	Idade                int8           `json:"idade" gorm:"not null"`

@@ -39,7 +39,7 @@
         <button @click="editProfile"
           class="w-full text-sm bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
           <font-awesome-icon :icon="['fas', 'pen-to-square']" />
-          <span> Editar Perfil</span>
+          <!-- <span> Editar Perfil</span> -->
         </button>
       </div>
     </div>

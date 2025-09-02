@@ -23,10 +23,14 @@
             <p class="text-sm text-gray-500">{{ patient.age }}</p>
           </div>
         </div>
-        <div class="text-sm text-gray-600">
+        <button @click="$emit('view-relatorios', patient.id)" class="mb-6 flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800">
+            <i class="fa-solid fa-arrow-left mr-2"></i>
+            Ver Relatorio
+          </button>
+        <!-- <div class="text-sm text-gray-600">
           <p class="font-medium">Foco do tratamento:</p>
           <p>{{ patient.focus }}</p>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -42,7 +46,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 
 library.add(faUser);
 
-defineEmits(['view-patient']);
+defineEmits(['view-patient', 'view-relatorios']);
 
 const patients = ref([]);
 const isLoading = ref(true);

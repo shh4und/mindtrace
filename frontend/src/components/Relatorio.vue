@@ -57,6 +57,10 @@ const props = defineProps({
   patientId: {
     type: Number,
     default: null, // ID do paciente, usado pelo profissional
+  },
+  userType: {
+    type: String,
+    default: "paciente"
   }
 });
 
@@ -96,8 +100,13 @@ const fetchReportData = async () => {
   isLoading.value = true;
   try {
     // TODO: A API de relatório precisa aceitar um ID de paciente para o profissional
-    const response = await api.buscarRelatorio(selectedRange.value);
-    const report = response.data;
+    let report;
+    if (props.userType == "paciente"){
+      report = (await api.buscarRelatorio(selectedRange.value)).data;
+    }else{
+      report = (await api.buscarRelatorioPacienteDoProfissional(selectedRange.value, props.patientId)).data;
+    }
+    
 
     // Transforma os dados da API para o formato que os gráficos precisam
     const formattedData = report.grafico_sono.map((_, i) => ({
