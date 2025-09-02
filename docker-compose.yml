@@ -28,13 +28,8 @@ services:
       - db
 
   backend:
+    image: shh4und/mindtrace-backend:latest  # Substitua pelo seu username no Docker Hub
     container_name: mindtrace-backend
-    # Dev: use golang image, mount source and run with hot reload / go run
-    image: golang:1.24.5-alpine
-    working_dir: /app
-    volumes:
-      - ./backend:/app
-      - /app/pkg/mod
     ports:
       - "8080:8080"
     environment:
@@ -42,37 +37,18 @@ services:
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_DB=${POSTGRES_DB}
       - JWT_SECRET=${JWT_SECRET}
-    command: sh -c "apk add --no-cache git && go mod download && go run ./cmd/api/main.go"
     depends_on:
       - db
     restart: unless-stopped
 
-    # Production build (uncomment to use):
-    # build:
-    #   context: ./backend
-
   frontend:
+    image: shh4und/mindtrace-frontend:latest  # Substitua pelo seu username no Docker Hub
     container_name: mindtrace-frontend
-    # Dev: use node image, mount source and run Vite dev server (hot reload)
-    image: node:22.17.1-alpine
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-    command: sh -c "npm install --silent && npm run dev -- --host 0.0.0.0"
     ports:
-      - "5173:5173"
+      - "5173:5173"  # Mantenha para dev; para produção, mude para "8000:80" se usar Nginx
     depends_on:
       - backend
     restart: unless-stopped
-
-    # Production build (uncomment to use):
-    # build:
-    #   context: ./frontend
-    #   ports:
-    #     - "8000:80"
 
 volumes:
   postgres-data:
