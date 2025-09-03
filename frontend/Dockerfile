@@ -16,6 +16,7 @@ FROM nginx:1.29-alpine
 
 # Copia os arquivos estáticos gerados no estágio de build para a pasta que o Nginx serve
 COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expõe a porta 80 (padrão do Nginx)
 EXPOSE 80
