@@ -16,6 +16,7 @@ postgres-data/
 pgadmin-data/
 # Arquivos de ambiente
 .env
+.env.prod
 
 # Arquivos de sistema operacional
 .DS_Store

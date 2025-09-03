@@ -1,11 +1,18 @@
 import axios from 'axios';
 
-// Cria uma instância do Axios com a URL base da nossa API
+// Determina a base da API:
+// 1. Valor definido em build: import.meta.env.VITE_API_BASE_URL
+// 2. Fallback: same-origin + "/api/v1" (ajuste se seu backend não tiver prefixo)
+const buildTimeBase = import.meta.env?.VITE_API_BASE_URL;
+const fallbackBase = `${window.location.origin}/api/v1`;
+const baseURL = buildTimeBase || fallbackBase;
+
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api/v1',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // caso cookies venham a ser usados
 });
 
 // Interceptor: Adiciona o token JWT a todas as requisições protegidas
@@ -29,7 +36,7 @@ apiClient.interceptors.request.use(
 );
 
 // Funções de API que nossos componentes irão usar
-export default {
+const api = {
   login(credentials) {
     return apiClient.post('/entrar/login', credentials);
   },
@@ -84,3 +91,6 @@ export default {
     return apiClient.post('/convites/vincular', { token });
   },
 };
+
+export { apiClient, api };
+export default api;
