@@ -41,8 +41,8 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-    expose:
-      - "8080" # expõe só internamente à rede compose
+    ports:
+      - "8080:8080" # expõe só internamente à rede compose
 
   frontend:
     image: ${DOCKER_HUB_USERNAME:-shh4und}/mindtrace-frontend:latest

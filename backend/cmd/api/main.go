@@ -64,7 +64,7 @@ func main() {
 	conviteController := controladores.NovoConviteControlador(conviteService)
 
 	roteador := gin.Default()
-
+	roteador.SetTrustedProxies([]string{"127.0.0.1"})
 	// Adiciona o middleware de CORS
 	roteador.Use(middlewares.CORSMiddleware())
 
