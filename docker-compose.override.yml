@@ -1,8 +1,10 @@
 services:
   backend:
+    image: mindtrace-backend-dev        # tag local para DEV
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
+    pull_policy: never                  # não puxa do registry
     container_name: mindtrace-backend-dev
     working_dir: /app
     volumes:
@@ -19,9 +21,11 @@ services:
       - db
 
   frontend:
+    image: mindtrace-frontend-dev       # tag local para DEV
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
+    pull_policy: never
     container_name: mindtrace-frontend-dev
     working_dir: /app
     volumes:
