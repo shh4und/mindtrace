@@ -3,7 +3,7 @@ package servicos
 import (
 	"errors"
 	"mindtrace/backend/interno/dominio"
-	"mindtrace/backend/interno/persistencia/postgres"
+	"mindtrace/backend/interno/persistencia/repositorios"
 	"os"
 	"time"
 
@@ -79,10 +79,10 @@ type UsuarioServico interface {
 
 type usuarioServico struct {
 	db          *gorm.DB
-	repositorio postgres.UsuarioRepositorio
+	repositorio repositorios.UsuarioRepositorio
 }
 
-func NovoUsuarioServico(db *gorm.DB, repo postgres.UsuarioRepositorio) UsuarioServico {
+func NovoUsuarioServico(db *gorm.DB, repo repositorios.UsuarioRepositorio) UsuarioServico {
 	return &usuarioServico{db: db, repositorio: repo}
 }
 

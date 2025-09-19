@@ -1,36 +1,39 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"mindtrace/backend/interno/aplicacao/controladores"
 	"mindtrace/backend/interno/aplicacao/middlewares"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"mindtrace/backend/interno/dominio"
 	postgres_repo "mindtrace/backend/interno/persistencia/postgres"
+	"mindtrace/backend/interno/persistencia/repositorios"
+	sqlite_repo "mindtrace/backend/interno/persistencia/sqlite"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func main() {
+	var db *gorm.DB
+	var err error
 
-	db_USER := os.Getenv("DB_USER")
-	db_PASS := os.Getenv("DB_PASSWORD")
-	db_NAME := os.Getenv("DB_DB")
+	dbDriver := os.Getenv("DB_DRIVER")
 
-	DSN := fmt.Sprintf(
-		"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable",
-		db_USER,
-		db_PASS,
-		db_NAME,
-	)
-
-	db, err := gorm.Open(postgres.Open(DSN), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
+	switch dbDriver {
+	case "postgres":
+		db, err = postgres_repo.NewDB()
+		if err != nil {
+			log.Fatalf("failed to connect to postgres: %v", err)
+		}
+	case "sqlite":
+		db, err = sqlite_repo.NewDB()
+		if err != nil {
+			log.Fatalf("failed to connect to sqlite: %v", err)
+		}
+	default:
+		log.Fatalf("invalid DB_DRIVER: %s", dbDriver)
 	}
 
 	err = db.AutoMigrate(
@@ -45,21 +48,34 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
-	usuarioRepo := postgres_repo.NovoGormUsuarioRepositorio(db)
+
+	var usuarioRepo repositorios.UsuarioRepositorio
+	var registroHumorRepo repositorios.RegistroHumorRepositorio
+	var conviteRepo repositorios.ConviteRepositorio
+
+	switch dbDriver {
+	case "postgres":
+		usuarioRepo = postgres_repo.NovoGormUsuarioRepositorio(db)
+		registroHumorRepo = postgres_repo.NovoGormRegistroHumorRepositorio(db)
+		conviteRepo = postgres_repo.NovoGormConviteRepositorio(db)
+	case "sqlite":
+		usuarioRepo = sqlite_repo.NovoGormUsuarioRepositorio(db)
+		registroHumorRepo = sqlite_repo.NovoGormRegistroHumorRepositorio(db)
+		conviteRepo = sqlite_repo.NovoGormConviteRepositorio(db)
+	}
+
 	usuarioService := servicos.NovoUsuarioServico(db, usuarioRepo)
 	profissionalController := controladores.NovoProfissionalControlador(usuarioService)
 	pacienteController := controladores.NovoPacienteControlador(usuarioService)
 	autController := controladores.NovoAutControlador(usuarioService)
 	usuarioController := controladores.NovoUsuarioControlador(usuarioService)
 
-	registroHumorRepo := postgres_repo.NovoGormRegistroHumorRepositorio(db)
 	registroHumorService := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo)
 	registroHumorController := controladores.NovoRegistroHumorControlador(registroHumorService)
 
 	relatorioService := servicos.NovoRelatorioServico(db, registroHumorRepo, usuarioRepo)
 	relatorioController := controladores.NovoRelatorioControlador(relatorioService)
 
-	conviteRepo := postgres_repo.NovoGormConviteRepositorio(db)
 	conviteService := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo)
 	conviteController := controladores.NovoConviteControlador(conviteService)
 

@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"mindtrace/backend/interno/dominio"
-	"mindtrace/backend/interno/persistencia/postgres"
+	"mindtrace/backend/interno/persistencia/repositorios"
 	"time"
 
 	"gorm.io/gorm"
@@ -24,11 +24,11 @@ type ConviteServico interface {
 
 type conviteServico struct {
 	db                 *gorm.DB
-	conviteRepositorio postgres.ConviteRepositorio
-	usuarioRepositorio postgres.UsuarioRepositorio
+	conviteRepositorio repositorios.ConviteRepositorio
+	usuarioRepositorio repositorios.UsuarioRepositorio
 }
 
-func NovoConviteServico(db *gorm.DB, cr postgres.ConviteRepositorio, ur postgres.UsuarioRepositorio) ConviteServico {
+func NovoConviteServico(db *gorm.DB, cr repositorios.ConviteRepositorio, ur repositorios.UsuarioRepositorio) ConviteServico {
 	return &conviteServico{
 		db:                 db,
 		conviteRepositorio: cr,

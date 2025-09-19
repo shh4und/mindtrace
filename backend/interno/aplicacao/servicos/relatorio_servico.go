@@ -2,7 +2,7 @@ package servicos
 
 import (
 	"errors"
-	"mindtrace/backend/interno/persistencia/postgres"
+	"mindtrace/backend/interno/persistencia/repositorios"
 	"time"
 
 	"gorm.io/gorm"
@@ -31,11 +31,11 @@ type RelatorioServico interface {
 
 type relatorioServico struct {
 	db                       *gorm.DB
-	registroHumorRepositorio postgres.RegistroHumorRepositorio
-	usuarioRepositorio       postgres.UsuarioRepositorio
+	registroHumorRepositorio repositorios.RegistroHumorRepositorio
+	usuarioRepositorio       repositorios.UsuarioRepositorio
 }
 
-func NovoRelatorioServico(db *gorm.DB, registroHumorRepo postgres.RegistroHumorRepositorio, usuarioRepo postgres.UsuarioRepositorio) RelatorioServico {
+func NovoRelatorioServico(db *gorm.DB, registroHumorRepo repositorios.RegistroHumorRepositorio, usuarioRepo repositorios.UsuarioRepositorio) RelatorioServico {
 	return &relatorioServico{
 		db:                       db,
 		registroHumorRepositorio: registroHumorRepo,

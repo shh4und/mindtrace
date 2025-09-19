@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"mindtrace/backend/interno/dominio"
-	"mindtrace/backend/interno/persistencia/postgres"
+	"mindtrace/backend/interno/persistencia/repositorios"
 	"time"
 
 	"gorm.io/gorm"
@@ -29,11 +29,11 @@ type RegistroHumorServico interface {
 
 type registroHumorServico struct {
 	db                 *gorm.DB
-	repositorio        postgres.RegistroHumorRepositorio
-	usuarioRepositorio postgres.UsuarioRepositorio
+	repositorio        repositorios.RegistroHumorRepositorio
+	usuarioRepositorio repositorios.UsuarioRepositorio
 }
 
-func NovoRegistroHumorServico(db *gorm.DB, repo postgres.RegistroHumorRepositorio, userRepo postgres.UsuarioRepositorio) *registroHumorServico {
+func NovoRegistroHumorServico(db *gorm.DB, repo repositorios.RegistroHumorRepositorio, userRepo repositorios.UsuarioRepositorio) *registroHumorServico {
 	return &registroHumorServico{db: db, repositorio: repo, usuarioRepositorio: userRepo}
 }
 
