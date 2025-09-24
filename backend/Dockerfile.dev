@@ -3,8 +3,8 @@ FROM golang:alpine
 
 WORKDIR /app
 
-# Install git for dependencies
-RUN apk add --no-cache git
+# Install git for dependencies // GCC for go-sqlite3
+RUN apk add --no-cache git gcc musl-dev 
 
 # Copy go.mod and go.sum first for better caching
 COPY go.mod go.sum ./
