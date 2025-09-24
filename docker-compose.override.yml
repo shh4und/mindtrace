@@ -15,6 +15,7 @@ services:
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_DB=${POSTGRES_DB}
       - JWT_SECRET=${JWT_SECRET}
+      - DB_DRIVER=${DB_DRIVER}
     ports:
       - "8080:8080"
     depends_on:
@@ -49,3 +50,5 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - "8001:80"
+    depends_on:
+      - db
