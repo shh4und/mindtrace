@@ -13,7 +13,7 @@ type Notificacao struct {
 	Alerta    *Alerta   `json:"alerta,omitempty" gorm:"foreignKey:AlertaID"`
 	Conteudo  string    `json:"conteudo" gorm:"type:text;not null"`
 	Status    string    `json:"status" gorm:"type:varchar(50);not null;default:'Não lida'"`
-	DataEnvio time.Time `json:"data_envio" gorm:"not null;default:now()"`
+	DataEnvio time.Time `json:"data_envio" gorm:"not null;default:CURRENT_TIMESTAMP"`
 }
 
 func (Notificacao) TableName() string {

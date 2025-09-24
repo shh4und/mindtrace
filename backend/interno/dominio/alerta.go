@@ -15,7 +15,7 @@ type Alerta struct {
 	DescricaoDetalhada string       `json:"descricao_detalhada" gorm:"type:text"`
 	NivelUrgencia      string       `json:"nivel_urgencia" gorm:"type:varchar(50);not null"`
 	Status             string       `json:"status" gorm:"type:varchar(50);not null;default:'Ativo'"`
-	DataGeracao        time.Time    `json:"data_geracao" gorm:"not null;default:now()"`
+	DataGeracao        time.Time    `json:"data_geracao" gorm:"not null;default:CURRENT_TIMESTAMP"`
 }
 
 func (Alerta) TableName() string {
