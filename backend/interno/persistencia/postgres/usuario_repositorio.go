@@ -106,11 +106,32 @@ func (r *gormUsuarioRepositorio) DeletarUsuario(tx *gorm.DB, id uint) error {
 	}
 
 	// Deletar registros específicos baseados no tipo
-	if usuario.TipoUsuario == "profissional" {
+	switch usuario.TipoUsuario {
+	case "profissional":
+		// Buscar o profissional para limpar associações
+		profissional, err := r.BuscarProfissionalPorUsuarioID(tx, id)
+		if err != nil {
+			return err
+		}
+		// Limpar associações many-to-many (remove entradas da tabela profissional_paciente)
+		if err := tx.Model(profissional).Association("Pacientes").Clear(); err != nil {
+			return err
+		}
+		// Deletar o profissional
 		if err := tx.Where("usuario_id = ?", id).Delete(&dominio.Profissional{}).Error; err != nil {
 			return err
 		}
-	} else if usuario.TipoUsuario == "paciente" {
+	case "paciente":
+		// Buscar o paciente para limpar associações
+		paciente, err := r.BuscarPacientePorUsuarioID(tx, id)
+		if err != nil {
+			return err
+		}
+		// Limpar associações many-to-many (remove entradas da tabela profissional_paciente)
+		if err := tx.Model(paciente).Association("Profissionais").Clear(); err != nil {
+			return err
+		}
+		// Deletar o paciente
 		if err := tx.Where("usuario_id = ?", id).Delete(&dominio.Paciente{}).Error; err != nil {
 			return err
 		}
