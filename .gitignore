@@ -23,3 +23,5 @@ pgadmin-data/
 Thumbs.db
 
 *.sql
+backend/tmp/
+*.db
