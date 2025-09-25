@@ -17,7 +17,7 @@ type RegistrarProfissionalDTO struct {
 	Nome                 string
 	Email                string
 	Senha                string
-	Idade                int8
+	DataNascimento       time.Time
 	Especialidade        string
 	RegistroProfissional string
 	CPF                  string
@@ -29,7 +29,7 @@ type RegistrarPacienteDTO struct {
 	Email                string
 	Senha                string
 	Dependente           bool
-	Idade                int8
+	DataNascimento       time.Time
 	DataInicioTratamento *time.Time
 	HistoricoSaude       string
 	CPF                  string
@@ -47,10 +47,10 @@ type AtualizarPerfilDTO struct {
 	RegistroProfissional string `json:"registro_profissional,omitempty"`
 	// IdadeProfissional    *int8  `json:"idade_profissional,omitempty"` // Se aplicável
 	// Campos para Paciente
-	Idade              *int8  `json:"idade,omitempty"`
-	Dependente         *bool  `json:"dependente,omitempty"`
-	NomeResponsavel    string `json:"nome_responsavel,omitempty"`
-	ContatoResponsavel string `json:"contato_responsavel,omitempty"`
+	DataNascimento     *time.Time `json:"data_nascimento,omitempty"`
+	Dependente         *bool      `json:"dependente,omitempty"`
+	NomeResponsavel    string     `json:"nome_responsavel,omitempty"`
+	ContatoResponsavel string     `json:"contato_responsavel,omitempty"`
 }
 
 type AlterarSenhaDTO struct {
@@ -162,7 +162,7 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 
 		novoPaciente := &dominio.Paciente{
 			UsuarioID:          novoUsuario.ID,
-			Idade:              dto.Idade,
+			DataNascimento:     dto.DataNascimento,
 			Dependente:         dto.Dependente,
 			NomeResponsavel:    dto.NomeResponsavel,
 			ContatoResponsavel: dto.ContatoResponsavel,
@@ -288,9 +288,7 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*
 			if dto.RegistroProfissional != "" {
 				profissional.RegistroProfissional = dto.RegistroProfissional
 			}
-			// if dto.IdadeProfissional != nil {
-			// 	profissional.Idade = *dto.IdadeProfissional
-			// } TODO - adicionar idade do profissional back-front
+
 			if err := s.repositorio.AtualizarProfissional(tx, profissional); err != nil {
 				return err
 			}
@@ -299,8 +297,8 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*
 			if err != nil {
 				return err
 			}
-			if dto.Idade != nil {
-				paciente.Idade = *dto.Idade
+			if dto.DataNascimento != nil {
+				paciente.DataNascimento = *dto.DataNascimento
 			}
 			if dto.Dependente != nil {
 				paciente.Dependente = *dto.Dependente

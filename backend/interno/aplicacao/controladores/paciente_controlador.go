@@ -22,7 +22,7 @@ type RegistrarPacienteRequest struct {
 	Email                string     `json:"email" binding:"required,email"`
 	Senha                string     `json:"senha" binding:"required,min=8"`
 	Dependente           *bool      `json:"dependente" binding:"required"`
-	Idade                int8       `json:"idade" binding:"required"`
+	DataNascimento       time.Time  `json:"data_nascimento" binding:"required"`
 	DataInicioTratamento *time.Time `json:"data_inicio_tratamento"`
 	CPF                  string     `json:"cpf" binding:"required"`
 	NomeResponsavel      string     `json:"nome_responsavel"`
@@ -34,7 +34,7 @@ type ProprioPacienteRequest struct {
 	Nome                 string     `json:"nome"`
 	Email                string     `json:"email"`
 	Dependente           *bool      `json:"dependente"`
-	Idade                int8       `json:"idade"`
+	DataNascimento       time.Time  `json:"data_nascimento"`
 	DataInicioTratamento *time.Time `json:"data_inicio_tratamento"`
 	CPF                  string     `json:"cpf"`
 	NomeResponsavel      string     `json:"nome_responsavel"`
@@ -64,8 +64,8 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 		Nome:                 req.Nome,
 		Email:                req.Email,
 		Senha:                req.Senha,
+		DataNascimento:       req.DataNascimento,
 		Dependente:           *req.Dependente,
-		Idade:                req.Idade,
 		DataInicioTratamento: req.DataInicioTratamento,
 		CPF:                  req.CPF,
 		NomeResponsavel:      req.NomeResponsavel,
@@ -103,7 +103,7 @@ func (uc *PacienteControlador) ProprioPerfilPaciente(c *gin.Context) {
 		Nome:                 paciente.Usuario.Nome,
 		Email:                paciente.Usuario.Email,
 		Dependente:           &paciente.Dependente,
-		Idade:                paciente.Idade,
+		DataNascimento:       paciente.DataNascimento,
 		DataInicioTratamento: paciente.DataInicioTratamento,
 		CPF:                  paciente.Usuario.CPF,
 		NomeResponsavel:      paciente.NomeResponsavel,
