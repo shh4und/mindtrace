@@ -276,7 +276,8 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*
 			return err
 		}
 		// Atualizar específico baseado no TipoUsuario
-		if usuario.TipoUsuario == "profissional" {
+		switch usuario.TipoUsuario {
+		case "profissional":
 			profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, userID)
 			if err != nil {
 				return err
@@ -293,7 +294,7 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*
 			if err := s.repositorio.AtualizarProfissional(tx, profissional); err != nil {
 				return err
 			}
-		} else if usuario.TipoUsuario == "paciente" {
+		case "paciente":
 			paciente, err := s.repositorio.BuscarPacientePorUsuarioID(tx, userID)
 			if err != nil {
 				return err
