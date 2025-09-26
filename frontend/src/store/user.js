@@ -67,6 +67,7 @@ export const useUserStore = defineStore('user', () => {
       return { success: true, message: response.data.mensagem || 'Registro realizado com sucesso!' };
     } catch (error) {
       console.error('Falha no registro:', error);
+      console.log('Data:', data)
       return { success: false, error: error.response?.data?.erro || 'Erro no registro' };
     }
   }

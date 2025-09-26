@@ -68,6 +68,18 @@ const getAvatarClass = (index) => {
   return avatarColors[index % avatarColors.length];
 };
 
+const calculateAge = (birthdate) => {
+  if (!birthdate) return '';
+  const birthDate = new Date(birthdate);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
+
 onMounted(async () => {
   try {
     const response = await api.listarPacientesDoProfissional();
@@ -75,7 +87,7 @@ onMounted(async () => {
     patients.value = response.data.map(paciente => ({
       id: paciente.id,
       name: paciente.usuario.nome,
-      age: `${paciente.idade} anos`,
+      age: `${calculateAge(paciente.data_nascimento)} anos`,
       focus: paciente.usuario.bio || "Tratamento em andamento.", // Usar bio ou um placeholder
     }));
   } catch (error) {

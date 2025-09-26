@@ -30,7 +30,7 @@
           </button>
         </div>
         <div class="space-y-2 text-sm mb-4">
-          <p><strong class="font-medium">Idade:</strong> {{ userStore.user.idade }}</p>
+          <p><strong class="font-medium">Idade:</strong> {{ calculateAge(userStore.user.data_nascimento) }}</p>
           <p><strong class="font-medium">Contato:</strong> {{ userStore.user.contato || 'Não informado' }}</p>
           <p><strong class="font-medium">Dependente:</strong> {{ userStore.user.dependente ? 'É dependente' : 'Não dependente'  }}</p>
           <p v-if="userStore.user.dependente"><strong class="font-medium">Responsável:</strong> {{ userStore.user.nome_responsavel }}</p>
@@ -117,6 +117,18 @@ const performLogout = () => {
   if (confirm('Tem certeza que deseja sair?')) {
     userStore.logout();
   }
+};
+
+const calculateAge = (birthdate) => {
+  if (!birthdate) return 'N/A';
+  const birthDate = new Date(birthdate);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return `${age} anos`;
 };
 
 const editProfile = () => {

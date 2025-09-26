@@ -30,7 +30,7 @@ type Profissional struct {
 	ID                   uint       `gorm:"primaryKey"`
 	UsuarioID            uint       `json:"-" gorm:"unique;not null"`
 	Usuario              Usuario    `json:"usuario" gorm:"foreignKey:UsuarioID"`
-	DataNascimento       time.Time  `json:"data_nascimento" gorm:"not null"`
+	DataNascimento       time.Time  `json:"data_nascimento" gorm:"type:date"`
 	Especialidade        string     `json:"especialidade" gorm:"type:varchar(255)"`
 	RegistroProfissional string     `json:"registro_profissional" gorm:"type:varchar(12);unique;not null"`
 	Pacientes            []Paciente `json:"pacientes" gorm:"many2many:profissional_paciente;"`

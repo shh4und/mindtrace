@@ -22,6 +22,13 @@
               readonly>
           </div>
 
+          <div>
+            <label for="data_nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+            <input type="date" id="data_nascimento" v-model="profile.data_nascimento"
+              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+          </div>
+
+
           <!-- (Apenas para Profissional) -->
           <div v-if="props.userType === 'profissional'">
             <label for="especialidade" class="block text-sm font-medium text-gray-700">Especialidade</label>
@@ -130,6 +137,7 @@ const profile = ref({
   email: '', // O email não é editável, mas será exibido
   contato: '',
   bio: '',
+  data_nascimento: '',
   // Campo específico do profissional
   especialidade: ''
 });
@@ -153,9 +161,14 @@ onMounted(async () => {
       const profResponse = await api.proprioPerfilProfissional();
       profile.value.especialidade = profResponse.data.especialidade;
       profile.value.registro_profissional = profResponse.data.registro_profissional;
+      if (profResponse.data.data_nascimento) {
+        profile.value.data_nascimento = profResponse.data.data_nascimento.split('T')[0];
+      }
     } else if (props.userType === 'paciente') {
       const pacResponse = await api.proprioPerfilPaciente();
-      profile.value.idade = pacResponse.data.idade;
+      if (pacResponse.data.data_nascimento) {
+        profile.value.data_nascimento = pacResponse.data.data_nascimento.split('T')[0];
+      }
       profile.value.dependente = pacResponse.data.dependente;
       profile.value.nome_responsavel = pacResponse.data.nome_responsavel;
       profile.value.contato_responsavel = pacResponse.data.contato_responsavel;
@@ -172,12 +185,12 @@ const saveProfile = async () => {
     nome: profile.value.nome,
     contato: profile.value.contato,
     bio: profile.value.bio,
+    data_nascimento: profile.value.data_nascimento,
   };
   if (props.userType === 'profissional') {
     profileData.especialidade = profile.value.especialidade;
     profileData.registro_profissional = profile.value.registro_profissional;
   } else if (props.userType === 'paciente') {
-    profileData.idade = profile.value.idade;
     profileData.dependente = profile.value.dependente;
     profileData.nome_responsavel = profile.value.nome_responsavel;
     profileData.contato_responsavel = profile.value.contato_responsavel;

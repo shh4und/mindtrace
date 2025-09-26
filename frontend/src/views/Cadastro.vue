@@ -57,6 +57,10 @@
                   (Opcional)</label>
                 <input type="tel" id="contato" v-model="form.contato" class="w-full input-style" />
               </div>
+              <div>
+                <label for="data_nascimento" class="block text-base font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                <input type="date" id="data_nascimento" v-model="form.data_nascimento" class="w-full input-style" required />
+              </div>
             </div>
 
             <!-- Campos do Profissional -->
@@ -78,10 +82,7 @@
             <!-- Campos do Paciente -->
             <div v-if="form.userType === 'paciente'"
               class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-300">
-              <div>
-                <label for="idade" class="block text-base font-medium text-gray-700 mb-1">Idade</label>
-                <input type="number" id="idade" v-model="form.idade" class="w-full input-style" required />
-              </div>
+
               <div class="flex flex-row items-center gap-2">
                 <label for="dependente" class="text-base font-medium text-gray-700 mb-1">É dependente?</label>
                 <input id="dependente" v-model="form.dependente" type="checkbox"
@@ -142,12 +143,12 @@ const form = reactive({
   confirm_password: '',
   cpf: '',
   contato: '',
+  data_nascimento: new Date(),
   // Campos do profissional
   especialidade: '',
   registro_profissional: '',
   // Campos do paciente
   dependente: false,
-  idade: '',
   nome_responsavel: '',
   contato_responsavel: '',
 });
@@ -194,6 +195,7 @@ const handleRegister = async () => {
       senha: form.senha,
       cpf: form.cpf,
       contato: form.contato,
+      data_nascimento: new Date(form.data_nascimento).toJSON(),
     };
 
     let data;
@@ -201,7 +203,6 @@ const handleRegister = async () => {
       data = {
         ...commonData,
         dependente: form.dependente,
-        idade: form.idade,
         nome_responsavel: form.nome_responsavel,
         contato_responsavel: form.contato_responsavel,
       };
