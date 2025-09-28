@@ -38,11 +38,10 @@ func NovoRegistroHumorServico(db *gorm.DB, repo repositorios.RegistroHumorReposi
 }
 
 func (rhs *registroHumorServico) CriarRegistroHumor(dto CriarRegistroHumorDTO) (*dominio.RegistroHumor, error) {
-
 	var registroHumoRealizado *dominio.RegistroHumor
 
 	err := rhs.db.Transaction(func(tx *gorm.DB) error {
-		paciente, err := rhs.usuarioRepositorio.BuscarPacientePorID(tx, dto.UsuarioID)
+		paciente, err := rhs.usuarioRepositorio.BuscarPacientePorUsuarioID(tx, dto.UsuarioID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrPacienteNaoEncontrado
