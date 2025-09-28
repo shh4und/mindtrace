@@ -22,7 +22,7 @@ type RegistrarPacienteRequest struct {
 	Email                string     `json:"email" binding:"required,email"`
 	Senha                string     `json:"senha" binding:"required,min=8"`
 	Dependente           *bool      `json:"dependente" binding:"required"`
-	DataNascimento       time.Time  `json:"data_nascimento" binding:"required"`
+	DataNascimento       string     `json:"data_nascimento" binding:"required"`
 	DataInicioTratamento *time.Time `json:"data_inicio_tratamento"`
 	CPF                  string     `json:"cpf" binding:"required"`
 	NomeResponsavel      string     `json:"nome_responsavel"`
@@ -49,6 +49,12 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 		return
 	}
 
+	dataNascimento, err := time.Parse("2006-01-02", req.DataNascimento)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "Formato de data inválido. Use YYYY-MM-DD"})
+		return
+	}
+
 	if len(req.Senha) < 8 {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Senha inválida. Use 8 ou mais caracteres com letras, números e os símbolos: !@#$%^&*"})
 		return
@@ -64,7 +70,7 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 		Nome:                 req.Nome,
 		Email:                req.Email,
 		Senha:                req.Senha,
-		DataNascimento:       req.DataNascimento,
+		DataNascimento:       dataNascimento,
 		Dependente:           *req.Dependente,
 		DataInicioTratamento: req.DataInicioTratamento,
 		CPF:                  req.CPF,
