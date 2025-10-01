@@ -93,7 +93,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-import { useUserStore } from '../store/user';
+import { useUserStore } from '../../store/user';
 import { faBrain, faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();

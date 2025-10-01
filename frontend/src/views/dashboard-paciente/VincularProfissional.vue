@@ -12,7 +12,7 @@
             id="token" 
             v-model="token"
             placeholder="Cole o token aqui"
-            class="w-full font-mono tracking-wider input-style"
+            class="w-full font-mono tracking-wider px-4 py-3 rounded-lg border border-gray-300 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
             required 
           />
         </div>
@@ -33,7 +33,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useToast } from 'vue-toastification';
-import api from '../services/api';
+import api from '../../services/api';
 
 const token = ref('');
 const isLoading = ref(false);
@@ -60,21 +60,4 @@ const submitToken = async () => {
 };
 </script>
 
-<style scoped>
-.input-style {
-  width: 100%;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid #D1D5DB; /* gray-300 */
-  outline: none;
-  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
 
-.input-style:focus {
-  border-color: #10B981; /* emerald-500 */
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12); /* subtle ring effect */
-}
-</style>

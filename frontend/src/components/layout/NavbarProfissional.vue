@@ -46,25 +46,25 @@
     <nav class="p-4 flex-1">
       <ul class="space-y-1">
         <li>
-          <a href="#" @click.prevent="$emit('navigate', 'pacientes')" class="sidebar-item">
+          <a href="#" @click.prevent="$emit('navigate', 'pacientes')" class="flex items-center py-3 px-4 rounded-lg text-gray-600 font-medium transition-colors hover:bg-gray-100 hover:text-gray-800">
             <i class="fa-solid fa-users fa-fw mr-3"></i>
             <span>Pacientes</span>
           </a>
         </li>
         <li>
-          <a href="#" @click.prevent="$emit('navigate', 'relatorios')" class="sidebar-item">
+          <a href="#" @click.prevent="$emit('navigate', 'relatorios')" class="flex items-center py-3 px-4 rounded-lg text-gray-600 font-medium transition-colors hover:bg-gray-100 hover:text-gray-800">
             <i class="fa-solid fa-users fa-fw mr-3"></i>
             <span>Relatórios</span>
           </a>
         </li>
         <li>
-          <a href="#" @click.prevent="$emit('navigate', 'convite')" class="sidebar-item">
+          <a href="#" @click.prevent="$emit('navigate', 'convite')" class="flex items-center py-3 px-4 rounded-lg text-gray-600 font-medium transition-colors hover:bg-gray-100 hover:text-gray-800">
             <i class="fa-solid fa-ticket fa-fw mr-3"></i>
             <span>Gerar Convite</span>
           </a>
         </li>
         <li>
-          <a href="#" @click.prevent="$emit('navigate', 'editar-perfil')" class="sidebar-item">
+          <a href="#" @click.prevent="$emit('navigate', 'editar-perfil')" class="flex items-center py-3 px-4 rounded-lg text-gray-600 font-medium transition-colors hover:bg-gray-100 hover:text-gray-800">
             <i class="fa-solid fa-user-pen fa-fw mr-3"></i>
             <span>Editar Perfil</span>
           </a>
@@ -83,7 +83,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useUserStore } from '../store/user';
+import { useUserStore } from '../../store/user';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faUserDoctor, faPenToSquare, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -117,32 +117,3 @@ const editProfile = () => {
   closeProfileCard();
 };
 </script>
-
-<style scoped>
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  border-radius: 8px;
-  color: #4B5563;
-  font-weight: 500;
-  transition: background-color 0.2s, color 0.2s;
-  cursor: pointer;
-}
-
-.sidebar-item:hover {
-  background-color: #F3F4F6;
-  color: #1F2937;
-}
-
-.sidebar-item.active {
-  background-color: #DBF7E9;
-  color: #166534;
-}
-
-.truncate {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-</style>

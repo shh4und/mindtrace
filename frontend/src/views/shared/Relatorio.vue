@@ -50,7 +50,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import api from '../services/api';
+import api from '../../services/api';
 import { useToast } from 'vue-toastification';
 
 const props = defineProps({

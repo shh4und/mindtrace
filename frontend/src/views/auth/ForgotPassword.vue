@@ -32,7 +32,7 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Código de Verificação</label>
                 <div class="flex justify-between space-x-2 md:space-x-4">
-                  <input v-for="(item, index) in code" :key="index" type="number" v-model="code[index]" @input="handleCodeInput(index, $event)" @keydown="handleKeyDown(index, $event)" :id="'code-' + (index + 1)" class="code-input" maxlength="1" required ref="codeInputRefs" />
+                  <input v-for="(item, index) in code" :key="index" type="number" v-model="code[index]" @input="handleCodeInput(index, $event)" @keydown="handleKeyDown(index, $event)" :id="'code-' + (index + 1)" class="w-12 h-12 text-center text-2xl rounded-lg border border-gray-300 bg-gray-50 transition-all focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30" maxlength="1" required ref="codeInputRefs" />
                 </div>
               </div>
 
@@ -114,27 +114,10 @@ const handleKeyDown = (index, event) => {
 </script>
 
 <style scoped>
-/* Estilo personalizado para os inputs de código */
-.code-input {
-  width: 3rem; /* 48px */
-  height: 3rem; /* 48px */
-  text-align: center;
-  font-size: 1.5rem; /* 24px */
-  border-radius: 0.5rem; /* 8px */
-  border: 1px solid #d1d5db; /* Cor da borda cinza */
-  transition: all 0.2s ease-in-out;
-  background-color: #f9fafb; /* Cor de fundo cinza claro */
-}
 /* Remove as setas de inputs de números para navegadores baseados em WebKit (Chrome, Safari, etc.) */
 .code-input::-webkit-outer-spin-button,
 .code-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
-}
-/* Estilo de foco para todos os inputs */
-input:focus {
-  outline: none;
-  border-color: #66ce83; /* emerald */
-  box-shadow: 0 0 0 2px rgba(102, 206, 131, 0.35);
 }
 </style>

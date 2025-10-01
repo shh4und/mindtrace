@@ -29,37 +29,37 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label for="nome" class="block text-base font-medium text-gray-700 mb-1">Nome Completo</label>
-                <input type="text" id="nome" v-model="form.nome" class="w-full input-style" required />
+                <input type="text" id="nome" v-model="form.nome" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required />
               </div>
               <div>
                 <label for="cpf" class="block text-base font-medium text-gray-700 mb-1">CPF</label>
-                <input type="text" id="cpf" v-model="form.cpf" class="w-full input-style" required />
+                <input type="text" id="cpf" v-model="form.cpf" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required />
               </div>
               <div>
                 <label for="email" class="block text-base font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" id="email" v-model="form.email" class="w-full input-style" required />
+                <input type="email" id="email" v-model="form.email" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required />
               </div>
               <div>
                 <label for="senha" class="block text-base font-medium text-gray-700 mb-1">Senha</label>
                 <input type="password" id="senha" v-model="form.senha" @input="validatePassword"
-                  class="w-full input-style" required />
+                  class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required />
                 <p v-if="passwordError" class="text-sm text-red-600 mt-1">{{ passwordError }}</p>
                 <p class="text-sm text-gray-500 mt-1">Use 8+ caracteres com letras, números e símbolos como !@#$%^&*</p>
               </div>
               <div>
                 <label for="confirm_password" class="block text-base font-medium text-gray-700 mb-1">Confirme sua
                   Senha</label>
-                <input type="password" id="confirm_password" v-model="form.confirm_password" class="w-full input-style"
+                <input type="password" id="confirm_password" v-model="form.confirm_password" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   required />
               </div>
               <div>
                 <label for="contato" class="block text-base font-medium text-gray-700 mb-1">Número para Contato
                   (Opcional)</label>
-                <input type="tel" id="contato" v-model="form.contato" class="w-full input-style" />
+                <input type="tel" id="contato" v-model="form.contato" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" />
               </div>
               <div>
                 <label for="data_nascimento" class="block text-base font-medium text-gray-700 mb-1">Data de Nascimento</label>
-                <input type="date" id="data_nascimento" v-model="form.data_nascimento" class="w-full input-style" required />
+                <input type="date" id="data_nascimento" v-model="form.data_nascimento" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required />
               </div>
             </div>
 
@@ -68,14 +68,14 @@
               class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
               <div>
                 <label for="especialidade" class="block text-base font-medium text-gray-700 mb-1">Especialidade</label>
-                <input type="text" id="especialidade" v-model="form.especialidade" class="w-full input-style"
+                <input type="text" id="especialidade" v-model="form.especialidade" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   required />
               </div>
               <div>
                 <label for="registro_profissional" class="block text-base font-medium text-gray-700 mb-1">Nº Registro
                   Profissional (CRP, etc)</label>
                 <input type="text" id="registro_profissional" v-model="form.registro_profissional"
-                  class="w-full input-style" required />
+                  class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required />
               </div>
             </div>
 
@@ -92,13 +92,13 @@
               <div v-if="form.dependente === true">
                 <label for="nome_responsavel" class="block text-base font-medium text-gray-700 mb-1">Nome do
                   Responsável</label>
-                <input type="text" id="nome_responsavel" v-model="form.nome_responsavel" class="w-full input-style"
+                <input type="text" id="nome_responsavel" v-model="form.nome_responsavel" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   required />
               </div>
               <div v-if="form.dependente === true">
                 <label for="contato_responsavel" class="block text-base font-medium text-gray-700 mb-1">Contato do
                   Responsável</label>
-                <input id="contato_responsavel" v-model="form.contato_responsavel" type="tel" class="w-full input-style"
+                <input id="contato_responsavel" v-model="form.contato_responsavel" type="tel" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   required />
               </div>
 
@@ -128,7 +128,7 @@
 import { reactive, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-import { useUserStore } from '../store/user';
+import { useUserStore } from '../../store/user';
 import { faBrain, faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
@@ -230,25 +230,3 @@ const handleRegister = async () => {
   }
 };
 </script>
-
-<style scoped>
-.input-style {
-  width: 100%;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid #D1D5DB;
-  /* gray-300 */
-  outline: none;
-  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.input-style:focus {
-  border-color: #10B981;
-  /* emerald-500 */
-  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
-  /* subtle ring effect */
-}
-</style>

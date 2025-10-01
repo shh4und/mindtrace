@@ -40,7 +40,7 @@
 import { ref } from 'vue';
 import { useClipboard } from '@vueuse/core';
 import { useToast } from 'vue-toastification';
-import api from '../services/api'; // Importando a API
+import api from '../../services/api'; // Importando a API
 
 const token = ref(null);
 const expiryDate = ref(null);

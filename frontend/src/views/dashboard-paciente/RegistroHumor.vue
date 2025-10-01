@@ -115,9 +115,9 @@
         <h2 class="text-xl font-semibold text-gray-900 mb-6">Atividades de Autocuidado realizadas hoje</h2>
         <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <label v-for="activity in selfCareActivities" :key="activity"
-            class="flex items-center space-x-3 text-black custom-checkbox-label">
+            class="flex items-center space-x-3 text-black cursor-pointer">
             <input type="checkbox" :value="activity" v-model="selectedActivities" class="hidden peer" />
-            <span class="checkbox-box" :aria-checked="selectedActivities.includes(activity)">
+            <span class="w-7 h-7 border-2 border-gray-300/70 rounded-lg bg-white inline-flex items-center justify-center transition-all duration-150 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 peer-checked:-translate-y-0.5">
               <svg v-if="selectedActivities.includes(activity)" width="14" height="14" viewBox="0 0 24 24" fill="none"
                 xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 6L9 17L4 12" stroke="white" stroke-width="2.5" stroke-linecap="round"
@@ -154,7 +154,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useToast } from "vue-toastification";
-import api from '../services/api';
+import api from '../../services/api';
 
 const toast = useToast();
 
@@ -373,33 +373,7 @@ const submitMood = async () => {
   transform: translateY(-6px) scale(1.14);
 }
 
-/* Custom checkbox visuals */
-.custom-checkbox-label {
-  align-items: center;
-}
 
-.checkbox-box {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  border: 2px solid rgba(15, 23, 42, 0.06);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
-}
-
-.peer:checked+.checkbox-box,
-.checkbox-box[aria-checked="true"] {
-  background: #10B981;
-  border-color: #10B981;
-  transform: translateY(-2px);
-}
-
-.checkbox-box svg {
-  display: block;
-}
 
 /* Icon row (discrete steps above the slider) */
 .icon-row {

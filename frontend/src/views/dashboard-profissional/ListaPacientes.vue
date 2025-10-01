@@ -38,7 +38,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import api from '../services/api';
+import api from '../../services/api';
 import { useToast } from 'vue-toastification';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';

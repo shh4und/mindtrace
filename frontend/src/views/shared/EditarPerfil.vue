@@ -118,8 +118,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
-import api from '../services/api';
-import { useUserStore } from '../store/user';
+import api from '../../services/api';
+import { useUserStore } from '../../store/user';
 
 const props = defineProps({
   userType: {

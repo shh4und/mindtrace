@@ -189,12 +189,6 @@ const closeMenu = () => {
 </script>
 
 <style>
-@import "tailwindcss";
-
-html {
-  scroll-behavior: smooth;
-}
-
 /* Estilos para o menu de navegação responsivo */
 #mobile-menu {
   transition: all 0.3s ease-in-out;
