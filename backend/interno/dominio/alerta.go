@@ -8,9 +8,9 @@ import (
 type Alerta struct {
 	ID                 uint         `gorm:"primaryKey"`
 	PacienteID         uint         `json:"-" gorm:"not null"`
-	Paciente           Paciente     `json:"paciente" gorm:"foreignKey:PacienteID"`
+	Paciente           Paciente     `json:"paciente" gorm:"foreignKey:PacienteID;constraint:OnDelete:CASCADE"`
 	ProfissionalID     uint         `json:"-" gorm:"not null"`
-	Profissional       Profissional `json:"profissional" gorm:"foreignKey:ProfissionalID"`
+	Profissional       Profissional `json:"profissional" gorm:"foreignKey:ProfissionalID;constraint:OnDelete:CASCADE"`
 	Titulo             string       `json:"titulo" gorm:"type:varchar(255);not null"`
 	DescricaoDetalhada string       `json:"descricao_detalhada" gorm:"type:text"`
 	NivelUrgencia      string       `json:"nivel_urgencia" gorm:"type:varchar(50);not null"`

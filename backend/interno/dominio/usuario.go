@@ -29,11 +29,11 @@ func (Usuario) TableName() string {
 type Profissional struct {
 	ID                   uint       `gorm:"primaryKey"`
 	UsuarioID            uint       `json:"-" gorm:"unique;not null"`
-	Usuario              Usuario    `json:"usuario" gorm:"foreignKey:UsuarioID"`
+	Usuario              Usuario    `json:"usuario" gorm:"foreignKey:UsuarioID;constraint:OnDelete:CASCADE"`
 	DataNascimento       time.Time  `json:"data_nascimento" gorm:"type:date"`
 	Especialidade        string     `json:"especialidade" gorm:"type:varchar(255)"`
 	RegistroProfissional string     `json:"registro_profissional" gorm:"type:varchar(12);unique;not null"`
-	Pacientes            []Paciente `json:"pacientes" gorm:"many2many:profissional_paciente;"`
+	Pacientes            []Paciente `json:"pacientes" gorm:"many2many:profissional_paciente;constraint:OnDelete:CASCADE;"`
 	CreatedAt            time.Time  `json:"created_at"`
 	UpdatedAt            time.Time  `json:"updated_at"`
 }
@@ -46,13 +46,13 @@ func (Profissional) TableName() string {
 type Paciente struct {
 	ID                   uint           `json:"id" gorm:"primaryKey"`
 	UsuarioID            uint           `json:"-" gorm:"unique;not null"`
-	Usuario              Usuario        `json:"usuario" gorm:"foreignKey:UsuarioID"`
+	Usuario              Usuario        `json:"usuario" gorm:"foreignKey:UsuarioID;constraint:OnDelete:CASCADE"`
 	DataNascimento       time.Time      `json:"data_nascimento" gorm:"not null"`
 	Dependente           bool           `json:"dependente" gorm:"not null"`
 	NomeResponsavel      string         `json:"nome_responsavel,omitempty" gorm:"type:varchar(255)"`
 	ContatoResponsavel   string         `json:"contato_responsavel,omitempty" gorm:"type:varchar(100)"`
 	DataInicioTratamento *time.Time     `json:"data_inicio_tratamento"`
-	Profissionais        []Profissional `json:"profissionais" gorm:"many2many:profissional_paciente;"`
+	Profissionais        []Profissional `json:"profissionais" gorm:"many2many:profissional_paciente;constraint:OnDelete:CASCADE;"`
 	CreatedAt            time.Time      `json:"created_at"`
 	UpdatedAt            time.Time      `json:"updated_at"`
 }

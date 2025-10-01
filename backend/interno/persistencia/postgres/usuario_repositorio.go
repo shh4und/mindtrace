@@ -99,67 +99,6 @@ func (r *gormUsuarioRepositorio) AtualizarPaciente(tx *gorm.DB, paciente *domini
 }
 
 func (r *gormUsuarioRepositorio) DeletarUsuario(tx *gorm.DB, id uint) error {
-	// Buscar o usuário para determinar o tipo
-	usuario, err := r.BuscarUsuarioPorID(id)
-	if err != nil {
-		return err
-	}
-
-	// Deletar registros específicos baseados no tipo
-	switch usuario.TipoUsuario {
-	case "profissional":
-		// Buscar o profissional para limpar associações
-		profissional, err := r.BuscarProfissionalPorUsuarioID(tx, id)
-		if err != nil {
-			return err
-		}
-		// Deletar convites associados (evita violação de FK fk_convites_profissional)
-		if err := tx.Where("profissional_id = ?", profissional.ID).Delete(&dominio.Convite{}).Error; err != nil {
-			return err
-		}
-		// Deletar alertas associados (se houver FK para profissional)
-		if err := tx.Where("profissional_id = ?", profissional.ID).Delete(&dominio.Alerta{}).Error; err != nil {
-			return err
-		}
-		// Limpar associações many-to-many (remove entradas da tabela profissional_paciente)
-		if err := tx.Model(profissional).Association("Pacientes").Clear(); err != nil {
-			return err
-		}
-		// Deletar o profissional
-		if err := tx.Where("usuario_id = ?", id).Delete(&dominio.Profissional{}).Error; err != nil {
-			return err
-		}
-	case "paciente":
-		// Buscar o paciente para limpar associações
-		paciente, err := r.BuscarPacientePorUsuarioID(tx, id)
-		if err != nil {
-			return err
-		}
-		// Deletar registros de humor associados (evita FK violations)
-		if err := tx.Where("paciente_id = ?", paciente.ID).Delete(&dominio.RegistroHumor{}).Error; err != nil {
-			return err
-		}
-		if err := tx.Where("paciente_id = ?", paciente.ID).Delete(&dominio.Convite{}).Error; err != nil {
-			return err
-		}
-		// Deletar alertas associados
-		if err := tx.Where("paciente_id = ?", paciente.ID).Delete(&dominio.Alerta{}).Error; err != nil {
-			return err
-		}
-		// Deletar notificacoes associadas
-		if err := tx.Where("usuario_id = ?", id).Delete(&dominio.Notificacao{}).Error; err != nil {
-			return err
-		}
-		// Limpar associações many-to-many (remove entradas da tabela profissional_paciente)
-		if err := tx.Model(paciente).Association("Profissionais").Clear(); err != nil {
-			return err
-		}
-		// Deletar o paciente
-		if err := tx.Where("usuario_id = ?", id).Delete(&dominio.Paciente{}).Error; err != nil {
-			return err
-		}
-	}
-
 	// Deletar o usuário (hard delete, ignorando soft delete)
 	return tx.Unscoped().Delete(&dominio.Usuario{}, id).Error
 }

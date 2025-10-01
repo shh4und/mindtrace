@@ -50,7 +50,7 @@ func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo in
 		GraficoStress:  make([]PontoDeDadosDTO, 0),
 	}
 
-	paciente, err := rs.usuarioRepositorio.BuscarPacientePorID(rs.db, userID)
+	paciente, err := rs.usuarioRepositorio.BuscarPacientePorUsuarioID(rs.db, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return relatorioPacienteFeito, nil
