@@ -15,12 +15,12 @@
 
 <script setup>
 import { ref } from 'vue';
-import Navbar from '../components/Navbar.vue';
-import RegistroHumor from '../components/RegistroHumor.vue';
-import Resumo from '../components/Resumo.vue';
-import Relatorio from '../components/Relatorio.vue';
-import EditarPerfil from '../components/EditarPerfil.vue';
-import VincularProfissional from '@/components/VincularProfissional.vue';
+import Navbar from '../../components/layout/NavbarPaciente.vue';
+import RegistroHumor from './RegistroHumor.vue';
+import Resumo from './Resumo.vue';
+import Relatorio from '../shared/Relatorio.vue';
+import EditarPerfil from '../shared/EditarPerfil.vue';
+import VincularProfissional from './VincularProfissional.vue';
 
 const activeView = ref('resumo');
 

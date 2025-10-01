@@ -25,11 +25,11 @@
 
 <script setup>
 import { ref } from 'vue';
-import NavbarProfissional from '../components/NavbarProfissional.vue';
-import ListaPacientes from '../components/ListaPacientes.vue';
-import Relatorio from '../components/Relatorio.vue';
-import GerarConvite from '../components/GerarConvite.vue';
-import EditarPerfil from '../components/EditarPerfil.vue';
+import NavbarProfissional from '../../components/layout/NavbarProfissional.vue';
+import ListaPacientes from './ListaPacientes.vue';
+import Relatorio from '../shared/Relatorio.vue';
+import GerarConvite from './GerarConvite.vue';
+import EditarPerfil from '../shared/EditarPerfil.vue';
 
 const activeView = ref('pacientes'); // Visão inicial
 const selectedPatientId = ref(null);

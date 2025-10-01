@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Landpage from '../views/Landpage.vue'
-import Login from '../views/Login.vue'
-import Cadastro from '../views/Cadastro.vue'
-import ForgotPassword from '../views/ForgotPassword.vue'
-import PacienteDashboard from '../views/PacienteDashboard.vue'
-import ProfissionalDashboard from '../views/ProfissionalDashboard.vue'
+import Login from '../views/auth/Login.vue'
+import Cadastro from '../views/auth/Cadastro.vue'
+import ForgotPassword from '../views/auth/ForgotPassword.vue'
+import PacienteDashboard from '../views/dashboard-paciente/PacienteDashboard.vue'
+import ProfissionalDashboard from '../views/dashboard-profissional/ProfissionalDashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
