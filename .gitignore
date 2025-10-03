@@ -25,3 +25,5 @@ Thumbs.db
 *.sql
 backend/tmp/
 *.db
+*.txt
+*.plantuml
