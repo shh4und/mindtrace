@@ -17,7 +17,7 @@
         <!-- Right side: CTA and mobile menu toggle -->
         <div class="flex items-center space-x-4">
           <ul class="hidden md:flex space-x-8 items-center text-lg">
-            <li><a href="#hero" class="hover:text-emerald-600 transition duration-300">Início</a></li>
+            <li><a href="#home" class="hover:text-emerald-600 transition duration-300">Início</a></li>
             <li><a href="#features" class="hover:text-emerald-600 transition duration-300">Recursos</a></li>
             <li><a href="#about" class="hover:text-emerald-600 transition duration-300">Sobre</a></li>
             <li><a href="#contact" class="hover:text-emerald-600 transition duration-300">Contato</a></li>
@@ -33,7 +33,7 @@
       </nav>
       <div :class="['md:hidden', { 'hidden': !isMenuOpen, 'active': isMenuOpen }]" class="bg-white shadow-lg">
         <ul class="px-6 py-4 space-y-4 text-center">
-          <li><a href="#hero" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Início</a>
+          <li><a href="#home" @click="closeMenu" class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Início</a>
           </li>
           <li><a href="#features" @click="closeMenu"
               class="block text-gray-800 hover:bg-blue-50 p-3 rounded-lg">Recursos</a></li>
@@ -50,7 +50,7 @@
 
     <main>
       <!-- Hero Section -->
-      <section id="hero" class="relative py-24 md:py-40 bg-gradient-to-br from-emerald-100 to-rose-100">
+      <section id="home" class="relative py-24 md:py-40 bg-gradient-to-br from-emerald-100 to-rose-100">
         <div class="container mx-auto px-6 text-center">
           <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-wide text-gray-900">
             Sua mente é um universo. <span class="text-emerald-600">Explore-o.</span>
