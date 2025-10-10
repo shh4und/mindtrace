@@ -7,14 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ConviteControlador gerencia requisicoes HTTP relacionadas a convites
 type ConviteControlador struct {
 	conviteServico servicos.ConviteServico
 }
 
+// NovoConviteControlador cria uma nova instancia de ConviteControlador com o ConviteServico fornecido
 func NovoConviteControlador(cs servicos.ConviteServico) *ConviteControlador {
 	return &ConviteControlador{conviteServico: cs}
 }
 
+// GerarConvite gera um novo convite para o usuario autenticado
 func (cc *ConviteControlador) GerarConvite(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
@@ -34,10 +37,13 @@ func (cc *ConviteControlador) GerarConvite(c *gin.Context) {
 	})
 }
 
+// VincularRequest representa o payload da requisicao para vincular paciente
 type VincularRequest struct {
 	Token string `json:"token" binding:"required"`
 }
 
+// VincularPaciente vincula um paciente usando um token de convite
+// Valida a entrada e chama o servico para realizar o vinculo
 func (cc *ConviteControlador) VincularPaciente(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {

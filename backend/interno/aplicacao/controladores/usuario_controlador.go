@@ -7,14 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// UsuarioControlador gerencia requisicoes HTTP relacionadas ao gerenciamento de usuarios
 type UsuarioControlador struct {
 	usuarioServico servicos.UsuarioServico
 }
 
+// NovoUsuarioControlador cria uma nova instancia de UsuarioControlador com o UsuarioServico fornecido
 func NovoUsuarioControlador(us servicos.UsuarioServico) *UsuarioControlador {
 	return &UsuarioControlador{usuarioServico: us}
 }
 
+// BuscarPerfil busca o perfil do usuario autenticado
+// Extrai o ID do usuario do contexto e chama o servico para buscar os dados
 func (uc *UsuarioControlador) BuscarPerfil(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
@@ -31,6 +35,8 @@ func (uc *UsuarioControlador) BuscarPerfil(c *gin.Context) {
 	c.JSON(http.StatusOK, usuario)
 }
 
+// AtualizarPerfil atualiza o perfil do usuario autenticado
+// Valida a entrada e chama o servico para atualizar os dados
 func (uc *UsuarioControlador) AtualizarPerfil(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
@@ -53,6 +59,8 @@ func (uc *UsuarioControlador) AtualizarPerfil(c *gin.Context) {
 	c.JSON(http.StatusOK, usuario)
 }
 
+// AlterarSenha altera a senha do usuario autenticado
+// Valida a entrada e chama o servico para alterar a senha
 func (uc *UsuarioControlador) AlterarSenha(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
@@ -79,6 +87,8 @@ func (uc *UsuarioControlador) AlterarSenha(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"mensagem": "Senha alterada com sucesso"})
 }
 
+// ListarPacientesDoProfissional lista os pacientes associados ao profissional autenticado
+// Extrai o ID do usuario e chama o servico para listar os pacientes
 func (uc *UsuarioControlador) ListarPacientesDoProfissional(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
@@ -95,6 +105,8 @@ func (uc *UsuarioControlador) ListarPacientesDoProfissional(c *gin.Context) {
 	c.JSON(http.StatusOK, pacientes)
 }
 
+// DeletarPerfil deleta o perfil do usuario autenticado
+// Extrai o ID do usuario e chama o servico para deletar a conta
 func (uc *UsuarioControlador) DeletarPerfil(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {

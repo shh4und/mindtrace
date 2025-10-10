@@ -8,14 +8,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// RelatorioControlador gerencia requisicoes HTTP relacionadas a relatorios
 type RelatorioControlador struct {
 	relatorioServico servicos.RelatorioServico
 }
 
+// NovoRelatorioControlador cria uma nova instancia de RelatorioControlador com o RelatorioServico fornecido
 func NovoRelatorioControlador(rs servicos.RelatorioServico) *RelatorioControlador {
 	return &RelatorioControlador{relatorioServico: rs}
 }
 
+// GerarRelatorio gera um relatorio para o paciente autenticado
+// Extrai o periodo da query e chama o servico para gerar o relatorio
 func (rc *RelatorioControlador) GerarRelatorio(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
@@ -41,6 +45,8 @@ func (rc *RelatorioControlador) GerarRelatorio(c *gin.Context) {
 	c.JSON(http.StatusOK, relatorio)
 }
 
+// GerarRelatorioPacienteDoProfissional gera um relatorio para um paciente especifico pelo profissional
+// Extrai o ID do paciente e periodo da query e chama o servico para gerar o relatorio
 func (rc *RelatorioControlador) GerarRelatorioPacienteDoProfissional(c *gin.Context) {
 	_, exists := c.Get("userID")
 	if !exists {

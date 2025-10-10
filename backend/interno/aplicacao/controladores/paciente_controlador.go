@@ -9,14 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// PacienteControlador gerencia requisicoes HTTP relacionadas ao gerenciamento de pacientes
 type PacienteControlador struct {
 	usuarioServico servicos.UsuarioServico
 }
 
+// NovoPacienteControlador cria uma nova instancia de PacienteControlador com o UsuarioServico fornecido
 func NovoPacienteControlador(us servicos.UsuarioServico) *PacienteControlador {
 	return &PacienteControlador{usuarioServico: us}
 }
 
+// RegistrarPacienteRequest representa o payload da requisicao para registrar um novo paciente
 type RegistrarPacienteRequest struct {
 	Nome                 string     `json:"nome" binding:"required"`
 	Email                string     `json:"email" binding:"required,email"`
@@ -30,6 +33,7 @@ type RegistrarPacienteRequest struct {
 	Contato              string     `json:"contato"`
 }
 
+// ProprioPacienteRequest representa o payload da resposta para o perfil proprio do paciente
 type ProprioPacienteRequest struct {
 	Nome                 string     `json:"nome"`
 	Email                string     `json:"email"`
@@ -42,6 +46,8 @@ type ProprioPacienteRequest struct {
 	Contato              string     `json:"contato"`
 }
 
+// Registrar lida com o registro de um novo paciente
+// Valida a entrada analisa datas verifica a forca da senha e chama o servico para registrar o paciente
 func (pc *PacienteControlador) Registrar(c *gin.Context) {
 	var req RegistrarPacienteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -92,6 +98,8 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 	c.JSON(http.StatusCreated, paciente)
 }
 
+// ProprioPerfilPaciente recupera o perfil do paciente autenticado
+// Extrai o ID do usuario do contexto e busca os dados do paciente do servico
 func (uc *PacienteControlador) ProprioPerfilPaciente(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {

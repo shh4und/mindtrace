@@ -8,14 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ProfissionalControlador gerencia requisicoes HTTP relacionadas ao gerenciamento de profissionais
 type ProfissionalControlador struct {
 	usuarioServico servicos.UsuarioServico
 }
 
+// NovoProfissionalControlador cria uma nova instancia de ProfissionalControlador com o UsuarioServico fornecido
 func NovoProfissionalControlador(us servicos.UsuarioServico) *ProfissionalControlador {
 	return &ProfissionalControlador{usuarioServico: us}
 }
 
+// RegistrarProfissionalRequest representa o payload da requisicao para registrar um novo profissional
 type RegistrarProfissionalRequest struct {
 	Nome                 string `json:"nome" binding:"required"`
 	Email                string `json:"email" binding:"required,email"`
@@ -26,6 +29,7 @@ type RegistrarProfissionalRequest struct {
 	Contato              string `json:"contato"`
 }
 
+// ProprioProfissionalRequest representa o payload da resposta para o perfil proprio do profissional
 type ProprioProfissionalRequest struct {
 	Nome                 string `json:"nome"`
 	Email                string `json:"email" `
@@ -35,6 +39,8 @@ type ProprioProfissionalRequest struct {
 	Contato              string `json:"contato"`
 }
 
+// Registrar lida com o registro de um novo profissional
+// Valida a entrada verifica a forca da senha e chama o servico para registrar o profissional
 func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 	var req RegistrarProfissionalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -76,6 +82,8 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 	c.JSON(http.StatusCreated, profissional)
 }
 
+// ProprioPerfilProfissional recupera o perfil do profissional autenticado
+// Extrai o ID do usuario do contexto e busca os dados do profissional do servico
 func (uc *ProfissionalControlador) ProprioPerfilProfissional(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
