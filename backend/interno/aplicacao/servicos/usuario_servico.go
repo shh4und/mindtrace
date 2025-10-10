@@ -13,6 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// RegistrarProfissionalDTO representa os dados para registrar um profissional
 type RegistrarProfissionalDTO struct {
 	Nome                 string
 	Email                string
@@ -24,6 +25,7 @@ type RegistrarProfissionalDTO struct {
 	Contato              string
 }
 
+// RegistrarPacienteDTO representa os dados para registrar um paciente
 type RegistrarPacienteDTO struct {
 	Nome                 string
 	Email                string
@@ -38,6 +40,7 @@ type RegistrarPacienteDTO struct {
 	Contato              string
 }
 
+// AtualizarPerfilDTO representa os dados para atualizar o perfil do usuario
 type AtualizarPerfilDTO struct {
 	Nome    string `json:"nome" binding:"required"`
 	Contato string `json:"contato"`
@@ -53,6 +56,7 @@ type AtualizarPerfilDTO struct {
 	ContatoResponsavel string     `json:"contato_responsavel,omitempty"`
 }
 
+// AlterarSenhaDTO representa os dados para alterar a senha
 type AlterarSenhaDTO struct {
 	SenhaAtual  string `json:"senha_atual" binding:"required"`
 	NovaSenha   string `json:"nova_senha" binding:"required,min=8"`
@@ -64,6 +68,7 @@ var ErrCrendenciaisInvalidas = errors.New("credenciais invalidas")
 var ErrUsuarioNaoEncontrado = errors.New("usuario nao encontrado")
 var ErrSenhaNaoConfere = errors.New("a nova senha e a senha de confirmação não conferem")
 
+// UsuarioServico define os metodos para gerenciamento de usuarios
 type UsuarioServico interface {
 	RegistrarProfissional(dto RegistrarProfissionalDTO) (*dominio.Profissional, error)
 	RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.Paciente, error)
@@ -77,15 +82,18 @@ type UsuarioServico interface {
 	DeletarPerfil(userID uint) error
 }
 
+// usuarioServico implementa a interface UsuarioServico
 type usuarioServico struct {
 	db          *gorm.DB
 	repositorio repositorios.UsuarioRepositorio
 }
 
+// NovoUsuarioServico cria uma nova instancia de UsuarioServico
 func NovoUsuarioServico(db *gorm.DB, repo repositorios.UsuarioRepositorio) UsuarioServico {
 	return &usuarioServico{db: db, repositorio: repo}
 }
 
+// RegistrarProfissional registra um novo profissional no sistema
 func (s *usuarioServico) RegistrarProfissional(dto RegistrarProfissionalDTO) (*dominio.Profissional, error) {
 	var profissionalRegistrado *dominio.Profissional
 
@@ -181,6 +189,7 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 	return pacienteCompleto, err
 }
 
+// Login autentica o usuario e retorna um token JWT
 func (s *usuarioServico) Login(email, senha string) (string, error) {
 	// Buscar usuário pelo e-mail
 	usuario, err := s.repositorio.BuscarPorEmail(email)
@@ -215,6 +224,7 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 	return tokenString, nil
 }
 
+// BuscarUsuarioPorID busca um usuario pelo ID
 func (s *usuarioServico) BuscarUsuarioPorID(id uint) (*dominio.Usuario, error) {
 	usuario, err := s.repositorio.BuscarUsuarioPorID(id)
 	if err != nil {
@@ -226,6 +236,7 @@ func (s *usuarioServico) BuscarUsuarioPorID(id uint) (*dominio.Usuario, error) {
 	return usuario, nil
 }
 
+// ProprioPerfilPaciente busca o perfil proprio do paciente
 func (s *usuarioServico) ProprioPerfilPaciente(id uint) (*dominio.Paciente, error) {
 	var pacienteEncontado *dominio.Paciente
 
@@ -262,6 +273,7 @@ func (s *usuarioServico) ProprioPerfilProfissional(id uint) (*dominio.Profission
 	return profissionalEncontrado, err
 }
 
+// AtualizarPerfil atualiza o perfil do usuario
 func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error) {
 	var usuarioAtualizado *dominio.Usuario
 	err := s.db.Transaction(func(tx *gorm.DB) error {
@@ -319,6 +331,7 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*
 	return usuarioAtualizado, err
 }
 
+// AlterarSenha altera a senha do usuario
 func (s *usuarioServico) AlterarSenha(userID uint, dto AlterarSenhaDTO) error {
 
 	if dto.NovaSenha != dto.NovaSenhaRe {
@@ -367,6 +380,7 @@ func (s *usuarioServico) ListarPacientesDoProfissional(userID uint) ([]dominio.P
 	return pacientes, err
 }
 
+// DeletarPerfil deleta o perfil do usuario
 func (s *usuarioServico) DeletarPerfil(userID uint) error {
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		_, err := s.repositorio.BuscarUsuarioPorID(userID)

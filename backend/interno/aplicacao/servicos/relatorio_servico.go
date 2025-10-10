@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// PontoDeDadosDTO representa um ponto de dados para graficos
 type PontoDeDadosDTO struct {
 	Data     time.Time `json:"data"`
 	Valor    int16     `json:"valor"`
@@ -15,6 +16,7 @@ type PontoDeDadosDTO struct {
 	Anotacao string    `json:"anotacao,omitempty"`
 }
 
+// RelatorioPacienteDTO representa o relatorio de um paciente
 type RelatorioPacienteDTO struct {
 	GraficoSono    []PontoDeDadosDTO `json:"grafico_sono"`
 	GraficoEnergia []PontoDeDadosDTO `json:"grafico_energia"`
@@ -24,17 +26,20 @@ type RelatorioPacienteDTO struct {
 	MediaStress    float64           `json:"media_stress"`
 }
 
+// RelatorioServico define os metodos para gerar relatorios
 type RelatorioServico interface {
 	GerarRelatorioPaciente(userID uint, filtroPeriodo int64) (*RelatorioPacienteDTO, error)
 	GerarRelatorioPacienteDoProfissional(pacienteID uint, filtroPeriodo int64) (*RelatorioPacienteDTO, error)
 }
 
+// relatorioServico implementa a interface RelatorioServico
 type relatorioServico struct {
 	db                       *gorm.DB
 	registroHumorRepositorio repositorios.RegistroHumorRepositorio
 	usuarioRepositorio       repositorios.UsuarioRepositorio
 }
 
+// NovoRelatorioServico cria uma nova instancia de RelatorioServico
 func NovoRelatorioServico(db *gorm.DB, registroHumorRepo repositorios.RegistroHumorRepositorio, usuarioRepo repositorios.UsuarioRepositorio) RelatorioServico {
 	return &relatorioServico{
 		db:                       db,
@@ -43,6 +48,7 @@ func NovoRelatorioServico(db *gorm.DB, registroHumorRepo repositorios.RegistroHu
 	}
 }
 
+// GerarRelatorioPaciente gera um relatorio para o paciente autenticado
 func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo int64) (*RelatorioPacienteDTO, error) {
 	relatorioPacienteFeito := &RelatorioPacienteDTO{
 		GraficoSono:    make([]PontoDeDadosDTO, 0),
@@ -115,6 +121,7 @@ func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo in
 	return relatorioPacienteFeito, nil
 }
 
+// GerarRelatorioPacienteDoProfissional gera um relatorio para um paciente especifico pelo profissional
 func (rs *relatorioServico) GerarRelatorioPacienteDoProfissional(pacienteID uint, filtroPeriodo int64) (*RelatorioPacienteDTO, error) {
 	relatorioPacienteFeito := &RelatorioPacienteDTO{
 		GraficoSono:    make([]PontoDeDadosDTO, 0),

@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// CriarRegistroHumorDTO representa os dados para criar um registro de humor
 type CriarRegistroHumorDTO struct {
 	UsuarioID        uint
 	NivelHumor       int16
@@ -23,22 +24,26 @@ type CriarRegistroHumorDTO struct {
 
 var ErrPacienteNaoEncontrado = errors.New("usuario nao encontrado")
 
+// RegistroHumorServico define os metodos para gerenciamento de registros de humor
 type RegistroHumorServico interface {
 	CriarRegistroHumor(dto CriarRegistroHumorDTO) (*dominio.RegistroHumor, error)
 }
 
+// registroHumorServico implementa a interface RegistroHumorServico
 type registroHumorServico struct {
 	db                 *gorm.DB
 	repositorio        repositorios.RegistroHumorRepositorio
 	usuarioRepositorio repositorios.UsuarioRepositorio
 }
 
+// NovoRegistroHumorServico cria uma nova instancia de registroHumorServico
 func NovoRegistroHumorServico(db *gorm.DB, repo repositorios.RegistroHumorRepositorio, userRepo repositorios.UsuarioRepositorio) *registroHumorServico {
 	return &registroHumorServico{db: db, repositorio: repo, usuarioRepositorio: userRepo}
 }
 
+// CriarRegistroHumor cria um novo registro de humor para o paciente
 func (rhs *registroHumorServico) CriarRegistroHumor(dto CriarRegistroHumorDTO) (*dominio.RegistroHumor, error) {
-	var registroHumoRealizado *dominio.RegistroHumor
+	var registroHumorRealizado *dominio.RegistroHumor
 
 	err := rhs.db.Transaction(func(tx *gorm.DB) error {
 		paciente, err := rhs.usuarioRepositorio.BuscarPacientePorUsuarioID(tx, dto.UsuarioID)
@@ -70,9 +75,9 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto CriarRegistroHumorDTO) (
 			return err
 		}
 
-		registroHumoRealizado = novoRegistroHumor
+		registroHumorRealizado = novoRegistroHumor
 		return nil
 	})
 
-	return registroHumoRealizado, err
+	return registroHumorRealizado, err
 }

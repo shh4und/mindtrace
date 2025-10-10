@@ -10,6 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CORSMiddleware cria um middleware para configurar CORS
+// Permite requisicoes de origens especificadas no ambiente FRONTEND_ORIGINS
 func CORSMiddleware() gin.HandlerFunc {
 	originsEnv := strings.TrimSpace(os.Getenv("FRONTEND_ORIGINS"))
 	var allowOrigins []string

@@ -10,6 +10,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// AutMiddleware cria um middleware para autenticacao JWT
+// Verifica o token no header Authorization e extrai o userID para o contexto
 func AutMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")

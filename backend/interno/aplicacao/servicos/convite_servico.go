@@ -17,17 +17,20 @@ var (
 	ErrPerfilNaoEncontrado  = errors.New("perfil de profissional ou paciente não encontrado")
 )
 
+// ConviteServico define os metodos para gerenciamento de convites
 type ConviteServico interface {
 	GerarConvite(userID uint) (*dominio.Convite, error)
 	VincularPaciente(userID uint, token string) error
 }
 
+// conviteServico implementa a interface ConviteServico
 type conviteServico struct {
 	db                 *gorm.DB
 	conviteRepositorio repositorios.ConviteRepositorio
 	usuarioRepositorio repositorios.UsuarioRepositorio
 }
 
+// NovoConviteServico cria uma nova instancia de ConviteServico
 func NovoConviteServico(db *gorm.DB, cr repositorios.ConviteRepositorio, ur repositorios.UsuarioRepositorio) ConviteServico {
 	return &conviteServico{
 		db:                 db,
@@ -36,6 +39,7 @@ func NovoConviteServico(db *gorm.DB, cr repositorios.ConviteRepositorio, ur repo
 	}
 }
 
+// GerarConvite gera um novo convite para o profissional
 func (s *conviteServico) GerarConvite(userID uint) (*dominio.Convite, error) {
 	profissional, err := s.usuarioRepositorio.BuscarProfissionalPorUsuarioID(s.db, userID)
 	if err != nil {
@@ -62,6 +66,7 @@ func (s *conviteServico) GerarConvite(userID uint) (*dominio.Convite, error) {
 	return convite, nil
 }
 
+// VincularPaciente vincula um paciente a um profissional usando um token de convite
 func (s *conviteServico) VincularPaciente(userID uint, token string) error {
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		convite, err := s.conviteRepositorio.BuscarConvitePorToken(tx, token)
