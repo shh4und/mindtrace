@@ -1,11 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <header class="w-full p-6">
-      <router-link to="/" class="items-center space-x-2 border-0 border-gray-200 rounded-lg p-2">
-        <font-awesome-icon :icon="faBrain" class="text-rose-300 text-2xl" />
-        <span class="text-3xl font-bold text-emerald-600 whitespace-nowrap">MindTrace</span>
-      </router-link>
-    </header>
+    <!-- Navbar Pública -->
+    <NavbarPublic :show-menu="false" />
 
     <div class="flex items-center justify-center px-4 py-8">
       <div class="w-full max-w-2xl">
@@ -114,7 +110,7 @@
           </form>
 
           <div class="mt-6 text-center">
-            <router-link to="/login" class="text-sm text-gray-600 hover:text-emerald-600 transition-colors">
+            <router-link to="/login" class="text-lg text-gray-600 hover:text-emerald-600 transition-colors">
               Já tem uma conta? Faça login
             </router-link>
           </div>
@@ -125,11 +121,11 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { useUserStore } from '../../store/user';
-import { faBrain, faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
+import NavbarPublic from '../../components/layout/NavbarPublic.vue';
 
 const router = useRouter();
 const toast = useToast();
