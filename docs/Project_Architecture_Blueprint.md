@@ -36,7 +36,7 @@ MindTrace is a full-stack web application built with the following technology st
 - **Reverse Proxy**: Nginx (frontend)
 
 ### Architectural Pattern Determination
-The codebase implements **Clean Architecture** (also known as Hexagonal Architecture or Onion Architecture) in the backend, with clear separation of concerns across multiple layers:
+The codebase implements **Clean Architecture** in the backend, with clear separation of concerns across multiple layers:
 
 - **Domain Layer** (`interno/dominio/`): Contains business entities and core business rules
 - **Application Layer** (`interno/aplicacao/`): Contains application services, controllers, and middlewares
