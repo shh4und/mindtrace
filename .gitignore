@@ -27,3 +27,5 @@ backend/tmp/
 *.db
 *.txt
 *.plantuml
+prompts/
+docs/_*.md

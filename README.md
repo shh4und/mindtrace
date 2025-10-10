@@ -1,180 +1,295 @@
 # MindTrace
 
-MindTrace é uma aplicação web full-stack projetada para rastreamento e gerenciamento de saúde mental. Permite que profissionais monitorem registros de humor dos pacientes, gerem relatórios e gerenciem notificações, enquanto os pacientes podem registrar seus humores diários e visualizar insights personalizados.
+[![Go Version](https://img.shields.io/badge/Go-1.25.1-blue.svg)](https://golang.org/)
+[![Vue Version](https://img.shields.io/badge/Vue.js-3.5.18-green.svg)](https://vuejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue.svg)](https://www.postgresql.org/)
 
-## Recursos
+MindTrace is a comprehensive full-stack web application designed for mental health tracking and management. It enables healthcare professionals to monitor patient mood records, generate reports, and manage notifications, while patients can log their daily moods and view personalized insights.
 
-- **Gerenciamento de Usuários**: Registro e autenticação para pacientes e profissionais.
-- **Rastreamento de Humor**: Pacientes podem registrar seu humor diário com carimbos de data/hora e notas.
-- **Relatórios e Análises**: Profissionais podem gerar relatórios sobre tendências de humor dos pacientes.
-- **Notificações e Alertas**: Alertas automatizados para profissionais com base nos dados dos pacientes.
-- **Convites**: Profissionais podem enviar convites para pacientes para vinculação de contas.
-- **Dashboard**: Dashboards separados para pacientes e profissionais com visualização de dados relevante.
+## 🚀 Key Features
 
-## Pilha Tecnológica
+- **User Management**: Registration and authentication for both patients and healthcare professionals
+- **Mood Tracking**: Patients can record daily mood entries with timestamps and notes
+- **Reports & Analytics**: Professionals can generate mood trend reports for their patients
+- **Automated Alerts**: Intelligent notifications for professionals based on patient data patterns
+- **Invitation System**: Professionals can send account linking invitations to patients
+- **Dual Dashboards**: Separate, role-based interfaces for patients and professionals
+- **Data Visualization**: Interactive charts and graphs for mood trend analysis
+
+## 🛠 Technology Stack
 
 ### Backend
-- **Linguagem**: Go (Golang)
-- **Framework**: Gin
-- **Banco de Dados**: PostgreSQL com GORM ORM
-- **Autenticação**: JWT
-- **Arquitetura**: Arquitetura Limpa (camadas de Domínio, Aplicação, Persistência)
+- **Language**: Go (Golang) 1.25.1
+- **Web Framework**: Gin v1.10.1
+- **ORM**: GORM v1.30.1
+- **Database**: PostgreSQL 17 (production) / SQLite (development)
+- **Authentication**: JWT (golang-jwt/jwt/v5)
+- **Testing**: Testify v1.10.0
+- **Architecture**: Clean Architecture (Domain-Driven Design)
 
 ### Frontend
-- **Linguagem**: JavaScript
-- **Framework**: Vue.js 3
-- **Ferramenta de Build**: Vite
-- **Estilização**: TailwindCSS
-- **Gerenciamento de Estado**: Pinia
-- **Gráficos**: ApexCharts
+- **Language**: JavaScript (ES6+)
+- **Framework**: Vue.js 3.5.18 (Composition API)
+- **Build Tool**: Vite v7.0.6
+- **State Management**: Pinia v3.0.3
+- **HTTP Client**: Axios v1.11.0
+- **Styling**: TailwindCSS v4.1.11
+- **Charts**: ApexCharts v5.3.4 with vue3-apexcharts
+- **Icons**: FontAwesome v7.0.0
 
-### Infraestrutura
-- **Containerização**: Docker
-- **Orquestração**: Docker Compose
-- **Gerenciamento de Banco de Dados**: PgAdmin
+### Infrastructure & DevOps
+- **Containerization**: Docker
+- **Orchestration**: Docker Compose
+- **Database Admin**: PgAdmin 4
+- **Reverse Proxy**: Nginx
+- **Version Control**: Git
 
-## Estrutura do Projeto
+## 🏗 Project Architecture
+
+MindTrace implements **Clean Architecture** principles with clear separation of concerns across multiple layers:
 
 ```
-.
-├── backend/                 # Aplicação backend em Go
-│   ├── cmd/api/             # Ponto de entrada principal
-│   ├── interno/             # Pacotes internos
-│   │   ├── aplicacao/       # Camada de aplicação (controladores, serviços, middlewares)
-│   │   ├── dominio/         # Camada de domínio (entidades)
-│   │   └── persistencia/    # Camada de persistência (repositórios)
-│   ├── Dockerfile           # Dockerfile de produção
-│   ├── Dockerfile.dev       # Dockerfile de desenvolvimento
-│   ├── go.mod               # Módulos Go
-│   └── go.sum               # Dependências Go
-├── frontend/                # Aplicação frontend em Vue.js
-│   ├── src/                 # Código fonte
-│   │   ├── components/      # Componentes Vue
-│   │   ├── views/           # Visualizações de página
-│   │   ├── router/          # Configuração de roteamento
-│   │   ├── store/           # Gerenciamento de estado
-│   │   └── services/        # Serviços de API
-│   ├── Dockerfile           # Dockerfile de produção
-│   ├── Dockerfile.dev       # Dockerfile de desenvolvimento
-│   ├── package.json         # Dependências Node
-│   └── vite.config.js       # Configuração Vite
-├── docker-compose.yml       # Docker Compose para produção
-├── docker-compose.override.yml  # Substituição Docker Compose para desenvolvimento
-└── README.md                # Este arquivo
+┌─────────────────────────────────────────────────────────────┐
+│                    Presentation Layer                       │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐  │
+│  │   Vue.js SPA    │  │   REST API      │  │   Nginx     │  │
+│  │  (Frontend)     │  │   (Gin)         │  │ (Reverse    │  │
+│  └─────────────────┘  └─────────────────┘  │  Proxy)    │  │
+└─────────────────────────────────────────────┼─────────────┘
+                                              │
+┌─────────────────────────────────────────────┼─────────────┐
+│                 Application Layer           │             │
+│  ┌─────────────────┐  ┌─────────────────┐   │             │
+│  │  Controllers    │  │   Services      │   │             │
+│  │  (HTTP Handlers)│  │ (Business Logic)│   │             │
+│  └─────────────────┘  └─────────────────┘   │             │
+└─────────────────────────────────────────────┼─────────────┘
+                                              │
+┌─────────────────────────────────────────────┼─────────────┘
+│                 Domain Layer                │
+│  ┌─────────────────┐                        │
+│  │  Entities       │                        │
+│  │  (Business      │                        │
+│  │   Models)       │                        │
+│  └─────────────────┘                        │
+└─────────────────────────────────────────────────────────┘
 ```
 
-## Pré-requisitos
+### Architectural Principles
+- **Dependency Inversion**: Inner layers don't depend on outer layers
+- **Single Responsibility**: Each layer has a distinct purpose
+- **Interface Segregation**: Repository interfaces define clear contracts
+- **Testability**: Dependency injection enables comprehensive testing
 
-- Docker e Docker Compose
-- Node.js (para desenvolvimento local do frontend, opcional)
-- Go (para desenvolvimento local do backend, opcional)
+## 🚀 Getting Started
 
-## Instalação e Configuração
+### Prerequisites
+- Docker and Docker Compose
+- Node.js 22.17.1 (optional, for local frontend development)
+- Go 1.25.1 (optional, for local backend development)
 
-### Usando Docker (Recomendado)
+### Quick Start with Docker (Recommended)
 
-1. **Clone o repositório**:
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/shh4und/mindtrace.git
    cd mindtrace
    ```
 
-2. **Crie o arquivo de ambiente**:
-   Crie um arquivo `.env` no diretório raiz com as seguintes variáveis:
-   ```
-   POSTGRES_USER=seu_usuario_db
-   POSTGRES_PASSWORD=sua_senha_db
+2. **Create environment file**:
+   Create a `.env` file in the root directory:
+   ```env
+   POSTGRES_USER=your_db_user
+   POSTGRES_PASSWORD=your_db_password
    POSTGRES_DB=mindtrace
-   PGADMIN_DEFAULT_EMAIL=admin@exemplo.com
-   PGADMIN_DEFAULT_PASSWORD=senha_admin
-   JWT_SECRET=seu_segredo_jwt
+   PGADMIN_DEFAULT_EMAIL=admin@example.com
+   PGADMIN_DEFAULT_PASSWORD=admin_password
+   JWT_SECRET=your_jwt_secret_key
    ```
 
-3. **Execute a aplicação**:
-   Para desenvolvimento:
+3. **Start the application**:
    ```bash
+   # For development (with hot reload)
    docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build
+
+   # For production
+   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build
    ```
 
-   Para produção:
-   ```bash
-   docker-compose up --build
-   ```
+4. **Access the application**:
+   - Frontend: http://localhost
+   - Backend API: http://localhost/api/v1
+   - PgAdmin: http://localhost:5050
 
-4. **Acesse a aplicação**:
-   - Frontend: http://localhost:5173
-   - API Backend: http://localhost:8080
-   - PgAdmin: http://localhost:8001
+### Local Development Setup
 
-### Desenvolvimento Local
+#### Backend (Go)
+```bash
+cd backend
+go mod download
+go run cmd/api/main.go
+```
 
-#### Backend
-1. Navegue para o diretório backend:
-   ```bash
-   cd backend
-   ```
+#### Frontend (Vue.js)
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-2. Instale as dependências:
-   ```bash
-   go mod download
-   ```
+## 📁 Project Structure
 
-3. Execute a aplicação:
-   ```bash
-   go run ./cmd/api/main.go
-   ```
+```
+mindtrace/
+├── backend/                          # Go backend application
+│   ├── cmd/api/                      # Application entry point
+│   ├── interno/                      # Internal packages
+│   │   ├── aplicacao/                # Application layer
+│   │   │   ├── controladores/        # HTTP controllers
+│   │   │   ├── middlewares/          # HTTP middlewares
+│   │   │   └── servicos/             # Business services
+│   │   ├── dominio/                  # Domain layer
+│   │   │   ├── alerta.go             # Alert entity
+│   │   │   ├── convite.go            # Invitation entity
+│   │   │   ├── registro_humor.go     # Mood record entity
+│   │   │   └── usuario.go            # User entities
+│   │   └── persistencia/             # Persistence layer
+│   │       ├── postgres/             # PostgreSQL implementations
+│   │       ├── repositorios/         # Repository interfaces
+│   │       └── sqlite/               # SQLite implementations
+│   ├── Dockerfile                    # Production container
+│   ├── Dockerfile.dev                # Development container
+│   ├── go.mod                        # Go modules
+│   └── go.sum                        # Dependencies
+├── frontend/                         # Vue.js frontend application
+│   ├── src/
+│   │   ├── components/               # Reusable Vue components
+│   │   ├── views/                    # Page components
+│   │   ├── router/                   # Vue Router configuration
+│   │   ├── store/                    # Pinia state management
+│   │   └── services/                 # API services
+│   ├── Dockerfile                    # Production container
+│   ├── Dockerfile.dev                # Development container
+│   ├── package.json                  # Node dependencies
+│   └── vite.config.js                # Vite configuration
+├── docker-compose.yml                # Base Docker Compose
+├── docker-compose.override.yml       # Development overrides
+├── docker-compose.prod.yml           # Production configuration
+├── docker-compose.sqlite.yml         # SQLite configuration
+├── schema.sql                        # Database schema
+├── seed.sh                           # Database seeding script
+└── README.md                         # This file
+```
 
-#### Frontend
-1. Navegue para o diretório frontend:
-   ```bash
-   cd frontend
-   ```
+## 🔧 Development Workflow
 
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
+### Branching Strategy
+- `main`: Production-ready code
+- `feature/*`: New features and enhancements
+- `docs/*`: New or updated documentation
+- `bugfix/*`: Bug fixes
+- `hotfix/*`: Critical production fixes
 
-3. Execute o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
+### Development Process
+1. **Create Feature Branch**: `git checkout -b feature/new-feature`
+2. **Make Changes**: Implement features following Clean Architecture principles
+3. **Run Tests**: Execute test suites for both backend and frontend
+4. **Code Review**: Submit pull request for review
+5. **Merge**: Squash merge to main after approval
 
-## Uso
+### Database Management
+- **Migrations**: Automatic via GORM AutoMigrate
+- **Seeding**: Use `seed.sh` for initial data
+- **Backup**: Regular PostgreSQL backups in production
 
-1. **Registrar/Login**: Crie uma conta como paciente ou profissional.
-2. **Para Pacientes**:
-   - Registre humores diários no dashboard.
-   - Visualize histórico pessoal de humor e tendências.
-3. **Para Profissionais**:
-   - Gerencie pacientes e envie convites.
-   - Visualize relatórios de pacientes e análises.
-   - Gere alertas com base nos dados de humor.
+## 📋 Coding Standards
 
-## Documentação da API
+### Go Backend Standards
+- **Formatting**: `gofmt` and `goimports` for consistent formatting
+- **Naming**: PascalCase for exported, camelCase for unexported
+- **Error Handling**: Explicit error returns, no panics in production
+- **Documentation**: Godoc comments for all exported functions
+- **Testing**: Table-driven tests with testify assertions
 
-O backend fornece APIs RESTful. Endpoints principais incluem:
+### Vue.js Frontend Standards
+- **Composition API**: Use Vue 3 Composition API over Options API
+- **Component Naming**: PascalCase for component files
+- **State Management**: Pinia stores for global state
+- **Styling**: TailwindCSS utility classes
+- **TypeScript**: Consider migration for better type safety
 
-- `POST /auth/login` - Login do usuário
-- `POST /auth/register` - Registro do usuário
-- `GET /mood` - Obter registros de humor
-- `POST /mood` - Criar registro de humor
-- `GET /reports` - Gerar relatórios
+### General Standards
+- **Commits**: Conventional commits (`feat:`, `fix:`, `docs:`)
+- **Documentation**: Update README and docs for significant changes
+- **Security**: Input validation, JWT for authentication
+- **Performance**: Optimize database queries, lazy loading for components
 
-Para documentação detalhada da API, consulte o código do backend ou use ferramentas como Swagger se implementado.
+## 🧪 Testing
 
-## Contribuição
+### Backend Testing
+- **Framework**: Testify for assertions and test organization
+- **Coverage**: Unit tests for services, repositories, and controllers
+- **Mocking**: Interface-based dependency injection enables easy mocking
+- **Database**: SQLite for fast, isolated integration tests
 
-1. Faça um fork do repositório.
-2. Crie uma branch de feature: `git checkout -b feature/sua-feature`
-3. Faça commit das suas mudanças: `git commit -m 'Adicione alguma feature'`
-4. Faça push para a branch: `git push origin feature/sua-feature`
-5. Abra um pull request.
+### Frontend Testing
+- **Framework**: Vue Test Utils (planned)
+- **Coverage**: Component and service testing
+- **E2E**: Playwright or Cypress for end-to-end testing (planned)
 
-## Licença
+### Running Tests
+```bash
+# Backend tests
+cd backend
+go test ./...
 
-Este projeto está licenciado sob a Licença MIT - veja o arquivo LICENSE para detalhes.
+# Frontend tests (when implemented)
+cd frontend
+npm run test
+```
 
-## Contato
+## 🤝 Contributing
 
-Para dúvidas ou suporte, entre em contato com o mantenedor do projeto.
+We welcome contributions! Please follow these guidelines:
+
+### Development Setup
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes following the coding standards
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+### Code Examples
+- **Controller Pattern**: Thin controllers that delegate to services
+- **Service Pattern**: Business logic separated from HTTP concerns
+- **Repository Pattern**: Data access abstracted through interfaces
+- **Component Composition**: Reusable Vue components with clear props/emits
+
+### Pull Request Process
+1. **Title**: Use conventional commit format
+2. **Description**: Explain what and why, reference issues
+3. **Testing**: Include test coverage for changes
+4. **Documentation**: Update docs if needed
+5. **Review**: Address reviewer feedback
+
+## 📚 Additional Documentation
+
+- [Project Architecture Blueprint](./docs/Project_Architecture_Blueprint.md) - Detailed architectural documentation
+- [API Documentation](./frontend/swagger-output.json) - OpenAPI specification
+<!-- - [Database Schema](./schema.sql) - PostgreSQL database schema -->
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with Go, Vue.js, and modern web technologies
+- Inspired by mental health tracking best practices
+- Community contributions and open-source ecosystem
+
+---
+
+**MindTrace** - Empowering mental health professionals and patients through technology.
