@@ -41,6 +41,9 @@ MindTrace is a comprehensive full-stack web application designed for mental heal
 ### Infrastructure & DevOps
 - **Containerization**: Docker
 - **Orchestration**: Docker Compose
+- **CI/CD**: GitHub Actions
+- **Container Registry**: Docker Hub
+- **Cloud Provider**: AWS EC2
 - **Database Admin**: PgAdmin 4
 - **Reverse Proxy**: Nginx
 - **Version Control**: Git
@@ -85,11 +88,11 @@ MindTrace implements **Clean Architecture** principles with clear separation of 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Docker and Docker Compose
+- Docker and Docker Compose (for local development)
 - Node.js 22.17.1 (optional, for local frontend development)
 - Go 1.25.1 (optional, for local backend development)
 
-### Quick Start with Docker (Recommended)
+### Local Development Setup
 
 1. **Clone the repository**:
    ```bash
@@ -113,8 +116,8 @@ MindTrace implements **Clean Architecture** principles with clear separation of 
    # For development (with hot reload)
    docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build
 
-   # For production
-   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+   # For SQLite development (lighter setup)
+   docker-compose -f docker-compose.sqlite.yml up --build
    ```
 
 4. **Access the application**:
@@ -122,7 +125,7 @@ MindTrace implements **Clean Architecture** principles with clear separation of 
    - Backend API: http://localhost/api/v1
    - PgAdmin: http://localhost:5050
 
-### Local Development Setup
+### Local Development (Without Docker)
 
 #### Backend (Go)
 ```bash
@@ -136,6 +139,42 @@ go run cmd/api/main.go
 cd frontend
 npm install
 npm run dev
+```
+
+## 🚀 Production Deployment
+
+MindTrace uses **CI/CD** with GitHub Actions for automated deployment to AWS:
+
+### Deployment Process
+1. **Push to main branch** triggers GitHub Actions workflow
+2. **Build** Docker images for backend and frontend
+3. **Push** images to Docker Hub
+4. **Deploy** to AWS EC2 instance via SSH
+5. **Update** containers with zero-downtime deployment
+
+### Production Environment Setup
+- **Cloud Provider**: AWS EC2
+- **Container Registry**: Docker Hub
+- **CI/CD**: GitHub Actions
+- **Database**: PostgreSQL (managed)
+- **Reverse Proxy**: Nginx
+
+### Deployment Configuration
+The production deployment requires these secrets in GitHub repository:
+- `DOCKER_HUB_USERNAME`: Docker Hub username
+- `DOCKER_HUB_TOKEN`: Docker Hub access token
+- `EC2_HOST`: AWS EC2 instance IP/hostname
+- `EC2_USER`: EC2 SSH username
+- `EC2_SSH_KEY`: Private SSH key for EC2 access
+- `FRONTEND_API_BASE_URL`: Production API URL (optional, defaults to localhost)
+
+### Manual Deployment (if needed)
+```bash
+# On production server
+cd /home/ubuntu/mindtrace
+git pull origin main
+docker compose -f docker-compose.prod.yml --env-file .env.prod pull
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --remove-orphans
 ```
 
 ## 📁 Project Structure
@@ -185,7 +224,7 @@ mindtrace/
 ## 🔧 Development Workflow
 
 ### Branching Strategy
-- `main`: Production-ready code
+- `main`: Production-ready code (protected branch with CI/CD)
 - `feature/*`: New features and enhancements
 - `docs/*`: New or updated documentation
 - `bugfix/*`: Bug fixes
@@ -197,11 +236,44 @@ mindtrace/
 3. **Run Tests**: Execute test suites for both backend and frontend
 4. **Code Review**: Submit pull request for review
 5. **Merge**: Squash merge to main after approval
+6. **Auto-deploy**: GitHub Actions automatically builds and deploys to production
+
+### CI/CD Pipeline
+- **Trigger**: Push to `main` branch or manual dispatch
+- **Build**: Multi-stage Docker builds for optimized images
+- **Test**: Automated testing (backend unit tests)
+- **Deploy**: Zero-downtime deployment to AWS EC2
+- **Monitoring**: Container health checks and log aggregation
+
+### Activating CI/CD
+The deployment workflow is currently disabled (`.github/workflows/deploy.yml.disabled`). To enable:
+
+1. Rename `.github/workflows/deploy.yml.disabled` to `.github/workflows/deploy.yml`
+2. Configure the required secrets in your GitHub repository:
+   - `DOCKER_HUB_USERNAME`
+   - `DOCKER_HUB_TOKEN`
+   - `EC2_HOST`
+   - `EC2_USER`
+   - `EC2_SSH_KEY`
+   - `FRONTEND_API_BASE_URL` (optional)
 
 ### Database Management
 - **Migrations**: Automatic via GORM AutoMigrate
 - **Seeding**: Use `seed.sh` for initial data
 - **Backup**: Regular PostgreSQL backups in production
+
+## 📊 Monitoring & Observability
+
+### Production Monitoring
+- **Health Checks**: Container health endpoints
+- **Logs**: Centralized logging with Docker Compose
+- **Metrics**: Application performance monitoring
+- **Alerts**: Automated notifications for system issues
+
+### Error Tracking
+- **Error Logging**: Structured logging in production
+- **Exception Handling**: Graceful error responses
+- **Debug Information**: Environment-specific error details
 
 ## 📋 Coding Standards
 
@@ -276,9 +348,10 @@ We welcome contributions! Please follow these guidelines:
 
 ## 📚 Additional Documentation
 
-- [Project Architecture Blueprint](./docs/Project_Architecture_Blueprint.md) - Detailed architectural documentation
+- [Project Architecture Blueprint](./Project_Architecture_Blueprint.md) - Detailed architectural documentation
 - [API Documentation](./frontend/swagger-output.json) - OpenAPI specification
-<!-- - [Database Schema](./schema.sql) - PostgreSQL database schema -->
+- [Database Schema](./schema.sql) - PostgreSQL database schema
+- [Migration Guide](./MIGRATION_GUIDE.md) - Version upgrade instructions
 
 ## 📄 License
 
