@@ -8,7 +8,7 @@
     <!-- Filtros de Período -->
     <div class="mb-8 flex justify-center md:justify-start space-x-2">
       <button v-for="range in timeRanges" :key="range.days" @click="selectedRange = range.days"
-        :class="['px-4 py-2 rounded-md font-medium text-sm transition-colors', selectedRange === range.days ? 'bg-emerald-600 text-white shadow' : 'bg-white text-gray-700 hover:bg-gray-100']">
+        :class="['px-4 py-2 rounded-md font-medium text-sm transition-colors', selectedRange === range.days ? 'bg-emerald-50 text-emerald-700 shadow-sm' : 'bg-white text-gray-600 hover:bg-gray-100 shadow-sm border border-gray-200 hover:text-gray-900']">
         {{ range.label }}
       </button>
     </div>
