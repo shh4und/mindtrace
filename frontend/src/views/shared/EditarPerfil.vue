@@ -102,17 +102,17 @@
         </div>
       </form>
     </div>
-
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-sm border border-red-200 p-6 md:p-8 mt-8">
+      <h2 class="text-xl font-semibold text-red-900 mb-6">Apagar Conta</h2>
+      <p class="text-gray-700 mb-4">Esta ação é irreversível e removerá todos os seus dados.</p>
+      <button type="button" @click="deleteAccount"
+        class="bg-red-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+        Apagar Conta
+      </button>
+    </div>
   </div>
   <!-- Card para Apagar Conta -->
-  <div class="w-full max-w-2xl bg-white rounded-xl shadow-sm border border-red-200 p-6 md:p-8 mt-8">
-    <h2 class="text-xl font-semibold text-red-900 mb-6">Apagar Conta</h2>
-    <p class="text-gray-700 mb-4">Esta ação é irreversível e removerá todos os seus dados.</p>
-    <button type="button" @click="deleteAccount"
-      class="bg-red-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-      Apagar Conta
-    </button>
-  </div>
+
 </template>
 
 <script setup>
