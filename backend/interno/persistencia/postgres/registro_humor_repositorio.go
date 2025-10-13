@@ -25,3 +25,9 @@ func (r *gormRegistroHumorRepositorio) BuscarPorPacienteEPeriodo(pacienteID uint
 	err := r.db.Where("paciente_id = ? AND data_hora_registro BETWEEN ? AND ?", pacienteID, inicio, fim).Find(&registros).Error
 	return registros, err
 }
+
+func (r *gormRegistroHumorRepositorio) BuscarUltimoRegistroDePaciente(pacienteID uint) (*dominio.RegistroHumor, error) {
+	var registro *dominio.RegistroHumor
+	err := r.db.Where("paciente_id = ?", pacienteID).Last(&registro).Error
+	return registro, err
+}

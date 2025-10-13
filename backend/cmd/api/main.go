@@ -80,6 +80,9 @@ func main() {
 	relatorioService := servicos.NovoRelatorioServico(db, registroHumorRepo, usuarioRepo)
 	relatorioController := controladores.NovoRelatorioControlador(relatorioService)
 
+	resumoService := servicos.NovoResumoServico(db, registroHumorRepo, usuarioRepo)
+	resumoController := controladores.NovoResumoControlador(resumoService)
+
 	conviteService := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo)
 	conviteController := controladores.NovoConviteControlador(conviteService)
 
@@ -136,6 +139,11 @@ func main() {
 			{
 				relatorios.GET("/", relatorioController.GerarRelatorio)
 				relatorios.GET("/paciente-lista", relatorioController.GerarRelatorioPacienteDoProfissional)
+			}
+
+			resumo := protegido.Group("/resumo")
+			{
+				resumo.GET("/", resumoController.GerarResumo)
 			}
 
 			convites := protegido.Group("/convites")

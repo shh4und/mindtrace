@@ -99,7 +99,6 @@ const chartData = computed(() => {
 const fetchReportData = async () => {
   isLoading.value = true;
   try {
-    // TODO: A API de relatório precisa aceitar um ID de paciente para o profissional
     let report;
     if (props.userType == "paciente"){
       report = (await api.buscarRelatorio(selectedRange.value)).data;

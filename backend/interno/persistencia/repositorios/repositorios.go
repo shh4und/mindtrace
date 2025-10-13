@@ -16,6 +16,7 @@ type ConviteRepositorio interface {
 type RegistroHumorRepositorio interface {
 	CriarRegistroHumor(tx *gorm.DB, registro *dominio.RegistroHumor) error
 	BuscarPorPacienteEPeriodo(pacienteID uint, inicio, fim time.Time) ([]*dominio.RegistroHumor, error)
+	BuscarUltimoRegistroDePaciente(pacienteID uint) (*dominio.RegistroHumor, error)
 }
 
 type UsuarioRepositorio interface {
