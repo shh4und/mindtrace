@@ -53,5 +53,5 @@
 </template>
 
 <script setup>
-// Nenhuma lógica de script necessária para este componente estático por enquanto.
+// Nenhuma logica de script necessaria para este componente estatico por enquanto
 </script>

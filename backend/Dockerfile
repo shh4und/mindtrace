@@ -2,7 +2,7 @@
 
 # --- Estágio 1: Build ---
 # Usamos uma imagem que já tem o Go instalado para compilar nosso projeto
-FROM golang:1.24.5-alpine AS builder
+FROM golang:alpine AS builder
 
 # Define o diretório de trabalho dentro do container
 WORKDIR /app

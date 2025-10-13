@@ -10,7 +10,7 @@
 	--emeral: #66ce83ff; /* Ortografia fornecida pelo usuario */
 	--aquamarine: #a5ffd6ff;
 	--melon: #ffa69eff;
-    --light-rose: oklch(71.2% 0.194 13.428);
+	--light-rose: oklch(71.2% 0.194 13.428); /* Tom rosa pastel usado em destaques sutis */
 	font-family: "Atkinson Hyperlegible Next", sans-serif;
 	font-weight: 400;
 }

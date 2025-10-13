@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import api from '../services/api';
-import router from '../router'; // Importa o roteador para redirecionamento
+import router from '../router'; // Importa roteador para redirecionamento
 
 export const useUserStore = defineStore('user', () => {
   // estado centralizado do usuario autenticado
@@ -12,14 +12,14 @@ export const useUserStore = defineStore('user', () => {
   // --- GETTERS (como computed properties) ---
   const isLoggedIn = computed(() => isAuthenticated.value);
 
-  // --- ACTIONS (como funções) ---
+  // --- ACTIONS (como funcoes) ---
 
   /**
-   * Busca os dados do perfil do usuário logado (paciente ou profissional).
-   * @param {string} userType - O tipo de usuário ('paciente' ou 'profissional').
+   * Busca os dados do perfil do usuario logado paciente ou profissional
+   * @param {string} userType - tipo de usuario paciente ou profissional
    */
   async function fetchUser(userType) {
-    // Busca dados apenas se estiver autenticado e o perfil ainda não foi carregado.
+    // Busca dados apenas se estiver autenticado e perfil ainda nao foi carregado
     if (isAuthenticated.value && !user.value) {
       try {
         let response;
@@ -33,7 +33,7 @@ export const useUserStore = defineStore('user', () => {
         user.value = response.data;
       } catch (error) {
         console.error('Falha ao buscar dados do usuário:', error);
-        // Se o token for inválido (erro 401/403), desloga o usuário.
+        // Se o token for invalido erro 401 403 desloga o usuario
         if (error.response && [401, 403].includes(error.response.status)) {
           logout();
         }
@@ -43,7 +43,7 @@ export const useUserStore = defineStore('user', () => {
   async function deleteAccount() {
       try {
         await api.deletarConta();
-        logout(); // Logout após exclusão
+        logout(); // Logout apos exclusao
         return { success: true };
       } catch (error) {
         console.error('Falha ao deletar conta:', error);
@@ -51,9 +51,9 @@ export const useUserStore = defineStore('user', () => {
       }
     }
   /**
-   * Realiza o registro de um novo usuário.
-   * @param {Object} data - Dados do registro.
-   * @param {string} userType - Tipo de usuário ('paciente' ou 'profissional').
+   * Realiza o registro de um novo usuario
+   * @param {Object} data - dados do registro
+   * @param {string} userType - tipo de usuario paciente ou profissional
    */
   async function register(data, userType) {
     try {
@@ -74,16 +74,16 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /**
-   * Realiza o login do usuário.
-   * @param {Object} credentials - Credenciais de login (email e senha).
+   * Realiza o login do usuario
+   * @param {Object} credentials - credenciais de login email e senha
    */
   async function login(credentials) {
     try {
       const response = await api.login(credentials);
       const token = response.data.token;
       localStorage.setItem('token', token);
-      isAuthenticated.value = true;
-      // Opcional: Buscar dados do usuário após login
+    isAuthenticated.value = true;
+    // Opcional buscar dados do usuario apos login
       const decodedToken = JSON.parse(atob(token.split('.')[1]));
       if (decodedToken && decodedToken.role) {
         await fetchUser(decodedToken.role === 'profissional' ? 'profissional' : 'paciente');
@@ -96,13 +96,13 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /**
-   * Realiza o logout do usuário.
+   * Realiza o logout do usuario
    */
   function logout() {
     localStorage.removeItem('token');
     user.value = null;
     isAuthenticated.value = false;
-    // Redireciona para a página de login para uma experiência de usuário mais fluida.
+    // Redireciona para pagina de login para uma experiencia de usuario mais fluida
     router.push('/login');
   }
 

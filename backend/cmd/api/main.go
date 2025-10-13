@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// main inicializa o servidor HTTP e configura as rotas principais
+// main inicializa servidor http organiza dependencias e configura rotas principais
 func main() {
 	var db *gorm.DB
 	var err error
@@ -37,7 +37,7 @@ func main() {
 		log.Fatalf("DB_DRIVER invalido: %s", dbDriver)
 	}
 
-	// Executa migracoes automatizadas para alinhar o esquema do banco
+	// Executa migracoes automatizadas para alinhar esquema do banco
 	err = db.AutoMigrate(
 		&dominio.Usuario{},
 		&dominio.Profissional{},
@@ -51,7 +51,7 @@ func main() {
 		log.Fatalf("falha ao migrar o banco de dados: %v", err)
 	}
 
-	// Seleciona implementacoes de repositorio conforme o driver ativo
+	// Seleciona implementacoes de repositorio conforme driver ativo
 	var usuarioRepo repositorios.UsuarioRepositorio
 	var registroHumorRepo repositorios.RegistroHumorRepositorio
 	var conviteRepo repositorios.ConviteRepositorio
@@ -83,15 +83,15 @@ func main() {
 	conviteService := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo)
 	conviteController := controladores.NovoConviteControlador(conviteService)
 
-	// Configura roteador HTTP com middlewares e grupos de rotas
+	// Configura roteador http com middlewares e grupos de rotas
 	roteador := gin.Default()
 	roteador.SetTrustedProxies([]string{"127.0.0.1"})
-	// Adiciona o middleware de CORS
+	// Inclui middleware cors padrao aceitando chamadas do frontend
 	roteador.Use(middlewares.CORSMiddleware())
 
 	api := roteador.Group("/api/v1")
 	{
-		// --- ROTAS PÚBLICAS ---
+		// --- ROTAS PUBLICAS ---
 		auth := api.Group("/entrar")
 		{
 			auth.POST("/login", autController.Login)
@@ -99,18 +99,18 @@ func main() {
 
 		profissionais := api.Group("/profissionais")
 		{
-			// O registro de profissionais pode ser público
+			// Registro de profissionais acessivel sem autenticacao
 			profissionais.POST("/registrar", profissionalController.Registrar)
 		}
 
 		pacientes := api.Group("/pacientes")
 		{
-			// O registro de pacientes também
+			// Registro de pacientes disponivel sem token
 			pacientes.POST("/registrar", pacienteController.Registrar)
 		}
 
 		// --- ROTAS PROTEGIDAS ---
-		// Todas as rotas dentro deste grupo exigirão um token JWT válido
+		// Todas as rotas deste grupo exigirao token jwt valido
 		protegido := api.Group("/")
 		protegido.Use(middlewares.AutMiddleware())
 		{

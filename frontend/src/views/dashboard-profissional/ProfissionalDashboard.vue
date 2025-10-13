@@ -1,23 +1,23 @@
 <template>
   <div class="min-h-screen bg-gray-50 font-sans antialiased flex flex-col">
-    <!-- Top Navbar -->
+  <!-- Navbar superior -->
     <TopNavbar 
       user-type="profissional" 
       @edit-profile="handleNavigation('editar-perfil')"
       @logout="handleLogout"
     />
 
-    <!-- Main Content with Sidebar -->
+  <!-- Conteudo principal com sidebar -->
     <div class="flex flex-1 overflow-hidden">
-      <!-- Sidebar -->
+  <!-- Barra lateral -->
       <SidebarProfissional 
         :active-view="activeView"
         @navigate="handleNavigation" 
       />
 
-      <!-- Main Content Area -->
+  <!-- Area de conteudo principal -->
       <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <!-- Mostra a lista de pacientes ou o relatório de um paciente específico -->
+  <!-- Lista de pacientes ou relatorio de um paciente especifico -->
         <div v-if="activeView === 'pacientes'">
           <ListaPacientes v-if="!selectedPatientId" @view-patient="showPatientReport" />
           <div v-else>
@@ -29,7 +29,7 @@
           </div>
         </div>
 
-        <!-- Mostra outras views -->
+  <!-- Outras views disponiveis -->
         <GerarConvite v-if="activeView === 'convite'" />
         <EditarPerfil v-if="activeView === 'editar-perfil'" user-type="profissional" />
       </main>
@@ -48,17 +48,17 @@ import GerarConvite from './GerarConvite.vue';
 import EditarPerfil from '../shared/EditarPerfil.vue';
 
 const userStore = useUserStore();
-const activeView = ref('pacientes'); // Visão inicial
+const activeView = ref('pacientes'); // Visao inicial
 const selectedPatientId = ref(null);
 
 const handleNavigation = (view) => {
   activeView.value = view;
-  selectedPatientId.value = null; // Reseta a seleção de paciente ao navegar
+  selectedPatientId.value = null; // Reseta a selecao de paciente ao navegar
 };
 
 const showPatientReport = (patientId) => {
   selectedPatientId.value = patientId;
-  // A view já é 'pacientes', então apenas a condição do v-if/v-else muda
+  // A view ja e pacientes entao apenas a condicao do vif velse muda
 };
 
 const showPatientList = () => {
@@ -70,7 +70,7 @@ const handleLogout = () => {
 };
 
 onMounted(async () => {
-  // Fetch user data if not already loaded
+  // Busca dados do usuario se ainda nao estiverem carregados
   if (!userStore.user) {
     await userStore.fetchUser('profissional');
   }

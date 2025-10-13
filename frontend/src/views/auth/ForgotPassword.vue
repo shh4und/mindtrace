@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 flex flex-col">
-    <!-- Navbar Pública -->
+  <!-- Navbar publica -->
     <NavbarPublic :show-menu="false" />
 
     <div class="flex flex-grow items-center justify-center px-4">
@@ -75,10 +75,10 @@ const newPassword = ref('');
 const confirmPassword = ref('');
 const codeInputRefs = ref([]);
 
-const sentCode = '1234'; // Simulação
+const sentCode = '1234'; // Simulacao
 
 const sendCode = () => {
-  // Simula o envio do código
+  // Simula o envio do codigo
   alert(`Código de verificação enviado para ${email.value}. Código simulado: ${sentCode}`);
   step.value = 2;
 };
@@ -114,7 +114,7 @@ const handleKeyDown = (index, event) => {
 </script>
 
 <style scoped>
-/* Remove as setas de inputs de números para navegadores baseados em WebKit (Chrome, Safari, etc.) */
+/* Remove as setas dos inputs numericos em navegadores webkit */
 .code-input::-webkit-outer-spin-button,
 .code-input::-webkit-inner-spin-button {
   -webkit-appearance: none;

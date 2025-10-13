@@ -6,10 +6,10 @@ import ForgotPassword from '../views/auth/ForgotPassword.vue'
 import PacienteDashboard from '../views/dashboard-paciente/PacienteDashboard.vue'
 import ProfissionalDashboard from '../views/dashboard-profissional/ProfissionalDashboard.vue'
 
-// configura o roteador principal com historico baseado em URL
+// configura roteador principal com historico html5 baseado na base url do ambiente
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  // define as rotas publicas da aplicacao
+  // define rotas declaradas delegando protecao para regras de autenticacao externas
   routes: [
     {
       path: '/',

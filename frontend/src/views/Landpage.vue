@@ -20,7 +20,7 @@
         </div>
       </section>
 
-  <!-- Secao de Recursos -->
+  <!-- Secao recursos -->
       <section id="features" class="py-24 bg-white">
         <div class="container mx-auto px-6 text-center">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Como o MindTrace te Ajuda</h2>
@@ -77,7 +77,7 @@
         </div>
       </section>
 
-  <!-- Secao Sobre -->
+  <!-- Secao sobre -->
       <section id="about" class="py-24 bg-gray-100">
         <div class="container mx-auto px-6">
           <div class="flex flex-col md:flex-row items-center justify-between">
@@ -101,7 +101,7 @@
         </div>
       </section>
 
-  <!-- Secao Contato -->
+  <!-- Secao contato -->
       <section id="contact" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white py-24">
         <div class="container mx-auto px-6 text-center">
           <h2 class="text-3xl md:text-4xl font-bold">Pronto para começar sua jornada?</h2>
@@ -135,19 +135,20 @@ import { faBrain, } from '@fortawesome/free-solid-svg-icons';
 </script>
 
 <style>
-/* Estilos para o menu de navegação responsivo */
+/* Estilos para o menu de navegacao responsivo */
 #mobile-menu {
   transition: all 0.3s ease-in-out;
   transform: translateY(-100%);
   opacity: 0;
 }
 
+/* Estado ativo do menu mobile */
 #mobile-menu.active {
   transform: translateY(0);
   opacity: 1;
 }
 
-/* Animação para os cards de feature */
+/* Animacao para os cards de feature */
 .feature-card {
   animation: fadeInUp 0.6s ease-in-out forwards;
   opacity: 0;

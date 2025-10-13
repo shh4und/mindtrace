@@ -27,6 +27,7 @@ app.component('font-awesome-icon', FontAwesomeIcon);
 
 app.use(pinia)
 app.use(router)
+// habilita componentes apexcharts como plugin global
 app.use(VueApexCharts)
 
 // configuracoes padrao para notificacoes toast

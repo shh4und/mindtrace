@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Navbar Pública -->
+  <!-- Navbar publica -->
     <NavbarPublic :show-menu="false" />
 
     <div class="flex items-center justify-center px-4 py-8">
@@ -8,7 +8,7 @@
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
           <h2 class="text-2xl font-semibold text-center text-gray-900 mb-6">Criar Conta</h2>
 
-          <!-- Seletor de Tipo de Conta -->
+          <!-- Seletor tipo conta -->
           <div class="grid grid-cols-2 gap-4 mb-8">
             <button @click="form.userType = 'paciente'"
               :class="['p-4 rounded-lg border-2 text-center transition', form.userType === 'paciente' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 bg-white hover:border-emerald-400']">
@@ -21,7 +21,7 @@
           </div>
 
           <form v-if="form.userType" @submit.prevent="handleRegister" class="space-y-6">
-            <!-- Campos Comuns -->
+            <!-- Campos comuns -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label for="nome" class="block text-base font-medium text-gray-700 mb-1">Nome Completo</label>
@@ -59,7 +59,7 @@
               </div>
             </div>
 
-            <!-- Campos do Profissional -->
+            <!-- Campos profissional -->
             <div v-if="form.userType === 'profissional'"
               class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
               <div>
@@ -75,7 +75,7 @@
               </div>
             </div>
 
-            <!-- Campos do Paciente -->
+            <!-- Campos paciente -->
             <div v-if="form.userType === 'paciente'"
               class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-300">
 
@@ -132,7 +132,7 @@ const toast = useToast();
 const userStore = useUserStore();
 
 const form = reactive({
-  userType: '', // paciente ou profissional
+  userType: '', // Tipo selecionado paciente ou profissional
   nome: '',
   email: '',
   senha: '',

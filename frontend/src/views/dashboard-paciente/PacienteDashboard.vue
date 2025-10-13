@@ -1,21 +1,21 @@
 <template>
   <div class="min-h-screen bg-gray-50 font-sans antialiased flex flex-col">
-    <!-- Top Navbar -->
+  <!-- Navbar superior -->
     <TopNavbar 
       user-type="paciente" 
       @edit-profile="handleNavigation('editar-perfil')"
       @logout="handleLogout"
     />
 
-    <!-- Main Content with Sidebar -->
+  <!-- Conteudo principal com sidebar -->
     <div class="flex flex-1 overflow-hidden">
-      <!-- Sidebar -->
+  <!-- Barra lateral -->
       <SidebarPaciente 
         :active-view="activeView"
         @navigate="handleNavigation" 
       />
 
-      <!-- Main Content Area -->
+  <!-- Area de conteudo principal -->
       <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <Resumo v-if="activeView === 'resumo'" />
         <RegistroHumor v-if="activeView === 'humor'" />
@@ -50,7 +50,7 @@ const handleLogout = () => {
 };
 
 onMounted(async () => {
-  // Fetch user data if not already loaded
+  // Busca dados do usuario se ainda nao estiverem carregados
   if (!userStore.user) {
     await userStore.fetchUser('paciente');
   }

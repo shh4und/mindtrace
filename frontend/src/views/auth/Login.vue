@@ -1,17 +1,17 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Navbar Pública -->
+  <!-- Navbar publica -->
     <NavbarPublic :show-menu="false" />
 
-    <!-- Container do Formulário de Login -->
+  <!-- Container do formulario de login -->
     <div class="flex items-center justify-center px-4 mt-16">
       <div class="w-full max-w-md">
-        <!-- Formulário de Login -->
+  <!-- Formulario de login -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
           <h2 class="text-3xl font-semibold text-center text-gray-900 mb-8">Entrar</h2>
 
           <form @submit.prevent="handleLogin" class="space-y-6">
-            <!-- Campo Email -->
+            <!-- Campo email -->
             <div>
               <label for="email" class="block text-lg font-medium text-gray-700 mb-2">
                 E-mail
@@ -21,7 +21,7 @@
                 required />
             </div>
 
-            <!-- Campo Password -->
+            <!-- Campo senha -->
             <div>
               <label for="password" class="block text-lg font-medium text-gray-700 mb-2">
                 Senha
@@ -85,7 +85,7 @@ const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 };
 
-// Função para decodificar o payload do JWT
+// Funcao para decodificar o payload do jwt
 const parseJwt = (token) => {
   try {
     return JSON.parse(atob(token.split('.')[1]));
@@ -98,7 +98,7 @@ const handleLogin = async () => {
   const result = await userStore.login({ email: email.value, senha: password.value });
   if (result.success) {
     toast.success('Login realizado com sucesso!');
-    // O redirecionamento é baseado no role, que já foi determinado no store
+  // O redirecionamento eh baseado no role que ja foi determinado no store
     const token = localStorage.getItem('token');
     const decodedToken = parseJwt(token);
     if (decodedToken && decodedToken.role) {

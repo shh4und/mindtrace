@@ -16,7 +16,7 @@
         </div>
       </div>
 
-      <!-- Mood selection (more generic, with emojis) -->
+  <!-- Secao de selecao de humor com emojis -->
       <div class="bg-rose-50 rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4 text-center">Como você se sentiu hoje?</h2>
         <div class="flex flex-wrap gap-6 justify-center">
@@ -29,7 +29,7 @@
         </div>
       </div>
 
-      <!-- Sleep slider with discrete moon icons (0..12) -->
+  <!-- Controle de sono com icones de lua -->
       <div class="bg-rose-100 rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">Horas de Sono</h2>
         <div class="flex flex-col md:flex-row items-center md:space-x-4">
@@ -57,7 +57,7 @@
         </div>
       </div>
 
-      <!-- Energy slider with battery icons -->
+  <!-- Controle de energia com icones de bateria -->
       <div class="bg-amber-50 rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">Nível de Energia</h2>
         <div class="flex flex-col md:flex-row items-center md:space-x-4">
@@ -84,7 +84,7 @@
         </div>
       </div>
 
-      <!-- Stress slider with alert icons -->
+  <!-- Controle de stress com icones de alerta -->
       <div class="bg-yellow-50 rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">Nível de Stress</h2>
         <div class="flex flex-col md:flex-row items-center md:space-x-4">
@@ -158,7 +158,7 @@ import api from '../../services/api';
 
 const toast = useToast();
 
-// Core selections
+// Selecoes principais do formulario
 const selectedMood = ref('');
 const sleepHours = ref(0);
 const energyLevel = ref(6);
@@ -169,12 +169,12 @@ const selectedActivities = ref([]);
 const otherActivity = ref('');
 const notes = ref('');
 
-// Discrete slider configuration (number of steps)
+// Configuracao discreta dos sliders com numero de passos
 const sleepMax = 12;
 const energyMax = 10;
 const stressMax = 10;
 
-// Arrays used to render the icon rows (0..max)
+// Arrays utilizados para montar as linhas de icones passo a passo
 const sleepSteps = Array.from({ length: sleepMax + 1 }, (_, i) => i);
 const energySteps = Array.from({ length: energyMax }, (_, i) => i);
 const stressSteps = Array.from({ length: stressMax }, (_, i) => i);
@@ -187,7 +187,7 @@ const moodOptions = [
   { value: 'very_good', label: 'Muito Bem', emoji: '😁' },
 ];
 
-// More elaborate stress SVG used for the large icon display
+// Svg detalhado utilizado para destacar o indicador de stress na area maior
 
 const today = new Date();
 const currentDate = computed(() => today.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' }));
@@ -215,7 +215,7 @@ const submitMood = async () => {
   if (otherActivity.value) finalActivities.push(otherActivity.value);
   if (finalActivities.includes('Nenhuma Atividade')) finalActivities = ['Nenhuma Atividade'];
 
-  // Objeto padronizado para corresponder ao DTO do backend
+  // Objeto padronizado para corresponder ao dto do backend
   const submission = {
     nivel_humor: moodLevelMapping[selectedMood.value],
     horas_sono: sleepHours.value > sleepMax ? sleepMax : sleepHours.value,
@@ -229,7 +229,7 @@ const submitMood = async () => {
   try {
     await api.registrarHumor(submission);
     toast.success('Seu humor foi registrado com sucesso!');
-    // Opcional: limpar o formulário ou navegar para outra página
+    // Opcional limpar o formulario ou navegar para outra pagina
   } catch (error) {
     toast.error('Houve um erro ao registrar seu humor.');
     console.error("Erro ao registrar humor:", error);
@@ -267,7 +267,7 @@ const submitMood = async () => {
   filter: drop-shadow(0 0 4px rgba(255, 104, 122, 0.35));
 }
 
-/* New styles for sliders and mood buttons */
+/* Novos estilos para os sliders e botoes de humor */
 .slider {
   appearance: none;
   -webkit-appearance: none;
@@ -292,7 +292,7 @@ const submitMood = async () => {
   width: 110px;
   height: 110px;
   background: transparent;
-  /* removed white background */
+  /* Fundo branco removido */
   border: 1px solid transparent;
 }
 
@@ -307,10 +307,10 @@ const submitMood = async () => {
   box-shadow: 0 6px 18px rgba(16, 185, 129, 0.08);
 }
 
-/* Larger emoji and svg icon sizes */
+/* Emojis e svgs em tamanho ampliado */
 .mood-emoji {
   font-size: 34px;
-  /* larger emojis */
+  /* Emojis maiores para facilitar a leitura */
   line-height: 1;
 }
 
@@ -332,7 +332,7 @@ const submitMood = async () => {
   margin: 0 auto 4px;
 }
 
-/* increase spacing and tappable area for steps */
+/* Aumenta o espacamento e a area de toque dos passos */
 .icon-row {
   gap: 8px;
 }
@@ -340,10 +340,10 @@ const submitMood = async () => {
 .icon-step {
   padding: 10px 6px;
   flex: 0 0 28px;
-  /* fixed step width to avoid overflow */
+  /* Largura fixa para evitar overflow */
 }
 
-/* make the icon row constrained to the slider width */
+/* Mantem a linha de icones dentro da largura do slider */
 .w-full .icon-row {
   max-width: 100%;
   justify-content: space-between;
@@ -357,7 +357,7 @@ const submitMood = async () => {
   font-size: 18px;
 }
 
-/* Larger emoji steps and display */
+/* Emojis maiores para passos e display principal */
 .step-emoji {
   font-size: 22px;
   line-height: 1;
@@ -375,7 +375,7 @@ const submitMood = async () => {
 
 
 
-/* Icon row (discrete steps above the slider) */
+/* Linha de icones representando passos discretos acima do slider */
 .icon-row {
   display: flex;
   gap: 6px;

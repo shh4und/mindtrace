@@ -40,16 +40,19 @@
 import { ref } from 'vue';
 import { useClipboard } from '@vueuse/core';
 import { useToast } from 'vue-toastification';
-import api from '../../services/api'; // Importando a API
+import api from '../../services/api'; // Dependencias principais
 
 const token = ref(null);
 const expiryDate = ref(null);
 const copied = ref(false);
 const isLoading = ref(false);
 
+// Estados reativos do componente
+
 const { copy } = useClipboard({ source: token });
 const toast = useToast();
 
+// Cria novo convite e atualiza estado
 const generateInvite = async () => {
   isLoading.value = true;
   copied.value = false;
@@ -70,11 +73,12 @@ const generateInvite = async () => {
   }
 };
 
+// Copia token gerado e exibe confirmacao
 const copyToken = () => {
   if (!token.value) return;
   copy(token.value);
   toast.success("Token copiado!");
   copied.value = true;
-  setTimeout(() => (copied.value = false), 3000); // Resetar a mensagem após 3 segundos
+  setTimeout(() => (copied.value = false), 3000); // Redefine mensagem apos 3 segundos
 }
 </script>

@@ -48,8 +48,8 @@ const submitToken = async () => {
   isLoading.value = true;
   try {
     const response = await api.vincularComToken(token.value.trim());
-    toast.success(response.data.mensagem || "Vínculo realizado com sucesso!");
-    token.value = ''; // Limpa o campo após o sucesso
+  toast.success(response.data.mensagem || "Vínculo realizado com sucesso!");
+  token.value = ''; // Limpa o campo apos o sucesso
   } catch (error) {
     const errorMessage = error.response?.data?.erro || "Falha ao processar o token.";
     toast.error(errorMessage);
