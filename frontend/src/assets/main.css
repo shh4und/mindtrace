@@ -2,10 +2,12 @@
 @import "tailwindcss";
 
 
+
+/* Define tokens visuais globais do projeto */
 :root {
-	/* New design tokens requested by the user */
+	/* Novos tokens de design solicitados pelo usuario */
 	--white: #ffffffff;
-	--emeral: #66ce83ff; /* user-provided spelling */
+	--emeral: #66ce83ff; /* Ortografia fornecida pelo usuario */
 	--aquamarine: #a5ffd6ff;
 	--melon: #ffa69eff;
     --light-rose: oklch(71.2% 0.194 13.428);

@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import api from '../services/api';
-import router from '../router'; // Import router for redirection
+import router from '../router'; // Importa o roteador para redirecionamento
 
 export const useUserStore = defineStore('user', () => {
+  // estado centralizado do usuario autenticado
   // --- STATE ---
   const user = ref(null);
   const isAuthenticated = ref(!!localStorage.getItem('token'));
@@ -105,6 +106,7 @@ export const useUserStore = defineStore('user', () => {
     router.push('/login');
   }
 
+  // disponibiliza estado e acoes para os componentes
   return {
     user,
     isAuthenticated,

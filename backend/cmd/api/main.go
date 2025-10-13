@@ -15,6 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// main inicializa o servidor HTTP e configura as rotas principais
 func main() {
 	var db *gorm.DB
 	var err error
@@ -25,17 +26,18 @@ func main() {
 	case "postgres":
 		db, err = postgres_repo.NewDB()
 		if err != nil {
-			log.Fatalf("failed to connect to postgres: %v", err)
+			log.Fatalf("falha ao conectar ao postgres: %v", err)
 		}
 	case "sqlite":
 		db, err = sqlite_repo.NewDB()
 		if err != nil {
-			log.Fatalf("failed to connect to sqlite: %v", err)
+			log.Fatalf("falha ao conectar ao sqlite: %v", err)
 		}
 	default:
-		log.Fatalf("invalid DB_DRIVER: %s", dbDriver)
+		log.Fatalf("DB_DRIVER invalido: %s", dbDriver)
 	}
 
+	// Executa migracoes automatizadas para alinhar o esquema do banco
 	err = db.AutoMigrate(
 		&dominio.Usuario{},
 		&dominio.Profissional{},
@@ -46,9 +48,10 @@ func main() {
 		&dominio.Convite{},
 	)
 	if err != nil {
-		log.Fatalf("failed to migrate database: %v", err)
+		log.Fatalf("falha ao migrar o banco de dados: %v", err)
 	}
 
+	// Seleciona implementacoes de repositorio conforme o driver ativo
 	var usuarioRepo repositorios.UsuarioRepositorio
 	var registroHumorRepo repositorios.RegistroHumorRepositorio
 	var conviteRepo repositorios.ConviteRepositorio
@@ -64,6 +67,7 @@ func main() {
 		conviteRepo = sqlite_repo.NovoGormConviteRepositorio(db)
 	}
 
+	// Inicializa servicos e controladores da camada de aplicacao
 	usuarioService := servicos.NovoUsuarioServico(db, usuarioRepo)
 	profissionalController := controladores.NovoProfissionalControlador(usuarioService)
 	pacienteController := controladores.NovoPacienteControlador(usuarioService)
@@ -79,6 +83,7 @@ func main() {
 	conviteService := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo)
 	conviteController := controladores.NovoConviteControlador(conviteService)
 
+	// Configura roteador HTTP com middlewares e grupos de rotas
 	roteador := gin.Default()
 	roteador.SetTrustedProxies([]string{"127.0.0.1"})
 	// Adiciona o middleware de CORS
@@ -141,6 +146,6 @@ func main() {
 		}
 	}
 
-	log.Println("Server is running on port 8080")
+	log.Println("servidor iniciado na porta 8080")
 	roteador.Run(":8080")
 }

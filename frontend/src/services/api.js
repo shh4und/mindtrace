@@ -7,6 +7,7 @@ const buildTimeBase = import.meta.env?.VITE_API_BASE_URL;
 const fallbackBase = `${window.location.origin}/api/v1`;
 const baseURL = buildTimeBase || fallbackBase;
 
+// instancia um cliente axios padrao para consumir a API
 const apiClient = axios.create({
   baseURL,
   headers: {
@@ -37,6 +38,7 @@ apiClient.interceptors.request.use(
 
 // Funções de API que nossos componentes irão usar
 const api = {
+  // autenticacao e sessao
   login(credentials) {
     return apiClient.post('/entrar/login', credentials);
   },
@@ -92,5 +94,6 @@ const api = {
   },
 };
 
+// exporta o cliente configurado e funcoes auxiliares
 export { apiClient, api };
 export default api;

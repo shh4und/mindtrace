@@ -1,10 +1,10 @@
 <template>
   <div class="bg-gray-50 text-gray-800">
-    <!-- Header -->
+    <!-- Cabecalho -->
     <NavbarPublic />
 
     <main>
-      <!-- Hero Section -->
+      <!-- Secao Hero -->
       <section id="home" class="relative py-24 md:py-40 bg-gradient-to-br from-emerald-100 to-rose-100">
         <div class="container mx-auto px-6 text-center">
           <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-wide text-gray-900">
@@ -20,7 +20,7 @@
         </div>
       </section>
 
-      <!-- Features Section -->
+  <!-- Secao de Recursos -->
       <section id="features" class="py-24 bg-white">
         <div class="container mx-auto px-6 text-center">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Como o MindTrace te Ajuda</h2>
@@ -28,7 +28,7 @@
             Ferramentas intuitivas e divertidas para o seu bem-estar emocional.
           </p>
           <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-10">
-            <!-- Feature 1 -->
+            <!-- Recurso 1 -->
             <div
               class="feature-card bg-gray-50 p-8 rounded-2xl shadow-lg transform transition duration-500 hover:scale-105 hover:shadow-2xl">
               <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -44,7 +44,7 @@
                 emocionais.
               </p>
             </div>
-            <!-- Feature 2 -->
+            <!-- Recurso 2 -->
             <div
               class="feature-card bg-gray-50 p-8 rounded-2xl shadow-lg transform transition duration-500 hover:scale-105 hover:shadow-2xl">
               <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -58,7 +58,7 @@
                 Veja sua jornada em gráficos intuitivos. Informação valiosa para você e para seu terapeuta.
               </p>
             </div>
-            <!-- Feature 3 -->
+            <!-- Recurso 3 -->
             <div
               class="feature-card bg-gray-50 p-8 rounded-2xl shadow-lg transform transition duration-500 hover:scale-105 hover:shadow-2xl">
               <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -77,7 +77,7 @@
         </div>
       </section>
 
-      <!-- About Section -->
+  <!-- Secao Sobre -->
       <section id="about" class="py-24 bg-gray-100">
         <div class="container mx-auto px-6">
           <div class="flex flex-col md:flex-row items-center justify-between">
@@ -101,7 +101,7 @@
         </div>
       </section>
 
-      <!-- Contact Section -->
+  <!-- Secao Contato -->
       <section id="contact" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white py-24">
         <div class="container mx-auto px-6 text-center">
           <h2 class="text-3xl md:text-4xl font-bold">Pronto para começar sua jornada?</h2>
