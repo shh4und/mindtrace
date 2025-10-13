@@ -34,7 +34,7 @@ func (ac *AutControlador) Login(c *gin.Context) {
 
 	token, err := ac.usuarioServico.Login(req.Email, req.Senha)
 	if err != nil {
-		// Retorna 401 para credenciais inválidas
+		// Retorna 401 para credenciais invalidas
 		c.JSON(http.StatusUnauthorized, gin.H{"erro": err.Error()})
 		return
 	}

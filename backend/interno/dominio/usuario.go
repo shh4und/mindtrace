@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Usuario é a base para todos os tipos de usuários.
+// Usuario e a base para todos os tipos de usuarios.
 type Usuario struct {
 	ID          uint           `gorm:"primaryKey"`
 	TipoUsuario string         `json:"tipo_usuario" gorm:"type:varchar(50);not null"`
@@ -25,7 +25,7 @@ func (Usuario) TableName() string {
 	return "usuarios"
 }
 
-// Profissional tem seus próprios dados e uma referência ao Usuario.
+// Profissional tem seus proprios dados e uma referencia ao Usuario.
 type Profissional struct {
 	ID                   uint       `gorm:"primaryKey"`
 	UsuarioID            uint       `json:"-" gorm:"unique;not null"`
@@ -42,7 +42,7 @@ func (Profissional) TableName() string {
 	return "profissionais"
 }
 
-// Paciente tem seus próprios dados e uma referência ao Usuario.
+// Paciente tem seus proprios dados e uma referencia ao Usuario.
 type Paciente struct {
 	ID                   uint           `json:"id" gorm:"primaryKey"`
 	UsuarioID            uint           `json:"-" gorm:"unique;not null"`

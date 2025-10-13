@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// Notificacao representa uma notificação enviada a um usuário.
+// Notificacao representa uma notificacao enviada a um usuario.
 type Notificacao struct {
 	ID        uint      `gorm:"primaryKey"`
 	UsuarioID uint      `json:"-" gorm:"not null"`

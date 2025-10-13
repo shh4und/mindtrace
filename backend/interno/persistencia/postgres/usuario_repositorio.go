@@ -11,7 +11,7 @@ type gormUsuarioRepositorio struct {
 	db *gorm.DB
 }
 
-// NovoGormUsuarioRepositorio cria uma nova instância do repositório de usuário com GORM.
+// NovoGormUsuarioRepositorio cria uma nova instancia do repositorio de usuario com GORM
 func NovoGormUsuarioRepositorio(db *gorm.DB) repositorios.UsuarioRepositorio {
 	return &gormUsuarioRepositorio{db: db}
 }
@@ -99,6 +99,6 @@ func (r *gormUsuarioRepositorio) AtualizarPaciente(tx *gorm.DB, paciente *domini
 }
 
 func (r *gormUsuarioRepositorio) DeletarUsuario(tx *gorm.DB, id uint) error {
-	// Deletar o usuário (hard delete, ignorando soft delete)
+	// Deleta o usuario com hard delete ignorando soft delete
 	return tx.Unscoped().Delete(&dominio.Usuario{}, id).Error
 }

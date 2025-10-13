@@ -43,8 +43,8 @@ func AutMiddleware() gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			// Extrai o ID do usuário do token e o coloca no contexto do Gin
-			// Isso é útil para os controladores saberem qual usuário está fazendo a requisição
+			// Extrai o ID do usuario do token e coloca no contexto do Gin
+			// Facilita os controladores a identificar qual usuario fez a requisicao
 			userIDFloat := claims["sub"].(float64)
 			c.Set("userID", uint(userIDFloat))
 		} else {
@@ -52,6 +52,6 @@ func AutMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Next() // Passa para o próximo handler
+		c.Next() // Passa para o proximo handler
 	}
 }

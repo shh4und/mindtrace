@@ -48,7 +48,7 @@ type AtualizarPerfilDTO struct {
 	// Campos para Profissional
 	Especialidade        string `json:"especialidade,omitempty"`
 	RegistroProfissional string `json:"registro_profissional,omitempty"`
-	// IdadeProfissional    *int8  `json:"idade_profissional,omitempty"` // Se aplicável
+	// IdadeProfissional    *int8  `json:"idade_profissional,omitempty"` // Se aplicavel
 	// Campos para Paciente
 	DataNascimento     *time.Time `json:"data_nascimento,omitempty"`
 	Dependente         *bool      `json:"dependente,omitempty"`
@@ -66,7 +66,7 @@ type AlterarSenhaDTO struct {
 var ErrEmailJaCadastrado = errors.New("e-mail existente")
 var ErrCrendenciaisInvalidas = errors.New("credenciais invalidas")
 var ErrUsuarioNaoEncontrado = errors.New("usuario nao encontrado")
-var ErrSenhaNaoConfere = errors.New("a nova senha e a senha de confirmação não conferem")
+var ErrSenhaNaoConfere = errors.New("a nova senha e a senha de confirmacao nao conferem")
 
 // UsuarioServico define os metodos para gerenciamento de usuarios
 type UsuarioServico interface {
@@ -183,7 +183,7 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 		novoPaciente.Usuario = *novoUsuario
 		pacienteCompleto = novoPaciente
 
-		return nil // Sucesso na transação
+		return nil // Sucesso na transacao
 	})
 
 	return pacienteCompleto, err
@@ -191,7 +191,7 @@ func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.P
 
 // Login autentica o usuario e retorna um token JWT
 func (s *usuarioServico) Login(email, senha string) (string, error) {
-	// Buscar usuário pelo e-mail
+	// Busca usuario pelo e-mail
 	usuario, err := s.repositorio.BuscarPorEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -205,12 +205,12 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 		return "", ErrCrendenciaisInvalidas
 	}
 
-	// Gerar o token JWT
+	// Gera o token JWT
 	claims := jwt.MapClaims{
-		"sub":  usuario.ID,                           // "Subject", o ID do usuário
-		"role": usuario.TipoUsuario,                  // Adiciona o tipo de usuário (role)
-		"iat":  time.Now().Unix(),                    // "Issued At", quando o token foi criado
-		"exp":  time.Now().Add(time.Hour * 1).Unix(), // Data de expiração (1 hora)
+		"sub":  usuario.ID,                           // Subject com o ID do usuario
+		"role": usuario.TipoUsuario,                  // Adiciona o tipo de usuario como role
+		"iat":  time.Now().Unix(),                    // Issued At indica quando o token foi criado
+		"exp":  time.Now().Add(time.Hour * 1).Unix(), // Define expiracao do token em uma hora
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -287,7 +287,7 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*
 		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
 			return err
 		}
-		// Atualizar específico baseado no TipoUsuario
+		// Atualiza dados especificos conforme o tipo do usuario
 		switch usuario.TipoUsuario {
 		case "profissional":
 			profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, userID)

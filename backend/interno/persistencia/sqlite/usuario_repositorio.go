@@ -11,7 +11,7 @@ type gormUsuarioRepositorio struct {
 	db *gorm.DB
 }
 
-// NovoGormUsuarioRepositorio cria uma nova instância do repositório de usuário com GORM.
+// NovoGormUsuarioRepositorio cria uma nova instancia do repositorio de usuario com GORM
 func NovoGormUsuarioRepositorio(db *gorm.DB) repositorios.UsuarioRepositorio {
 	return &gormUsuarioRepositorio{db: db}
 }
@@ -99,44 +99,44 @@ func (r *gormUsuarioRepositorio) AtualizarPaciente(tx *gorm.DB, paciente *domini
 }
 
 func (r *gormUsuarioRepositorio) DeletarUsuario(tx *gorm.DB, id uint) error {
-	// Buscar o usuário para determinar o tipo
+	// Busca o usuario para determinar o tipo
 	usuario, err := r.BuscarUsuarioPorID(id)
 	if err != nil {
 		return err
 	}
 
-	// Deletar registros específicos baseados no tipo
+	// Deleta registros especificos conforme o tipo
 	switch usuario.TipoUsuario {
 	case "profissional":
-		// Buscar o profissional para limpar associações
+		// Busca o profissional para limpar associacoes
 		profissional, err := r.BuscarProfissionalPorUsuarioID(tx, id)
 		if err != nil {
 			return err
 		}
-		// Limpar associações many-to-many (remove entradas da tabela profissional_paciente)
+		// Limpa associacoes many-to-many removendo entradas da tabela profissional_paciente
 		if err := tx.Model(profissional).Association("Pacientes").Clear(); err != nil {
 			return err
 		}
-		// Deletar o profissional
+		// Deleta o profissional
 		if err := tx.Where("usuario_id = ?", id).Delete(&dominio.Profissional{}).Error; err != nil {
 			return err
 		}
 	case "paciente":
-		// Buscar o paciente para limpar associações
+		// Busca o paciente para limpar associacoes
 		paciente, err := r.BuscarPacientePorUsuarioID(tx, id)
 		if err != nil {
 			return err
 		}
-		// Limpar associações many-to-many (remove entradas da tabela profissional_paciente)
+		// Limpa associacoes many-to-many removendo entradas da tabela profissional_paciente
 		if err := tx.Model(paciente).Association("Profissionais").Clear(); err != nil {
 			return err
 		}
-		// Deletar o paciente
+		// Deleta o paciente
 		if err := tx.Where("usuario_id = ?", id).Delete(&dominio.Paciente{}).Error; err != nil {
 			return err
 		}
 	}
 
-	// Deletar o usuário (hard delete, ignorando soft delete)
+	// Deleta o usuario com hard delete ignorando soft delete
 	return tx.Unscoped().Delete(&dominio.Usuario{}, id).Error
 }
