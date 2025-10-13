@@ -1,15 +1,15 @@
 <template>
   <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
     <nav class="px-4 sm:px-6 py-3 flex justify-between items-center">
-      <!-- Logo -->
+      <!-- Logo da aplicacao -->
       <router-link to="/" class="flex items-center space-x-2">
         <font-awesome-icon :icon="faBrain" class="text-rose-300 text-xl sm:text-2xl" />
         <span class="text-2xl sm:text-3xl font-bold text-emerald-600 whitespace-nowrap">MindTrace</span>
       </router-link>
 
-      <!-- Right Side: Profile and Logout -->
+      <!-- Acoes de perfil e sessao -->
       <div class="flex items-center space-x-3 sm:space-x-4">
-        <!-- Profile Button with Dropdown -->
+        <!-- Botao de perfil com dropdown -->
         <div class="relative" ref="profileDropdownContainer">
           <button 
             @click="toggleProfileDropdown"
@@ -26,7 +26,7 @@
             <font-awesome-icon :icon="faChevronDown" class="w-3 h-3 text-gray-400 hidden sm:block" />
           </button>
 
-          <!-- Profile Dropdown -->
+          <!-- Dropdown com dados do perfil -->
           <transition
             enter-active-class="transition ease-out duration-100"
             enter-from-class="transform opacity-0 scale-95"
@@ -40,7 +40,7 @@
               @click.stop
               class="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 py-2"
             >
-              <!-- Profile Info -->
+              <!-- Dados principais do perfil -->
               <div class="px-4 py-3 border-b border-gray-100">
                 <div class="flex items-center space-x-3">
                   <font-awesome-icon 
@@ -54,7 +54,7 @@
                 </div>
               </div>
 
-              <!-- Profile Details -->
+              <!-- Detalhes complementares -->
               <div class="px-4 py-3 space-y-2 text-sm border-b border-gray-100">
                 <template v-if="userType === 'paciente'">
                   <p><strong class="font-medium text-gray-700">Idade:</strong> <span class="text-gray-600">{{ calculateAge(user.data_nascimento) }}</span></p>
@@ -68,7 +68,7 @@
                 </template>
               </div>
 
-              <!-- Actions -->
+              <!-- Acoes rapidas -->
               <div class="py-1">
                 <button 
                   @click="handleEditProfile"
@@ -82,7 +82,7 @@
           </transition>
         </div>
 
-        <!-- Logout Button -->
+  <!-- Botao de sair -->
         <button 
           @click="handleLogout"
           class="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-rose-500 hover:bg-rose-600 rounded-lg transition-colors shadow-sm"
@@ -108,7 +108,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useUserStore } from '../../store/user';
 
-// Props
+// Propriedades esperadas pelo layout
 const props = defineProps({
   userType: {
     type: String,
@@ -117,38 +117,42 @@ const props = defineProps({
   }
 });
 
-// Emits
+// Eventos de interacao emitidos para o container
 const emit = defineEmits(['edit-profile', 'logout']);
 
-// Store
+// Estado global do usuario
 const userStore = useUserStore();
 
-// State
+// Estado do dropdown de perfil
 const isProfileDropdownOpen = ref(false);
 const profileDropdownContainer = ref(null);
 
-// Computed
+// Usuario logado obtido da store
 const user = computed(() => userStore.user);
 
-// Methods
+// Alterna exibicao do dropdown de perfil
 const toggleProfileDropdown = () => {
   isProfileDropdownOpen.value = !isProfileDropdownOpen.value;
 };
 
+// Fecha dropdown do perfil
 const closeProfileDropdown = () => {
   isProfileDropdownOpen.value = false;
 };
 
+// Dispara evento para edicao de perfil
 const handleEditProfile = () => {
   closeProfileDropdown();
   emit('edit-profile');
 };
 
+// Dispara evento para encerrar sessao
 const handleLogout = () => {
   closeProfileDropdown();
   emit('logout');
 };
 
+// Calcula idade estimada a partir da data de nascimento
 const calculateAge = (birthDate) => {
   if (!birthDate) return 'N/A';
   const today = new Date();
@@ -161,17 +165,16 @@ const calculateAge = (birthDate) => {
   return age;
 };
 
-// Click outside to close dropdown
+// Fecha dropdown quando clicar fora do container
 const handleClickOutside = (event) => {
   if (profileDropdownContainer.value && !profileDropdownContainer.value.contains(event.target)) {
     closeProfileDropdown();
   }
 };
-document.addEventListener('click', handleClickOutside);
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
-  // Fetch user data if not already loaded
+  // Recupera dados do usuario caso estejam ausentes
   if (!user.value) {
     userStore.fetchUser(props.userType);
   }

@@ -1,5 +1,5 @@
 <template>
-  <!-- Sidebar Container -->
+  <!-- Sidebar principal -->
   <aside 
     :class="[
       'fixed lg:static inset-y-0 left-0 z-30 transform transition-transform duration-300 ease-in-out lg:translate-x-0',
@@ -8,7 +8,7 @@
       'w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg lg:shadow-none'
     ]"
   >
-    <!-- Toggle Button (Desktop) -->
+  <!-- Botao desktop para recolher -->
     <div class="hidden lg:flex justify-end p-2 border-b border-gray-200">
       <button 
         @click="toggleCollapse"
@@ -18,7 +18,7 @@
       </button>
     </div>
 
-    <!-- Navigation -->
+  <!-- Lista de navegacao principal -->
     <nav class="flex-1 p-3 overflow-y-auto">
       <ul class="space-y-1">
         <li v-for="item in menuItems" :key="item.name">
@@ -52,7 +52,7 @@
       </ul>
     </nav>
 
-    <!-- Footer Info (Optional) -->
+  <!-- Informacoes no rodape -->
     <div 
       v-if="!isCollapsed"
       class="p-4 border-t border-gray-200 bg-gray-50"
@@ -64,14 +64,14 @@
     </div>
   </aside>
 
-  <!-- Mobile Overlay -->
+  <!-- Sobreposicao mobile -->
   <div 
     v-if="isOpen"
     @click="closeSidebar"
     class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
   ></div>
 
-  <!-- Mobile Toggle Button -->
+  <!-- Botao mobile para abrir -->
   <button
     @click="toggleSidebar"
     class="fixed bottom-4 left-4 z-40 lg:hidden bg-rose-500 text-white p-4 rounded-full shadow-lg hover:bg-rose-600 transition-colors"
@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { 
   faUsers,
@@ -94,7 +94,7 @@ import {
   faTimes
 } from '@fortawesome/free-solid-svg-icons';
 
-// Props
+// Propriedades recebidas do dashboard
 const props = defineProps({
   activeView: {
     type: String,
@@ -102,14 +102,14 @@ const props = defineProps({
   }
 });
 
-// Emits
+// Eventos emitidos para navegacao externa
 const emit = defineEmits(['navigate']);
 
-// State
+// Estado do drawer lateral
 const isOpen = ref(false);
 const isCollapsed = ref(false);
 
-// Menu Items
+// Itens exibidos no menu lateral
 const menuItems = [
   {
     name: 'pacientes',
@@ -131,19 +131,22 @@ const menuItems = [
   }
 ];
 
-// Methods
+// Alterna visibilidade da sidebar em telas pequenas
 const toggleSidebar = () => {
   isOpen.value = !isOpen.value;
 };
 
+// Fecha a sidebar apos interacao
 const closeSidebar = () => {
   isOpen.value = false;
 };
 
+// Controla modo compacto em telas largas
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value;
 };
 
+// Faz navegacao para a rota selecionada
 const handleNavigate = (view) => {
   emit('navigate', view);
   closeSidebar();

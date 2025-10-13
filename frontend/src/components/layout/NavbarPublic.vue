@@ -84,9 +84,9 @@
 <script setup>
 import { ref } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faBrain, faCaretUp, faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import { faBrain, faCaretUp, faCaretDown } from '@fortawesome/free-solid-svg-icons'; // Icones usados na navbar
 
-// Props
+// Propriedades de configuracao
 defineProps({
   showMenu: {
     type: Boolean,
@@ -94,14 +94,15 @@ defineProps({
   }
 });
 
-// State
+// Estado reativo do menu mobile
 const isMenuOpen = ref(false);
 
-// Methods
+// Alterna exibicao do menu mobile
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
 
+// Fecha o menu mobile e mantem navegacao limpa
 const closeMenu = () => {
   isMenuOpen.value = false;
 };
