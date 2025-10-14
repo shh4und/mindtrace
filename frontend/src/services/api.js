@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Determina a base da API:
 // 1. Valor definido em build: import.meta.env.VITE_API_BASE_URL
-// 2. Fallback: same-origin + "/api/v1" (ajuste se seu backend não tiver prefixo)
+// 2. Fallback: same-origin + "/api/v1" (ajuste se seu backend nao tiver prefixo)
 const buildTimeBase = import.meta.env?.VITE_API_BASE_URL;
 const fallbackBase = `${window.location.origin}/api/v1`;
 const baseURL = buildTimeBase || fallbackBase;
@@ -16,10 +16,10 @@ const apiClient = axios.create({
   withCredentials: true, // caso cookies venham a ser usados
 });
 
-// Interceptor: Adiciona o token JWT a todas as requisições protegidas
+// Interceptor: Adiciona o token JWT a todas as requisicoes protegidas
 apiClient.interceptors.request.use(
   (config) => {
-    // Rotas que não precisam de token
+    // Rotas que nao precisam de token
     const publicRoutes = ['/entrar/login', '/profissionais/registrar', '/pacientes/registrar'];
     if (publicRoutes.includes(config.url)) {
       return config;
@@ -36,7 +36,7 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Funções de API que nossos componentes irão usar
+// Funções de API que nossos componentes irao usar
 const api = {
   // autenticacao e sessao
   login(credentials) {
@@ -49,7 +49,7 @@ const api = {
     return apiClient.post('/profissionais/registrar', data);
   },
 
-  // --- Usuário ---
+  // --- Usuario ---
   buscarPerfil() {
     return apiClient.get('/usuarios/');
   },
@@ -77,12 +77,17 @@ const api = {
     return apiClient.post('/registro-humor/', data);
   },
 
-  // --- Relatórios ---
+  // --- Relatorios ---
   buscarRelatorio(periodo) {
     return apiClient.get(`/relatorios/?periodo=${periodo}`);
   },
   buscarRelatorioPacienteDoProfissional(periodo, pacienteID) {
     return apiClient.get(`/relatorios/paciente-lista?periodo=${periodo}&pacienteID=${pacienteID}`);
+  },
+
+  // --- Resumo ---
+  buscarResumo(){
+    return apiClient.get('/resumo/')
   },
 
   // --- Convites ---
