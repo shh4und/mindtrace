@@ -21,13 +21,13 @@ func NovoPacienteControlador(us servicos.UsuarioServico) *PacienteControlador {
 
 // RegistrarPacienteRequest representa o payload da requisicao para registrar um novo paciente
 type RegistrarPacienteRequest struct {
-	Nome                 string     `json:"nome" binding:"required"`
-	Email                string     `json:"email" binding:"required,email"`
-	Senha                string     `json:"senha" binding:"required,min=8"`
-	Dependente           *bool      `json:"dependente" binding:"required"`
-	DataNascimento       string     `json:"data_nascimento" binding:"required"`
+	Nome                 string     `json:"nome" validate:"required"`
+	Email                string     `json:"email" validate:"required,email"`
+	Senha                string     `json:"senha" validate:"required,min=8"`
+	Dependente           *bool      `json:"dependente" validate:"required"`
+	DataNascimento       string     `json:"data_nascimento" validate:"required,date"`
 	DataInicioTratamento *time.Time `json:"data_inicio_tratamento"`
-	CPF                  string     `json:"cpf" binding:"required"`
+	CPF                  string     `json:"cpf" validate:"required,len=11,numeric"`
 	NomeResponsavel      string     `json:"nome_responsavel"`
 	ContatoResponsavel   string     `json:"contato_responsavel"`
 	Contato              string     `json:"contato"`
@@ -35,12 +35,12 @@ type RegistrarPacienteRequest struct {
 
 // ProprioPacienteRequest representa o payload da resposta para o perfil proprio do paciente
 type ProprioPacienteRequest struct {
-	Nome                 string     `json:"nome"`
-	Email                string     `json:"email"`
+	Nome                 string     `json:"nome" validate:"required"`
+	Email                string     `json:"email" validate:"required,email"`
 	Dependente           *bool      `json:"dependente"`
 	DataNascimento       time.Time  `json:"data_nascimento"`
 	DataInicioTratamento *time.Time `json:"data_inicio_tratamento"`
-	CPF                  string     `json:"cpf"`
+	CPF                  string     `json:"cpf" validate:"required,len=11,numeric"`
 	NomeResponsavel      string     `json:"nome_responsavel"`
 	ContatoResponsavel   string     `json:"contato_responsavel"`
 	Contato              string     `json:"contato"`

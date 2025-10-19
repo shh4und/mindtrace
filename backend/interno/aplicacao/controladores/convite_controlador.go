@@ -39,7 +39,7 @@ func (cc *ConviteControlador) GerarConvite(c *gin.Context) {
 
 // VincularRequest representa o payload da requisicao para vincular paciente
 type VincularRequest struct {
-	Token string `json:"token" binding:"required"`
+	Token string `json:"token" validate:"required, hexadecimal"`
 }
 
 // VincularPaciente vincula um paciente usando um token de convite

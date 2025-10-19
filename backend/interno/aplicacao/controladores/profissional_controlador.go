@@ -20,22 +20,22 @@ func NovoProfissionalControlador(us servicos.UsuarioServico) *ProfissionalContro
 
 // RegistrarProfissionalRequest representa o payload da requisicao para registrar um novo profissional
 type RegistrarProfissionalRequest struct {
-	Nome                 string `json:"nome" binding:"required"`
-	Email                string `json:"email" binding:"required,email"`
-	Senha                string `json:"senha" binding:"required,min=8"`
-	Especialidade        string `json:"especialidade" binding:"required"`
-	RegistroProfissional string `json:"registro_profissional" binding:"required"`
-	CPF                  string `json:"cpf" binding:"required"`
+	Nome                 string `json:"nome" validate:"required"`
+	Email                string `json:"email" validate:"required,email"`
+	Senha                string `json:"senha" validate:"required,min=8"`
+	Especialidade        string `json:"especialidade" validate:"required"`
+	RegistroProfissional string `json:"registro_profissional" validate:"required"`
+	CPF                  string `json:"cpf" validate:"required,len=11,numeric"`
 	Contato              string `json:"contato"`
 }
 
 // ProprioProfissionalRequest representa o payload da resposta para o perfil proprio do profissional
 type ProprioProfissionalRequest struct {
-	Nome                 string `json:"nome"`
-	Email                string `json:"email" `
+	Nome                 string `json:"nome" validate:"required"`
+	Email                string `json:"email" validate:"required,email"`
 	Especialidade        string `json:"especialidade" `
 	RegistroProfissional string `json:"registro_profissional" `
-	CPF                  string `json:"cpf"`
+	CPF                  string `json:"cpf" validate:"required,len=11,numeric"`
 	Contato              string `json:"contato"`
 }
 

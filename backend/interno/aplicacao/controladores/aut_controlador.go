@@ -19,8 +19,8 @@ func NovoAutControlador(us servicos.UsuarioServico) *AutControlador {
 
 // LoginRequest representa o payload da requisicao para login
 type LoginRequest struct {
-	Email string `json:"email" binding:"required,email"`
-	Senha string `json:"senha" binding:"required"`
+	Email string `json:"email" validate:"required,email"`
+	Senha string `json:"senha" validate:"required, min=8"`
 }
 
 // Login lida com o login do usuario
