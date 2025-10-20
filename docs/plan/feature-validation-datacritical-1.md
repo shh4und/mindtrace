@@ -1,21 +1,26 @@
 ---
-goal: "Validação e Formatação de Dados Críticos"
+title: "Validação e Formatação de Dados Críticos - MVP v1.0"
 version: "1.0"
 date_created: "2025-10-16"
-owner: "Desenvolvedor"
-status: 'Planned'
-tags: ['validation', 'data-integrity', 'feature']
+last_updated: "2025-10-20"
+author: "Desenvolvedor"
+status: "Planned"
+priority: "Alta"
+tags: ["feature", "validation", "data-integrity", "critical"]
+project: "MindTrace"
 ---
 
-# Introdução
+# ✅ Validação e Formatação de Dados Críticos - MVP v1.0
 
-![Status: Planned](https://img.shields.io/badge/status-Planned-blue)
+![Status: Planned](https://img.shields.io/badge/status-Planned-blue) ![Priority: High](https://img.shields.io/badge/priority-High-red) ![Timeline: 7-11 days](https://img.shields.io/badge/timeline-7--11%20days-green)
+
+## 📊 Visão Geral
 
 Plano simplificado para implementar validação robusta de dados críticos da aplicação MindTrace. Foca em validações de entrada (email, CPF, datas, atividades de autocuidado) com verificações tanto no frontend quanto no backend.
 
-**Escopo**: 1 desenvolvedor | Projeto acadêmico | Iterativo
+**📊 Escopo**: 1 desenvolvedor | Projeto acadêmico | Iterativo
 
-## 1. Requisitos Críticos
+## 1️⃣ Requisitos Críticos
 
 - **REQ-001**: Email - validação de formato + unicidade no BD
 - **REQ-002**: CPF - validação de formato, dígitos e unicidade
@@ -24,9 +29,9 @@ Plano simplificado para implementar validação robusta de dados críticos da ap
 - **REQ-005**: Atividades de autocuidado - salvar como array JSON estruturado
 - **REQ-006**: Validação do formulário de Registro de Humor - ranges corretos, data válida
 
-## 2. Implementação
+## 2️⃣ Fases de Implementação
 
-### Fase 1: Backend - Validadores (1-2 dias)
+### Fase 1: Backend - Validadores (1-2 dias) 🔍
 
 **Objetivo**: Criar pacote centralizado de funções de validação
 
@@ -38,7 +43,7 @@ Plano simplificado para implementar validação robusta de dados críticos da ap
 | TASK-004 | Criar `backend/interno/pkg/validadores/telefone.go` - ValidarTelefone, NormalizarTelefone | ⏳ |
 | TASK-005 | Adicionar validações em DTOs com tags `binding:"required,email"` etc | ⏳ |
 
-### Fase 2: Backend - Controladores (2-3 dias)
+### Fase 2: Backend - Controladores (2-3 dias) 🔐
 
 **Objetivo**: Aplicar validação ao fluxo de criação/edição
 
@@ -49,7 +54,7 @@ Plano simplificado para implementar validação robusta de dados críticos da ap
 | TASK-008 | Adicionar validações ao registro de humor (ranges, data) | ⏳ |
 | TASK-009 | Criar middleware de erro padronizado para validação | ⏳ |
 
-### Fase 3: Frontend - Validações (2-3 dias)
+### Fase 3: Frontend - Validações (2-3 dias) 🎨
 
 **Objetivo**: Feedback visual ao usuário antes de enviar
 
@@ -60,7 +65,7 @@ Plano simplificado para implementar validação robusta de dados críticos da ap
 | TASK-012 | Mostrar mensagens de erro com toast/alert | ⏳ |
 | TASK-013 | Desabilitar submit enquanto há erros | ⏳ |
 
-### Fase 4: Armazenamento de Autocuidado (1-2 dias)
+### Fase 4: Armazenamento de Autocuidado (1-2 dias) 💾
 
 **Objetivo**: Converter autocuidado de string para JSON estruturado
 
@@ -71,23 +76,36 @@ Plano simplificado para implementar validação robusta de dados críticos da ap
 | TASK-016 | Atualizar serialização/desserialização no controlador | ⏳ |
 | TASK-017 | Atualizar frontend para enviar array estruturado | ⏳ |
 
-## 3. Arquivos a Modificar/Criar
+## 3️⃣ Arquivos a Modificar/Criar
 
-**Backend**
+### Backend
+
+**Novos arquivos**
 - ✨ `backend/interno/pkg/validadores/` - Novo pacote com 5 arquivos
+  - `email.go`
+  - `cpf.go`
+  - `data.go`
+  - `telefone.go`
+  - `autocuidado.go`
+
+**Arquivos modificados**
 - 🔄 `backend/interno/aplicacao/controladores/` - Atualizar controladores
 - 🔄 `backend/interno/dominio/registro_humor.go` - Atualizar tipo AutoCuidado
 - 🔄 `backend/cmd/api/main.go` - Se needed, adicionar imports
 
-**Frontend**
+### Frontend
+
+**Arquivos modificados**
 - 🔄 `frontend/src/views/dashboard-paciente/RegistroHumor.vue` - Adicionar validações
 - 🔄 `frontend/src/services/api.js` - Sem mudanças (apenas trata erros)
 - 🔄 Formulários de cadastro/edição - Adicionar validações
 
-**Database**
+### Database
+
+**Migrations**
 - 🔄 `schema.sql` / Migration SQL - Atualizar tipo de auto_cuidado
 
-## 4. Código de Exemplo
+## 4️⃣ Exemplos de Código
 
 ### Backend - Validadores
 
@@ -191,33 +209,50 @@ const isFormValid = computed(() => !emailError.value && email.value);
 </template>
 ```
 
-## 5. Testes Básicos
+## 5️⃣ Testes Básicos
 
-- **TEST-001**: ValidarCPF('123.456.789-09') deve retornar false (CPF inválido)
-- **TEST-002**: ValidarEmail('user@domain.com') deve retornar true
-- **TEST-003**: ValidarDataNascimento(data_futura) deve retornar false
-- **TEST-004**: POST /pacientes/registrar com email inválido retorna 400
-- **TEST-005**: POST /registro-humor com humor fora do range (1-5) retorna 400
+| # | Teste | Esperado |
+|---|-------|----------|
+| TEST-001 | ValidarCPF('123.456.789-09') | ✓ retorna false (CPF inválido) |
+| TEST-002 | ValidarEmail('user@domain.com') | ✓ retorna true |
+| TEST-003 | ValidarDataNascimento(data_futura) | ✓ retorna false |
+| TEST-004 | POST /pacientes/registrar com email inválido | ✓ retorna 400 |
+| TEST-005 | POST /registro-humor com humor fora do range | ✓ retorna 400 |
 
-## 6. Riscos
+## 6️⃣ Riscos & Mitigações
 
-- **RISK-001**: Migration de dados pode impactar registros antigos (backup recomendado)
-- **RISK-002**: Validações muito rígidas podem rejeitar dados válidos (testar bem)
-- **RISK-003**: Se houver dados antigos inconsistentes, migration pode falhar
+| Risk | Impacto | Mitigação |
+|------|--------|-----------|
+| Migration de dados pode impactar registros antigos | Alto | Backup recomendado |
+| Validações muito rígidas podem rejeitar dados válidos | Médio | Testar bem antes de deploy |
+| Dados antigos inconsistentes podem causar falha na migration | Alto | Validação prévia de dados existentes |
 
-## 7. Estimativa
+## 7️⃣ Timeline Estimada
 
-- **Total**: 7-11 dias de trabalho (com testes)
-- **Prioridade**: Alta (dados críticos)
+| Fase | Dias | Acumulado |
+|------|------|-----------|
+| 1: Backend - Validadores | 1-2 | 1-2 |
+| 2: Backend - Controladores | 2-3 | 3-5 |
+| 3: Frontend - Validações | 2-3 | 5-8 |
+| 4: Armazenamento Autocuidado | 1-2 | 6-10 |
+| **TOTAL** | **7-11 dias** | **7-11 dias** |
 
-## 8. Ordem Recomendada
+## 8️⃣ Ordem Recomendada
 
-1. **Primeiro**: Criar validadores (Fase 1) - são independentes
+1. **Primeiro**: Criar validadores (Fase 1) - independentes
 2. **Depois**: Aplicar nos controladores (Fase 2) - backend precisa estar pronto
 3. **Depois**: Adicionar feedback no frontend (Fase 3) - após API estar validando
 4. **Último**: Migração de autocuidado (Fase 4) - pode ser feita depois se necessário
 
 ---
 
-Criado: 2025-10-16
-Simplificado para: 1 desenvolvedor | Projeto acadêmico
+## 📌 Metadados
+
+| Campo | Valor |
+|-------|-------|
+| **Criado em** | 2025-10-16 |
+| **Atualizado em** | 2025-10-20 |
+| **Duração estimada** | 7-11 dias |
+| **Prioridade** | Alta ⬆️ |
+| **Contexto** | Disciplina Engenharia de Software - Projeto MindTrace |
+| **Status** | Planned 🔵 |

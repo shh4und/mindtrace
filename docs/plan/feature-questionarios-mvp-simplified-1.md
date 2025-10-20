@@ -1,24 +1,28 @@
 ---
-goal: "Questionários Personalizados com Templates - MVP"
+title: "Questionários Personalizados com Templates - MVP v1.0"
 version: "1.0"
 date_created: "2025-10-16"
 last_updated: "2025-10-16"
-owner: "Desenvolvedor"
-status: 'Planned'
-tags: ['feature', 'questionnaires', 'templates', 'mvp']
+author: "Desenvolvedor"
+status: "Planned"
+priority: "Alta"
+tags: ["feature", "questionnaires", "templates", "mvp"]
+project: "MindTrace"
 ---
 
-# Questionários Personalizados - Plano MVP Simplificado
+# 📋 Questionários Personalizados com Templates - MVP v1.0
 
-![Status: Planned](https://img.shields.io/badge/status-Planned-blue)
+![Status: Planned](https://img.shields.io/badge/status-Planned-blue) ![Priority: High](https://img.shields.io/badge/priority-High-red) ![Timeline: 20-30 days](https://img.shields.io/badge/timeline-20--30%20days-green)
 
-**Sistema MVP simplificado** de questionários personalizados para MindTrace. Profissionais criam/editam questionários, atribuem a pacientes, coletam respostas e visualizam estatísticas.
+## 📊 Visão Geral
 
-**Otimizado para**: 1 desenvolvedor | 20-30 dias | Projeto acadêmico
+Sistema MVP simplificado de questionários personalizados para MindTrace. Profissionais criam/editam questionários, atribuem a pacientes, coletam respostas e visualizam estatísticas.
 
-## 1. Requirements & Constraints
+**📊 Escopo**: 1 desenvolvedor | 20-30 dias | Projeto acadêmico
 
-### Requisitos Críticos (MVP)
+## 1️⃣ Requisitos e Restrições
+
+### 1.1 Requisitos Críticos (MVP)
 
 - **REQ-001**: Profissionais podem editar templates pré-definidos (PHQ-9, GAD-7, Bem-estar)
 - **REQ-002**: Profissionais podem criar questionários customizados baseados em templates
@@ -30,7 +34,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 - **REQ-008**: Profissionais visualizam estatísticas simples (médias, contadores, totalizadores)
 - **REQ-009**: Dados de questionários aparecem nos relatórios existentes
 
-### Constraints & Simplificações
+### 1.2 Constraints & Simplificações (MVP)
 
 - **CON-001**: MVP - apenas 3 tipos de pergunta: escala (1-10), múltipla escolha, texto livre
 - **CON-002**: Sem lógica condicional (if/then/skip) na v1.0
@@ -40,7 +44,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 - **CON-006**: Sem suporte a outras línguas na v1.0
 - **CON-007**: Um desenvolvedor - máximo 30 dias
 
-### Padrões & Guidelines
+### 1.3 Padrões & Guidelines
 
 - **PAT-001**: Repository Pattern para acesso a dados
 - **PAT-002**: Service Layer para lógica de negócio
@@ -48,9 +52,9 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 - **GUD-001**: Código em português para domínio
 - **GUD-002**: Nomenclatura clara: Questionario, Pergunta, Resposta
 
-## 2. Implementation Steps
+## 2️⃣ Fases de Implementação
 
-### Phase 1: Banco & Domínio (3-4 dias)
+### Fase 1: Banco & Domínio (3-4 dias) 🗄️
 
 **GOAL-001**: Estrutura de dados básica
 
@@ -64,7 +68,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TASK-006 | Adicionar relacionamentos GORM: Questionario ↔ Profissional, Questionario ↔ Perguntas | ⏳ |
 | TASK-007 | Criar seeds: 3 templates padrão pré-populados (PHQ-9, GAD-7, Bem-estar) | ⏳ |
 
-### Phase 2: Backend - Repositórios (2-3 dias)
+### Fase 2: Backend - Repositórios (2-3 dias) 📦
 
 **GOAL-002**: Camada de persistência
 
@@ -76,7 +80,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TASK-011 | Implementar `RepositorioResposta`: CRUD + CalcularEstatisticas (médias, contadores) | ⏳ |
 | TASK-012 | Adicionar índices de BD para otimização: idx_questionarios_profissional, idx_respostas_paciente | ⏳ |
 
-### Phase 3: Backend - Serviços (3-4 dias)
+### Fase 3: Backend - Serviços (3-4 dias) ⚙️
 
 **GOAL-003**: Lógica de negócio
 
@@ -89,7 +93,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TASK-017 | Serviço `EstatisticasServico`: CalcularMedia, CalcularTotalizadores, GerarDadosPorPeriodo | ⏳ |
 | TASK-018 | Integração com `NotificacaoServico` existente: notificar paciente ao atribuir | ⏳ |
 
-### Phase 4: Backend - APIs (2-3 dias)
+### Fase 4: Backend - APIs (2-3 dias) 🔌
 
 **GOAL-004**: Endpoints RESTful
 
@@ -109,7 +113,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TASK-030 | GET `/api/v1/questionarios/:id/estatisticas` - dados agregados (médias, contadores) | ⏳ |
 | TASK-031 | Adicionar autenticação JWT + validação de permissões em todos endpoints | ⏳ |
 
-### Phase 5: Frontend - Services & State (2 dias)
+### Fase 5: Frontend - Services & State (2 dias) 🛠️
 
 **GOAL-005**: Camada HTTP + State Management
 
@@ -119,7 +123,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TASK-033 | Criar Pinia store: state, actions, getters para questionários e respostas | ⏳ |
 | TASK-034 | Implementar tratamento de erro padronizado com toast notifications | ⏳ |
 
-### Phase 6: Frontend - Prof Dashboard (4-5 dias)
+### Fase 6: Frontend - Prof Dashboard (4-5 dias) 📊
 
 **GOAL-006**: Interface para profissional gerenciar questionários
 
@@ -133,7 +137,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TASK-040 | Página `EstatisticasQuestionarios.vue` - tabelas com médias e totalizadores por pergunta | ⏳ |
 | TASK-041 | Adicionar rotas no Vue Router (`/dashboard-profissional/questionarios`) + Menu sidebar | ⏳ |
 
-### Phase 7: Frontend - Patient Dashboard (3-4 dias)
+### Fase 7: Frontend - Patient Dashboard (3-4 dias) 👤
 
 **GOAL-007**: Interface para paciente responder questionários
 
@@ -147,7 +151,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TASK-047 | Tela de confirmação após envio + histórico de respostas respondidas | ⏳ |
 | TASK-048 | Adicionar rotas no Vue Router (`/dashboard-paciente/questionarios`) + Menu sidebar | ⏳ |
 
-### Phase 8: Integração & Relatórios (2 dias)
+### Fase 8: Integração & Relatórios (2 dias) 📈
 
 **GOAL-008**: Integrar dados nos relatórios existentes
 
@@ -157,7 +161,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TASK-050 | Adicionar dados de questionários na seção de estatísticas/evolução do relatório | ⏳ |
 | TASK-051 | Testar fluxo completo: prof cria → atribui → paciente responde → prof vê no relatório | ⏳ |
 
-### Phase 9: Testes & QA (2-3 dias)
+### Fase 9: Testes & QA (2-3 dias) ✅
 
 **GOAL-009**: Qualidade & confiabilidade
 
@@ -169,7 +173,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TASK-055 | Teste E2E: Prof cria → atribui → Paciente responde → Prof ve stats no relatório | ⏳ |
 | TASK-056 | Teste de segurança: SQL Injection, XSS em respostas texto, permissões prof-paciente | ⏳ |
 
-### Phase 10: Documentação & Deployment (1-2 dias)
+### Fase 10: Documentação & Deploy (1-2 dias) 📚
 
 **GOAL-010**: Documentar feature e preparar produção
 
@@ -180,7 +184,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TASK-059 | Atualizar README.md com features de questionários | ⏳ |
 | TASK-060 | Criar migration script + rollback plan para produção | ⏳ |
 
-## 3. Alternativas Descartadas
+## 3️⃣ Alternativas Descartadas
 
 - **ALT-001**: Form builder de terceiros (Typeform, Google Forms) - ❌ custo + dependência + perda de controle dados saúde
 - **ALT-002**: Questionários hardcoded - ❌ limita flexibilidade profissional para adaptar
@@ -188,7 +192,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 - **ALT-004**: Gráficos avançados ApexCharts - ❌ tabelas simples são suficientes v1.0
 - **ALT-005**: Lógica condicional (if/then/skip) - ❌ postpone para v2.0
 
-## 4. Dependências
+## 4️⃣ Dependências Externas
 
 - **DEP-001**: JWT auth middleware existente (`backend/interno/aplicacao/middlewares/`)
 - **DEP-002**: Sistema notificações existente (`backend/interno/aplicacao/servicos/notificacao_servico.go`)
@@ -199,9 +203,11 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 - **DEP-007**: PostgreSQL 17 com JSON support
 - **DEP-008**: Toast notifications sistema (já existe no projeto)
 
-## 5. Arquivos - Backend
+## 5️⃣ Estrutura de Arquivos
 
-**Novos**
+### Backend
+
+**Novos arquivos**
 - `backend/interno/dominio/questionario.go`
 - `backend/interno/dominio/pergunta.go`
 - `backend/interno/dominio/questionario_atribuido.go`
@@ -216,13 +222,13 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 - `backend/interno/aplicacao/servicos/estatisticas_servico.go`
 - `backend/interno/aplicacao/controladores/questionario_controlador.go`
 
-**Modificados**
+**Arquivos modificados**
 - `backend/cmd/api/main.go` - adicionar rotas
 - `backend/interno/aplicacao/servicos/relatorio_servico.go` - integrar dados
 
-## 6. Arquivos - Frontend
+### Frontend
 
-**Novos**
+**Novos arquivos**
 - `frontend/src/services/questionarioService.js`
 - `frontend/src/store/questionario.js`
 - `frontend/src/store/resposta.js`
@@ -235,15 +241,15 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 - `frontend/src/components/SeletorTemplate.vue`
 - `frontend/src/components/ModalAtribuir.vue`
 
-**Modificados**
+**Arquivos modificados**
 - `frontend/src/router/index.js` - adicionar rotas
 - `frontend/src/views/dashboard-profissional/ProfissionalDashboard.vue` - adicionar menu
 - `frontend/src/views/dashboard-paciente/PacienteDashboard.vue` - adicionar menu
 
-## 7. Testes Essenciais
+## 6️⃣ Testes Essenciais
 
-| # | Test | Esperado |
-|---|------|----------|
+| # | Teste | Esperado |
+|---|-------|----------|
 | TEST-001 | Criar questionário com 3 perguntas | ✓ valida e salva |
 | TEST-002 | Editar questionário | ✓ atualiza campos |
 | TEST-003 | Salvar como template | ✓ aparece em templates |
@@ -257,7 +263,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | TEST-011 | Teste responsivo mobile/tablet/desktop | ✓ funciona em todos |
 | TEST-012 | Fluxo E2E completo end-to-end | ✓ sem erros |
 
-## 8. Riscos & Mitigações
+## 7️⃣ Riscos & Mitigações
 
 | Risk | Impacto | Mitigação |
 |------|--------|-----------|
@@ -268,7 +274,7 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | UI muito complexa | Médio | Começar simples (lista ordenável), iterar |
 | Bugs em permissões | Alto | Testes de segurança, code review |
 
-## 9. Assumptions
+## 8️⃣ Suposições
 
 - Profissionais têm conhecimento mínimo para criar questionários estruturados
 - Pacientes têm acesso internet regular
@@ -279,10 +285,10 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 - Português apenas na v1.0
 - Sistema permissões atual (vinculação prof-paciente) é suficiente
 
-## 10. Estimativa de Timeline
+## 9️⃣ Timeline Estimada
 
-| Phase | Dias | Cumulative |
-|-------|------|-----------|
+| Fase | Dias | Acumulado |
+|------|------|-----------|
 | 1: Banco & Domínio | 3-4 | 3-4 |
 | 2: Repositórios | 2-3 | 5-7 |
 | 3: Serviços | 3-4 | 8-11 |
@@ -293,28 +299,34 @@ tags: ['feature', 'questionnaires', 'templates', 'mvp']
 | 8: Integração/Relatórios | 2 | 21-27 |
 | 9: Testes | 2-3 | 23-30 |
 | 10: Documentação | 1-2 | 24-32 |
-| **TOTAL** | **20-30** | **20-30** |
+| **TOTAL** | **20-30 dias** | **20-30 dias** |
 
-*Nota: Fases podem ser paralelizadas. Com focus: ~25 dias*
+**Nota**: Fases podem ser paralelizadas. Com focus: ~25 dias
 
-## 11. Próximos Passos Imediatos
+## 1️⃣0️⃣ Próximos Passos
 
 1. ✅ Revisar e aprovar plano
-2. ➡️ Começar Phase 1: criar structs de domínio
-3. ➡️ Criar migrations SQL
-4. ➡️ Seeds com templates padrão
-5. ➡️ Implementar repositórios
-6. ➡️ Testar CRUD básico
-7. ➡️ Desenvolver serviços
-8. ➡️ Criar APIs
-9. ➡️ Build frontend
-10. ➡️ Integração com relatórios
-11. ➡️ Testes completos
-12. ➡️ Deploy
+2. ➡️ **Fase 1**: Criar structs de domínio
+3. ➡️ **Fase 2**: Criar migrations SQL
+4. ➡️ **Fase 3**: Seeds com templates padrão
+5. ➡️ **Fase 4**: Implementar repositórios
+6. ➡️ **Fase 5**: Testar CRUD básico
+7. ➡️ **Fase 6**: Desenvolver serviços
+8. ➡️ **Fase 7**: Criar APIs
+9. ➡️ **Fase 8**: Build frontend
+10. ➡️ **Fase 9**: Integração com relatórios
+11. ➡️ **Fase 10**: Testes completos
+12. ➡️ **Deploy**
 
 ---
 
-**Criado em**: 2025-10-16  
-**Duração estimada**: 20-30 dias  
-**Prioridade**: Alta  
-**Contexto**: Disciplina Engenharia de Software - Projeto MindTrace
+## 📌 Metadados
+
+| Campo | Valor |
+|-------|-------|
+| **Criado em** | 2025-10-16 |
+| **Atualizado em** | 2025-10-20 |
+| **Duração estimada** | 20-30 dias |
+| **Prioridade** | Alta ⬆️ |
+| **Contexto** | Disciplina Engenharia de Software - Projeto MindTrace |
+| **Status** | Planned 🔵 |

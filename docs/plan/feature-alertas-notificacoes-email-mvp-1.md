@@ -1,24 +1,28 @@
 ---
-goal: "Sistema de Alertas e Notificações por Email"
+title: "Alertas e Notificações por Email - MVP v1.0"
 version: "1.0"
 date_created: "2025-10-20"
 last_updated: "2025-10-20"
-owner: "Desenvolvedor"
-status: 'Planned'
-tags: ['feature', 'alerts', 'notifications', 'email', 'mvp']
+author: "Desenvolvedor"
+status: "Planned"
+priority: "Alta"
+tags: ["feature", "alerts", "notifications", "email", "mvp"]
+project: "MindTrace"
 ---
 
-# Sistema de Alertas e Notificações
+# 📧 Alertas e Notificações por Email - MVP v1.0
 
-![Status: Planned](https://img.shields.io/badge/status-Planned-blue)
+![Status: Planned](https://img.shields.io/badge/status-Planned-blue) ![Priority: High](https://img.shields.io/badge/priority-High-red) ![Timeline: 15-20 days](https://img.shields.io/badge/timeline-15--20%20days-green)
 
-Sistema MVP de alertas automáticos e notificações por email para MindTrace. Profissionais e pacientes recebem notificações sobre: padrões preocupantes nos dados, lembretes para completar formulários (Registro de Humor, Questionários) e eventos importantes do acompanhamento.
+## 📋 Visão Geral
 
-**Otimizado para**: 1 desenvolvedor | 15-20 dias | Projeto acadêmico | Email MVP (SMS/WhatsApp v2.0)
+Sistema MVP de alertas automáticos e notificações por email para MindTrace. Profissionais e pacientes recebem notificações sobre padrões preocupantes nos dados, lembretes para completar formulários (Registro de Humor, Questionários) e eventos importantes do acompanhamento.
 
-## 1. Requirements & Constraints
+**📊 Escopo**: 1 desenvolvedor | 15-20 dias | Projeto acadêmico | Email MVP (SMS/WhatsApp em v2.0)
 
-### Requisitos Funcionais (MVP)
+## 1️⃣ Requisitos e Restrições
+
+### 1.1 Requisitos Funcionais (MVP)
 
 - **REQ-001**: Sistema detecta automaticamente quando estatísticas caem abaixo de um limiar preocupante (ex: humor muito baixo, stress muito alto)
 - **REQ-002**: Profissional recebe notificação email quando paciente tem padrão preocupante
@@ -30,7 +34,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 - **REQ-008**: Log de notificações enviadas para auditoria
 - **REQ-009**: Notificações podem ser configuradas (dias/horas de envio, frequência)
 
-### Requisitos Técnicos
+### 1.2 Requisitos Técnicos
 
 - **TEC-001**: Backend segue arquitetura existente (Domain → Application → Persistence)
 - **TEC-002**: Envio assíncrono com workers/goroutines (não framework pesado)
@@ -39,7 +43,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 - **TEC-005**: Scheduling de notificações periódicas (cron-like)
 - **TEC-006**: Sem alteração no esquema de autenticação JWT
 
-### Constraints & Simplificações
+### 1.3 Constraints & Simplificações (MVP)
 
 - **CON-001**: MVP - apenas EMAIL (sem SMS/WhatsApp)
 - **CON-002**: Sem dashboard visual de notificações (apenas email + log em BD)
@@ -49,7 +53,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 - **CON-006**: Notificações diárias máximo (não horária ou minuto a minuto)
 - **CON-007**: Um desenvolvedor - máximo 20 dias
 
-### Padrões & Guidelines
+### 1.4 Padrões & Guidelines
 
 - **PAT-001**: Repository Pattern para dados de notificações
 - **PAT-002**: Service Layer para lógica de detecção e envio
@@ -59,9 +63,9 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 - **GUD-002**: Nomes descritivos: Alerta, Notificacao, TipoNotificacao
 - **GUD-003**: Templates de email em arquivos separados (reutilizável)
 
-## 2. Implementation Steps
+## 2️⃣ Fases de Implementação
 
-### Phase 1: Banco & Domínio (2-3 dias)
+### Fase 1: Banco & Domínio (2-3 dias) 🗄️
 
 **GOAL-001**: Estrutura de dados para notificações e alertas
 
@@ -76,7 +80,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | TASK-007 | Relacionamentos GORM: Notificacao ↔ Usuario, Alerta ↔ Paciente, PreferenciaNotificacao ↔ Usuario | | |
 | TASK-008 | Seeds: preferências padrão (todas habilitadas), configurações padrão de alertas | | |
 
-### Phase 2: Serviço de Email (2-3 dias)
+### Fase 2: Serviço de Email (2-3 dias) 📨
 
 **GOAL-002**: Configuração de envio de email
 
@@ -91,7 +95,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | TASK-015 | Implementar retry automático para emails que falharem (máx 3 tentativas) | | |
 | TASK-016 | Adicionar logging de emails enviados/falhados | | |
 
-### Phase 3: Detecção de Alertas (2-3 dias)
+### Fase 3: Detecção de Alertas (2-3 dias) 🔔
 
 **GOAL-003**: Lógica para detectar padrões preocupantes
 
@@ -105,7 +109,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | TASK-022 | Armazenar alertas gerados em BD com timestamp e severidade | | |
 | TASK-023 | Marcar alerta como resolvido quando paciente dados melhoram (2+ dias bom) | | |
 
-### Phase 4: Serviço de Notificações (2-3 dias)
+### Fase 4: Serviço de Notificações (2-3 dias) 🔔
 
 **GOAL-004**: Lógica de criação e envio de notificações
 
@@ -120,7 +124,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | TASK-030 | Implementar verificação de preferências (se notificação está habilitada antes de enviar) | | |
 | TASK-031 | Implementar verificação de dias/horas preferenciais (se houver, só envia naquele horário) | | |
 
-### Phase 5: Gatilhos de Eventos (2-3 dias)
+### Fase 5: Gatilhos de Eventos (2-3 dias) ⚡
 
 **GOAL-005**: Disparar notificações quando eventos ocorrem
 
@@ -134,7 +138,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | TASK-037 | Implementar job periódico (diário) para: verificar alertas pendentes, enviar lembretes de humor | | |
 | TASK-038 | Implementar job para limpar notificações antigas (>30 dias) | | |
 
-### Phase 6: APIs para Gerenciar Preferências (1-2 dias)
+### Fase 6: APIs para Gerenciar Preferências (1-2 dias) 🔐
 
 **GOAL-006**: Endpoints para usuários configurarem notificações
 
@@ -149,7 +153,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | TASK-045 | PUT `/api/v1/alertas/:id/resolvido` - marcar alerta como resolvido | | |
 | TASK-046 | Adicionar autenticação JWT + validação de permissões | | |
 
-### Phase 7: Frontend - Settings (2-3 dias)
+### Fase 7: Frontend - Configurações (2-3 dias) 🎨
 
 **GOAL-007**: Interface para gerenciar preferências de notificação
 
@@ -164,7 +168,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | TASK-053 | Pinia store `useNotificacaoStore` para state management | | |
 | TASK-054 | Adicionar rota no Vue Router + menu no dashboard | | |
 
-### Phase 8: Frontend - Dashboard Prof (1-2 dias)
+### Fase 8: Frontend - Dashboard Profissional (1-2 dias) 📊
 
 **GOAL-008**: Visualizar alertas de pacientes
 
@@ -175,7 +179,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | TASK-057 | Link para visualizar detalhes do paciente/alerta | | |
 | TASK-058 | Badge de "alerta novo" se houver alertas não lidos | | |
 
-### Phase 9: Testes & QA (2-3 dias)
+### Fase 9: Testes & QA (2-3 dias) ✅
 
 **GOAL-009**: Qualidade & confiabilidade
 
@@ -190,7 +194,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | TASK-065 | Teste segurança: usuário não consegue acessar notificações de outro usuário | | |
 | TASK-066 | Teste email: verificar que email não é enviado se usuário desabilitar notificação | | |
 
-### Phase 10: Documentação & Deployment (1-2 dias)
+### Fase 10: Documentação & Deploy (1-2 dias) 📚
 
 **GOAL-010**: Documentar feature e preparar produção
 
@@ -203,7 +207,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | TASK-071 | Testar em staging com email real (usar conta teste Gmail ou similar) | | |
 | TASK-072 | Atualizar README.md com feature de alertas | | |
 
-## 3. Alternativas Descartadas
+## 3️⃣ Alternativas Descartadas
 
 - **ALT-001**: Usar serviço externo (SendGrid, Mailgun) - ❌ adiciona custo/dependência; SMTP direto é simples
 - **ALT-002**: Implementar push notifications mobile - ❌ complexidade, postpone para v2.0
@@ -211,7 +215,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 - **ALT-004**: Dashboard visual em tempo real - ❌ email+BD é suficiente, UI pode ser adicionada depois
 - **ALT-005**: SMS/WhatsApp na v1.0 - ❌ focar em email primeiro, mais simples
 
-## 4. Dependencies
+## 4️⃣ Dependências Externas
 
 - **DEP-001**: Go stdlib (net/smtp, mime/quotedprintable) - nenhuma dependência externa adicional
 - **DEP-002**: Banco de dados PostgreSQL existente
@@ -222,7 +226,7 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 - **DEP-007**: TailwindCSS (já instalado)
 - **DEP-008**: Servidor SMTP (Gmail, servidor local, ou provider)
 
-## 5. Arquivos - Backend
+## 5️⃣ Estrutura de Arquivos
 
 **Novos**
 - `backend/interno/dominio/notificacao.go`
@@ -291,7 +295,34 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | Performance de detecção (muito lento) | Médio | Rodas em goroutine async, não bloqueia |
 | Alertas falsos (muitos positivos) | Alto | Fine-tuning dos limiares baseado em feedback |
 
-## 9. Assumptions
+## 6️⃣ Testes Essenciais
+
+| # | Teste | Esperado |
+|---|-------|----------|
+| TEST-001 | Detectar alerta humor < 2 por 3 dias | ✓ gera alerta com severidade alta |
+| TEST-002 | Detectar alerta stress > 8 por 5 dias | ✓ gera alerta |
+| TEST-003 | Resolver alerta quando dados melhoram | ✓ marca como resolvido |
+| TEST-004 | Não enviar email se notificação desabilitada | ✓ email não enviado |
+| TEST-005 | Enviar email com template correto | ✓ email recebido com conteúdo correto |
+| TEST-006 | Retry automático se email falha | ✓ tenta 3 vezes |
+| TEST-007 | Atribuir questionário → paciente recebe email | ✓ email dentro de 1 minuto |
+| TEST-008 | Paciente responde questionário → prof recebe email | ✓ email dentro de 1 minuto |
+| TEST-009 | Profissional não consegue ver alertas de outro prof | ✓ segurança ok |
+| TEST-010 | Usuário consegue mudar preferências | ✓ salva e respeita |
+| TEST-011 | Email não enviado fora do horário preferencial | ✓ espera até horário correto |
+| TEST-012 | Job periódico detecta alertas | ✓ cria alertas à 0h diariamente |
+
+## 7️⃣ Riscos & Mitigações
+
+| Risk | Impacto | Mitigação |
+|------|--------|-----------|
+| Email spam (muitos alertas) | Médio | Limitar frequência, preferências, deduplicação |
+| SMTP falha/indisponível | Alto | Retry automático, fila de emails em BD, log detalhado |
+| Algoritmo de detecção errado | Alto | Consultar literatura, validar com profissionais, testes abrangentes |
+| Performance de detecção (muito lento) | Médio | Rodas em goroutine async, não bloqueia |
+| Alertas falsos (muitos positivos) | Alto | Fine-tuning dos limiares baseado em feedback |
+
+## 8️⃣ Suposições
 
 - Limiares de alertas definidos são razoáveis (podem ser ajustados depois)
 - Profissionais têm email válido no sistema
@@ -301,10 +332,12 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 - Usuários recebem emails em inbox (não spam)
 - Job periódico pode rodar a cada minuto (não trava o app)
 
-## 10. Estimativa de Timeline
+## 9️⃣ Timeline Estimada
 
-| Phase | Dias | Cumulative |
-|-------|------|-----------|
+## 9️⃣ Timeline Estimada
+
+| Fase | Dias | Acumulado |
+|------|------|-----------|
 | 1: Banco & Domínio | 2-3 | 2-3 |
 | 2: Email | 2-3 | 4-6 |
 | 3: Detecção Alertas | 2-3 | 6-9 |
@@ -315,11 +348,11 @@ Sistema MVP de alertas automáticos e notificações por email para MindTrace. P
 | 8: Frontend Prof Dashboard | 1-2 | 14-22 |
 | 9: Testes | 2-3 | 16-25 |
 | 10: Documentação | 1-2 | 17-27 |
-| **TOTAL** | **15-20** | **15-20** |
+| **TOTAL** | **15-20 dias** | **15-20 dias** |
 
-*Nota: Fases 2-5 podem ser paralelizadas. Com focus: ~18 dias*
+**Nota**: Fases 2-5 podem ser paralelizadas. Com focus: ~18 dias
 
-## 11. Configuração de Email (Exemplo Gmail)
+## 🔟 Configuração de Email
 
 ### Usando Gmail SMTP
 
@@ -342,7 +375,7 @@ SMTP_PASS=
 EMAIL_FROM=dev@mindtrace.local
 ```
 
-## 12. Tipos de Alerta (Configuráveis)
+## 1️⃣1️⃣ Tipos de Alerta (Configuráveis)
 
 | Tipo | Limiar | Severidade | Notifica |
 |------|--------|-----------|----------|
@@ -353,25 +386,30 @@ EMAIL_FROM=dev@mindtrace.local
 | HUMOR_NAO_RESPONDIDO | Sem registro há 3+ dias | Baixa | Paciente |
 | QUESTIONARIO_PENDENTE | Sem resposta há 7+ dias | Média | Paciente |
 
-## 13. Próximos Passos Imediatos
+## 1️⃣2️⃣ Próximos Passos
 
 1. ✅ Revisar e aprovar plano
-2. ➡️ Começar Phase 1: criar structs de domínio
-3. ➡️ Criar migrations SQL
-4. ➡️ Implementar EmailServico
-5. ➡️ Criar templates de email
-6. ➡️ Implementar DeteccaoAlertasServico
-7. ➡️ Implementar NotificacaoServico
-8. ➡️ Adicionar gatilhos nos serviços existentes
-9. ➡️ Criar APIs para preferências
-10. ➡️ Build frontend (settings + alertas)
-11. ➡️ Testes completos
-12. ➡️ Deploy
+2. ➡️ **Fase 1**: Criar structs de domínio
+3. ➡️ **Fase 2**: Implementar serviço de email
+4. ➡️ **Fase 3**: Implementar detecção de alertas
+5. ➡️ **Fase 4**: Implementar serviço de notificações
+6. ➡️ **Fase 5**: Adicionar gatilhos de eventos
+7. ➡️ **Fase 6**: Criar APIs de preferências
+8. ➡️ **Fase 7**: Build frontend (settings)
+9. ➡️ **Fase 8**: Frontend dashboard profissional
+10. ➡️ **Fase 9**: Testes e QA
+11. ➡️ **Fase 10**: Documentação e deploy
 
 ---
 
-**Criado em**: 2025-10-20  
-**Duração estimada**: 15-20 dias  
-**Prioridade**: Alta  
-**Contexto**: Disciplina Engenharia de Software - Projeto MindTrace  
-**Próximas versões**: SMS (v2.0), WhatsApp (v3.0), Push Notifications (v4.0)
+## 📌 Metadados
+
+| Campo | Valor |
+|-------|-------|
+| **Criado em** | 2025-10-20 |
+| **Atualizado em** | 2025-10-20 |
+| **Duração estimada** | 15-20 dias |
+| **Prioridade** | Alta ⬆️ |
+| **Contexto** | Disciplina Engenharia de Software - Projeto MindTrace |
+| **Próximas versões** | SMS (v2.0), WhatsApp (v3.0), Push Notifications (v4.0) |
+| **Status** | Planned 🔵 |
