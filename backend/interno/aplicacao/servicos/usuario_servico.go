@@ -2,6 +2,7 @@ package servicos
 
 import (
 	"errors"
+	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
 	"os"
@@ -13,56 +14,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// RegistrarProfissionalDTO representa os dados para registrar um profissional
-type RegistrarProfissionalDTO struct {
-	Nome                 string
-	Email                string
-	Senha                string
-	DataNascimento       time.Time
-	Especialidade        string
-	RegistroProfissional string
-	CPF                  string
-	Contato              string
-}
-
-// RegistrarPacienteDTO representa os dados para registrar um paciente
-type RegistrarPacienteDTO struct {
-	Nome                 string
-	Email                string
-	Senha                string
-	Dependente           bool
-	DataNascimento       time.Time
-	DataInicioTratamento *time.Time
-	HistoricoSaude       string
-	CPF                  string
-	NomeResponsavel      string
-	ContatoResponsavel   string
-	Contato              string
-}
-
-// AtualizarPerfilDTO representa os dados para atualizar o perfil do usuario
-type AtualizarPerfilDTO struct {
-	Nome    string `json:"nome" binding:"required"`
-	Contato string `json:"contato"`
-	Bio     string `json:"bio"`
-	// Campos para Profissional
-	Especialidade        string `json:"especialidade,omitempty"`
-	RegistroProfissional string `json:"registro_profissional,omitempty"`
-	// IdadeProfissional    *int8  `json:"idade_profissional,omitempty"` // Se aplicavel
-	// Campos para Paciente
-	DataNascimento     *time.Time `json:"data_nascimento,omitempty"`
-	Dependente         *bool      `json:"dependente,omitempty"`
-	NomeResponsavel    string     `json:"nome_responsavel,omitempty"`
-	ContatoResponsavel string     `json:"contato_responsavel,omitempty"`
-}
-
-// AlterarSenhaDTO representa os dados para alterar a senha
-type AlterarSenhaDTO struct {
-	SenhaAtual  string `json:"senha_atual" binding:"required"`
-	NovaSenha   string `json:"nova_senha" binding:"required,min=8"`
-	NovaSenhaRe string `json:"nova_senha_re" binding:"required,min=8"`
-}
-
 var ErrEmailJaCadastrado = errors.New("e-mail existente")
 var ErrCrendenciaisInvalidas = errors.New("credenciais invalidas")
 var ErrUsuarioNaoEncontrado = errors.New("usuario nao encontrado")
@@ -70,15 +21,15 @@ var ErrSenhaNaoConfere = errors.New("a nova senha e a senha de confirmacao nao c
 
 // UsuarioServico define os metodos para gerenciamento de usuarios
 type UsuarioServico interface {
-	RegistrarProfissional(dto RegistrarProfissionalDTO) (*dominio.Profissional, error)
-	RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.Paciente, error)
+	RegistrarProfissional(dto dtos.RegistrarProfissionalDTOin) (*dominio.Profissional, error)
+	RegistrarPaciente(dto dtos.RegistrarPacienteDTOin) (*dominio.Paciente, error)
 	Login(email, senha string) (string, error)
 	BuscarUsuarioPorID(id uint) (*dominio.Usuario, error)
 	ProprioPerfilPaciente(id uint) (*dominio.Paciente, error)
 	ProprioPerfilProfissional(id uint) (*dominio.Profissional, error)
 	ListarPacientesDoProfissional(userID uint) ([]dominio.Paciente, error)
-	AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error)
-	AlterarSenha(userID uint, dto AlterarSenhaDTO) error
+	AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDTOin) (*dominio.Usuario, error)
+	AlterarSenha(userID uint, dto dtos.AlterarSenhaDTOin) error
 	DeletarPerfil(userID uint) error
 }
 
@@ -94,7 +45,7 @@ func NovoUsuarioServico(db *gorm.DB, repo repositorios.UsuarioRepositorio) Usuar
 }
 
 // RegistrarProfissional registra um novo profissional no sistema
-func (s *usuarioServico) RegistrarProfissional(dto RegistrarProfissionalDTO) (*dominio.Profissional, error) {
+func (s *usuarioServico) RegistrarProfissional(dto dtos.RegistrarProfissionalDTOin) (*dominio.Profissional, error) {
 	var profissionalRegistrado *dominio.Profissional
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
@@ -141,7 +92,7 @@ func (s *usuarioServico) RegistrarProfissional(dto RegistrarProfissionalDTO) (*d
 	return profissionalRegistrado, err
 }
 
-func (s *usuarioServico) RegistrarPaciente(dto RegistrarPacienteDTO) (*dominio.Paciente, error) {
+func (s *usuarioServico) RegistrarPaciente(dto dtos.RegistrarPacienteDTOin) (*dominio.Paciente, error) {
 	var pacienteCompleto *dominio.Paciente
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
@@ -274,7 +225,7 @@ func (s *usuarioServico) ProprioPerfilProfissional(id uint) (*dominio.Profission
 }
 
 // AtualizarPerfil atualiza o perfil do usuario
-func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*dominio.Usuario, error) {
+func (s *usuarioServico) AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDTOin) (*dominio.Usuario, error) {
 	var usuarioAtualizado *dominio.Usuario
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
@@ -332,7 +283,7 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto AtualizarPerfilDTO) (*
 }
 
 // AlterarSenha altera a senha do usuario
-func (s *usuarioServico) AlterarSenha(userID uint, dto AlterarSenhaDTO) error {
+func (s *usuarioServico) AlterarSenha(userID uint, dto dtos.AlterarSenhaDTOin) error {
 
 	if dto.NovaSenha != dto.NovaSenhaRe {
 		return ErrSenhaNaoConfere

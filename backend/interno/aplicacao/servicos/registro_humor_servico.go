@@ -3,30 +3,18 @@ package servicos
 import (
 	"encoding/json"
 	"errors"
+	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
-	"time"
 
 	"gorm.io/gorm"
 )
-
-// CriarRegistroHumorDTO representa os dados para criar um registro de humor
-type CriarRegistroHumorDTO struct {
-	UsuarioID        uint
-	NivelHumor       int16
-	HorasSono        int16
-	NivelStress      int16
-	NivelEnergia     int16
-	AutoCuidado      []string
-	Observacoes      string
-	DataHoraRegistro time.Time
-}
 
 var ErrPacienteNaoEncontrado = errors.New("usuario nao encontrado")
 
 // RegistroHumorServico define os metodos para gerenciamento de registros de humor
 type RegistroHumorServico interface {
-	CriarRegistroHumor(dto CriarRegistroHumorDTO) (*dominio.RegistroHumor, error)
+	CriarRegistroHumor(dto dtos.CriarRegistroHumorDTOin) (*dominio.RegistroHumor, error)
 }
 
 // registroHumorServico implementa a interface RegistroHumorServico
@@ -42,7 +30,7 @@ func NovoRegistroHumorServico(db *gorm.DB, repo repositorios.RegistroHumorReposi
 }
 
 // CriarRegistroHumor cria um novo registro de humor para o paciente
-func (rhs *registroHumorServico) CriarRegistroHumor(dto CriarRegistroHumorDTO) (*dominio.RegistroHumor, error) {
+func (rhs *registroHumorServico) CriarRegistroHumor(dto dtos.CriarRegistroHumorDTOin) (*dominio.RegistroHumor, error) {
 	var registroHumorRealizado *dominio.RegistroHumor
 
 	err := rhs.db.Transaction(func(tx *gorm.DB) error {

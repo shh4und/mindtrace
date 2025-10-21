@@ -1,6 +1,7 @@
 package controladores
 
 import (
+	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
 	"time"
@@ -42,7 +43,7 @@ func (rhc *RegistroHumorControlador) Criar(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
 	}
-	dto := servicos.CriarRegistroHumorDTO{
+	dto := dtos.CriarRegistroHumorDTOin{
 		UsuarioID:        userID.(uint),
 		NivelHumor:       req.NivelHumor,
 		HorasSono:        req.HorasSono,

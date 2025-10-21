@@ -1,6 +1,7 @@
 package controladores
 
 import (
+	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
 	"regexp"
@@ -72,7 +73,7 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 		return
 	}
 
-	dto := servicos.RegistrarPacienteDTO{
+	dto := dtos.RegistrarPacienteDTOin{
 		Nome:                 req.Nome,
 		Email:                req.Email,
 		Senha:                req.Senha,

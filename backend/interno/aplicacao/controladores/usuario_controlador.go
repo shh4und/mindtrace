@@ -1,6 +1,7 @@
 package controladores
 
 import (
+	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
 
@@ -44,7 +45,7 @@ func (uc *UsuarioControlador) AtualizarPerfil(c *gin.Context) {
 		return
 	}
 
-	var req servicos.AtualizarPerfilDTO
+	var req dtos.AtualizarPerfilDTOin
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
@@ -68,7 +69,7 @@ func (uc *UsuarioControlador) AlterarSenha(c *gin.Context) {
 		return
 	}
 
-	var req servicos.AlterarSenhaDTO
+	var req dtos.AlterarSenhaDTOin
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return

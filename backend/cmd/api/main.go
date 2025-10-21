@@ -43,7 +43,6 @@ func main() {
 		&dominio.Profissional{},
 		&dominio.Paciente{},
 		&dominio.RegistroHumor{},
-		&dominio.Alerta{},
 		&dominio.Notificacao{},
 		&dominio.Convite{},
 	)
