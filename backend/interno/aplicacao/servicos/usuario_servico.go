@@ -3,6 +3,7 @@ package servicos
 import (
 	"errors"
 	"mindtrace/backend/interno/aplicacao/dtos"
+	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
 	"os"
@@ -21,15 +22,15 @@ var ErrSenhaNaoConfere = errors.New("a nova senha e a senha de confirmacao nao c
 
 // UsuarioServico define os metodos para gerenciamento de usuarios
 type UsuarioServico interface {
-	RegistrarProfissional(dto dtos.RegistrarProfissionalDTOin) (*dominio.Profissional, error)
-	RegistrarPaciente(dto dtos.RegistrarPacienteDTOin) (*dominio.Paciente, error)
+	RegistrarProfissional(dto dtos.RegistrarProfissionalDTOIn) (*dominio.Profissional, error)
+	RegistrarPaciente(dto dtos.RegistrarPacienteDTOIn) (*dominio.Paciente, error)
 	Login(email, senha string) (string, error)
 	BuscarUsuarioPorID(id uint) (*dominio.Usuario, error)
 	ProprioPerfilPaciente(id uint) (*dominio.Paciente, error)
 	ProprioPerfilProfissional(id uint) (*dominio.Profissional, error)
 	ListarPacientesDoProfissional(userID uint) ([]dominio.Paciente, error)
-	AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDTOin) (*dominio.Usuario, error)
-	AlterarSenha(userID uint, dto dtos.AlterarSenhaDTOin) error
+	AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDTOIn) (*dominio.Usuario, error)
+	AlterarSenha(userID uint, dto dtos.AlterarSenhaDTOIn) error
 	DeletarPerfil(userID uint) error
 }
 
@@ -45,44 +46,40 @@ func NovoUsuarioServico(db *gorm.DB, repo repositorios.UsuarioRepositorio) Usuar
 }
 
 // RegistrarProfissional registra um novo profissional no sistema
-func (s *usuarioServico) RegistrarProfissional(dto dtos.RegistrarProfissionalDTOin) (*dominio.Profissional, error) {
+func (s *usuarioServico) RegistrarProfissional(dto dtos.RegistrarProfissionalDTOIn) (*dominio.Profissional, error) {
 	var profissionalRegistrado *dominio.Profissional
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
-
+		// Verifica se o e-mail já está cadastrado
 		_, err := s.repositorio.BuscarPorEmail(dto.Email)
 		if err == nil {
 			return ErrEmailJaCadastrado
 		}
 
-		hashSenha, err := bcrypt.GenerateFromPassword([]byte(dto.Senha), bcrypt.DefaultCost)
+		// Usa o mapper para criar as entidades a partir do DTO
+		novoUsuario, novoProfissional := mappers.RegistrarProfissionalDTOInParaEntidade(&dto)
+
+		// Hash da senha
+		hashSenha, err := bcrypt.GenerateFromPassword([]byte(novoUsuario.Senha), bcrypt.DefaultCost)
 		if err != nil {
 			return err
 		}
+		novoUsuario.Senha = string(hashSenha)
 
-		novoUsuario := &dominio.Usuario{
-			Nome:        dto.Nome,
-			Email:       dto.Email,
-			Senha:       string(hashSenha),
-			TipoUsuario: "profissional",
-			CPF:         dto.CPF,
-			Contato:     dto.Contato,
-		}
-
+		// Cria o usuário
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
 		}
 
-		novoProfissional := &dominio.Profissional{
-			Especialidade:        dto.Especialidade,
-			RegistroProfissional: dto.RegistroProfissional,
-			UsuarioID:            novoUsuario.ID,
-		}
+		// Define o UsuarioID do profissional
+		novoProfissional.UsuarioID = novoUsuario.ID
 
+		// Cria o profissional
 		if err := s.repositorio.CriarProfissional(tx, novoProfissional); err != nil {
 			return err
 		}
 
+		// Prepara o objeto de retorno completo
 		novoProfissional.Usuario = *novoUsuario
 		profissionalRegistrado = novoProfissional
 
@@ -92,49 +89,44 @@ func (s *usuarioServico) RegistrarProfissional(dto dtos.RegistrarProfissionalDTO
 	return profissionalRegistrado, err
 }
 
-func (s *usuarioServico) RegistrarPaciente(dto dtos.RegistrarPacienteDTOin) (*dominio.Paciente, error) {
+func (s *usuarioServico) RegistrarPaciente(dto dtos.RegistrarPacienteDTOIn) (*dominio.Paciente, error) {
 	var pacienteCompleto *dominio.Paciente
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
-
+		// Verifica se o e-mail já está cadastrado
 		_, err := s.repositorio.BuscarPorEmail(dto.Email)
 		if err == nil {
 			return ErrEmailJaCadastrado
 		}
 
-		hashSenha, err := bcrypt.GenerateFromPassword([]byte(dto.Senha), bcrypt.DefaultCost)
+		// Usa o mapper para criar as entidades a partir do DTO
+		novoUsuario, novoPaciente := mappers.RegistrarPacienteDTOInParaEntidade(&dto)
+
+		// Hash da senha
+		hashSenha, err := bcrypt.GenerateFromPassword([]byte(novoUsuario.Senha), bcrypt.DefaultCost)
 		if err != nil {
 			return err
 		}
+		novoUsuario.Senha = string(hashSenha)
 
-		novoUsuario := &dominio.Usuario{
-			Nome:        dto.Nome,
-			Email:       dto.Email,
-			Senha:       string(hashSenha),
-			TipoUsuario: "paciente",
-			CPF:         dto.CPF,
-			Contato:     dto.Contato,
-		}
+		// Cria o usuário
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
 		}
 
-		novoPaciente := &dominio.Paciente{
-			UsuarioID:          novoUsuario.ID,
-			DataNascimento:     dto.DataNascimento,
-			Dependente:         dto.Dependente,
-			NomeResponsavel:    dto.NomeResponsavel,
-			ContatoResponsavel: dto.ContatoResponsavel,
-		}
+		// Define o UsuarioID do paciente
+		novoPaciente.UsuarioID = novoUsuario.ID
+
+		// Cria o paciente
 		if err := s.repositorio.CriarPaciente(tx, novoPaciente); err != nil {
 			return err
 		}
 
-		// Preparar o objeto de retorno completo
+		// Prepara o objeto de retorno completo
 		novoPaciente.Usuario = *novoUsuario
 		pacienteCompleto = novoPaciente
 
-		return nil // Sucesso na transacao
+		return nil
 	})
 
 	return pacienteCompleto, err
@@ -225,7 +217,7 @@ func (s *usuarioServico) ProprioPerfilProfissional(id uint) (*dominio.Profission
 }
 
 // AtualizarPerfil atualiza o perfil do usuario
-func (s *usuarioServico) AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDTOin) (*dominio.Usuario, error) {
+func (s *usuarioServico) AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDTOIn) (*dominio.Usuario, error) {
 	var usuarioAtualizado *dominio.Usuario
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
@@ -283,7 +275,7 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDT
 }
 
 // AlterarSenha altera a senha do usuario
-func (s *usuarioServico) AlterarSenha(userID uint, dto dtos.AlterarSenhaDTOin) error {
+func (s *usuarioServico) AlterarSenha(userID uint, dto dtos.AlterarSenhaDTOIn) error {
 
 	if dto.NovaSenha != dto.NovaSenhaRe {
 		return ErrSenhaNaoConfere
