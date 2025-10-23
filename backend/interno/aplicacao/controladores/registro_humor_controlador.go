@@ -1,6 +1,7 @@
 package controladores
 
 import (
+	"encoding/json"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
@@ -43,18 +44,24 @@ func (rhc *RegistroHumorControlador) Criar(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
 	}
-	dto := dtos.CriarRegistroHumorDTOin{
-		UsuarioID:        userID.(uint),
+
+	autoCuidadoJSON, err := json.Marshal(req.AutoCuidado)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"erro de marshaling": err.Error()})
+		return // Retorna erro de marshaling
+	}
+
+	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       req.NivelHumor,
 		HorasSono:        req.HorasSono,
 		NivelStress:      req.NivelStress,
 		NivelEnergia:     req.NivelEnergia,
-		AutoCuidado:      req.AutoCuidado,
+		AutoCuidado:      string(autoCuidadoJSON),
 		Observacoes:      req.Observacoes,
 		DataHoraRegistro: req.DataHoraRegistro,
 	}
 
-	registro_humor, err := rhc.registroHumorServico.CriarRegistroHumor(dto)
+	registro_humor, err := rhc.registroHumorServico.CriarRegistroHumor(dto, userID.(uint))
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})

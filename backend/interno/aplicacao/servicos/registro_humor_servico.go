@@ -1,9 +1,9 @@
 package servicos
 
 import (
-	"encoding/json"
 	"errors"
 	"mindtrace/backend/interno/aplicacao/dtos"
+	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
 
@@ -14,7 +14,7 @@ var ErrPacienteNaoEncontrado = errors.New("usuario nao encontrado")
 
 // RegistroHumorServico define os metodos para gerenciamento de registros de humor
 type RegistroHumorServico interface {
-	CriarRegistroHumor(dto dtos.CriarRegistroHumorDTOin) (*dominio.RegistroHumor, error)
+	CriarRegistroHumor(dto dtos.CriarRegistroHumorDTOIn, userID uint) (*dominio.RegistroHumor, error)
 }
 
 // registroHumorServico implementa a interface RegistroHumorServico
@@ -30,11 +30,11 @@ func NovoRegistroHumorServico(db *gorm.DB, repo repositorios.RegistroHumorReposi
 }
 
 // CriarRegistroHumor cria um novo registro de humor para o paciente
-func (rhs *registroHumorServico) CriarRegistroHumor(dto dtos.CriarRegistroHumorDTOin) (*dominio.RegistroHumor, error) {
+func (rhs *registroHumorServico) CriarRegistroHumor(dto dtos.CriarRegistroHumorDTOIn, userID uint) (*dominio.RegistroHumor, error) {
 	var registroHumorRealizado *dominio.RegistroHumor
 
 	err := rhs.db.Transaction(func(tx *gorm.DB) error {
-		paciente, err := rhs.usuarioRepositorio.BuscarPacientePorUsuarioID(tx, dto.UsuarioID)
+		paciente, err := rhs.usuarioRepositorio.BuscarPacientePorUsuarioID(tx, userID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrPacienteNaoEncontrado
@@ -42,22 +42,19 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto dtos.CriarRegistroHumorD
 			return err
 		}
 
-		autoCuidadoJSON, err := json.Marshal(dto.AutoCuidado)
-		if err != nil {
-			return err // Retorna erro de marshaling
-		}
+		novoRegistroHumor := mappers.CriarRegistroHumorDTOInParaEntidade(&dto, paciente.ID)
 
-		novoRegistroHumor := &dominio.RegistroHumor{
-			PacienteID:       paciente.ID,
-			Paciente:         *paciente,
-			NivelHumor:       dto.NivelHumor,
-			HorasSono:        dto.HorasSono,
-			NivelEnergia:     dto.NivelEnergia,
-			NivelStress:      dto.NivelStress,
-			AutoCuidado:      string(autoCuidadoJSON),
-			Observacoes:      dto.Observacoes,
-			DataHoraRegistro: dto.DataHoraRegistro,
-		}
+		// novoRegistroHumor = &dominio.RegistroHumor{
+		// 	PacienteID:       paciente.ID,
+		// 	Paciente:         *paciente,
+		// 	NivelHumor:       dto.NivelHumor,
+		// 	HorasSono:        dto.HorasSono,
+		// 	NivelEnergia:     dto.NivelEnergia,
+		// 	NivelStress:      dto.NivelStress,
+		// 	AutoCuidado:      string(autoCuidadoJSON),
+		// 	Observacoes:      dto.Observacoes,
+		// 	DataHoraRegistro: dto.DataHoraRegistro,
+		// }
 
 		if err := rhs.repositorio.CriarRegistroHumor(tx, novoRegistroHumor); err != nil {
 			return err
