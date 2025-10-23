@@ -2,6 +2,7 @@ package controladores
 
 import (
 	"mindtrace/backend/interno/aplicacao/dtos"
+	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
 	"regexp"
@@ -66,14 +67,19 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Senha inválida. Use 8 ou mais caracteres com letras, números e os símbolos: !@#$%^&*"})
 		return
 	}
+	/********************
 
+		Verficicar a possibilidade das checagens feitas em controladores
+		serem implementadas como regras de negocios nos dominios
+
+	*********************/
 	passwordRegex := `^[a-zA-Z0-9!@#$%^&*].{8,}$`
 	if match, _ := regexp.MatchString(passwordRegex, req.Senha); !match {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Senha inválida. Use 8 ou mais caracteres com letras, números e os símbolos: !@#$%^&*"})
 		return
 	}
 
-	dto := dtos.RegistrarPacienteDTOin{
+	dto := dtos.RegistrarPacienteDTOIn{
 		Nome:                 req.Nome,
 		Email:                req.Email,
 		Senha:                req.Senha,
@@ -96,7 +102,9 @@ func (pc *PacienteControlador) Registrar(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, paciente)
+	pacienteOut := mappers.PacienteParaDTOOut(paciente)
+
+	c.JSON(http.StatusCreated, pacienteOut)
 }
 
 // ProprioPerfilPaciente recupera o perfil do paciente autenticado
@@ -114,17 +122,6 @@ func (uc *PacienteControlador) ProprioPerfilPaciente(c *gin.Context) {
 		return
 	}
 
-	proprioPaciente := ProprioPacienteRequest{
-		Nome:                 paciente.Usuario.Nome,
-		Email:                paciente.Usuario.Email,
-		Dependente:           &paciente.Dependente,
-		DataNascimento:       paciente.DataNascimento,
-		DataInicioTratamento: paciente.DataInicioTratamento,
-		CPF:                  paciente.Usuario.CPF,
-		NomeResponsavel:      paciente.NomeResponsavel,
-		ContatoResponsavel:   paciente.ContatoResponsavel,
-		Contato:              paciente.Usuario.Contato,
-	}
-
+	proprioPaciente := mappers.PacienteParaDTOOut(paciente)
 	c.JSON(http.StatusOK, proprioPaciente)
 }

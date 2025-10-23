@@ -132,7 +132,7 @@ type PacienteDTOOut struct {
 	ID             uint                 `json:"id"`
 	Usuario        UsuarioDTOOut        `json:"usuario"`
 	DataNascimento time.Time            `json:"data_nascimento"`
-	Dependente     bool                 `json:"dependente"`
+	Dependente     *bool                `json:"dependente"`
 	Profissionais  []ProfissionalDTOOut `json:"profissionais,omitempty"`
 	CreatedAt      time.Time            `json:"created_at"`
 	UpdatedAt      time.Time            `json:"updated_at"`

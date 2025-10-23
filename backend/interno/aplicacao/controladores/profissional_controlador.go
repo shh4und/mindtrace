@@ -2,6 +2,7 @@ package controladores
 
 import (
 	"mindtrace/backend/interno/aplicacao/dtos"
+	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
 	"regexp"
@@ -49,6 +50,13 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 		return
 	}
 
+	/********************
+
+		Verficicar a possibilidade das checagens feitas em controladores
+		serem implementadas como regras de negocios nos dominios
+
+	*********************/
+
 	if len(req.Senha) < 8 {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Senha inválida. Use 8 ou mais caracteres com letras, números e os símbolos: !@#$%^&*"})
 		return
@@ -60,7 +68,7 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 		return
 	}
 
-	dto := dtos.RegistrarProfissionalDTOin{
+	dto := dtos.RegistrarProfissionalDTOIn{
 		Nome:                 req.Nome,
 		Email:                req.Email,
 		Senha:                req.Senha,
@@ -80,7 +88,9 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, profissional)
+	profissionalOut := mappers.ProfissionalParaDTOOut(profissional)
+
+	c.JSON(http.StatusCreated, profissionalOut)
 }
 
 // ProprioPerfilProfissional recupera o perfil do profissional autenticado
@@ -98,14 +108,7 @@ func (uc *ProfissionalControlador) ProprioPerfilProfissional(c *gin.Context) {
 		return
 	}
 
-	proprioProfissional := ProprioProfissionalRequest{
-		Nome:                 profissional.Usuario.Nome,
-		Email:                profissional.Usuario.Email,
-		CPF:                  profissional.Usuario.CPF,
-		Especialidade:        profissional.Especialidade,
-		RegistroProfissional: profissional.RegistroProfissional,
-		Contato:              profissional.Usuario.Contato,
-	}
+	proprioProfissional := mappers.ProfissionalParaDTOOut(profissional)
 
 	c.JSON(http.StatusOK, proprioProfissional)
 }

@@ -45,7 +45,7 @@ func PacienteParaDTOOut(pac *dominio.Paciente) *dtos.PacienteDTOOut {
 		ID:             pac.ID,
 		Usuario:        *usuarioDTO,
 		DataNascimento: pac.DataNascimento,
-		Dependente:     pac.Dependente,
+		Dependente:     &pac.Dependente,
 		Profissionais:  profissionalDTOs,
 		CreatedAt:      pac.CreatedAt,
 		UpdatedAt:      pac.UpdatedAt,
