@@ -2,6 +2,7 @@ package controladores
 
 import (
 	"mindtrace/backend/interno/aplicacao/dtos"
+	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
 
@@ -33,7 +34,9 @@ func (uc *UsuarioControlador) BuscarPerfil(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, usuario)
+	usuarioOut := mappers.UsuarioParaDTOOut(usuario)
+
+	c.JSON(http.StatusOK, usuarioOut)
 }
 
 // AtualizarPerfil atualiza o perfil do usuario autenticado
@@ -45,19 +48,24 @@ func (uc *UsuarioControlador) AtualizarPerfil(c *gin.Context) {
 		return
 	}
 
-	var req dtos.AtualizarPerfilDTOin
+	var req dtos.AtualizarPerfilDTOIn
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
 	}
-
+	/*
+		TO-DO
+		Melhorar AtualizarPerfil para saber lidar com diferentes TIPOS de Usuario (paciente, profissional)
+		ou
+		Fazer 2 Metodos Diferentes
+	*/
 	usuario, err := uc.usuarioServico.AtualizarPerfil(userID.(uint), req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, usuario)
+	usuarioOut := mappers.UsuarioParaDTOOut(usuario)
+	c.JSON(http.StatusOK, usuarioOut)
 }
 
 // AlterarSenha altera a senha do usuario autenticado
@@ -69,7 +77,7 @@ func (uc *UsuarioControlador) AlterarSenha(c *gin.Context) {
 		return
 	}
 
-	var req dtos.AlterarSenhaDTOin
+	var req dtos.AlterarSenhaDTOIn
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
@@ -103,7 +111,9 @@ func (uc *UsuarioControlador) ListarPacientesDoProfissional(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, pacientes)
+	pacientesOut := mappers.PacientesParaDTOOut(pacientes)
+
+	c.JSON(http.StatusOK, pacientesOut)
 }
 
 // DeletarPerfil deleta o perfil do usuario autenticado
