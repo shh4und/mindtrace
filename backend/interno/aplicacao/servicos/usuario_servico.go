@@ -22,15 +22,15 @@ var ErrSenhaNaoConfere = errors.New("a nova senha e a senha de confirmacao nao c
 
 // UsuarioServico define os metodos para gerenciamento de usuarios
 type UsuarioServico interface {
-	RegistrarProfissional(dto dtos.RegistrarProfissionalDTOIn) (*dominio.Profissional, error)
-	RegistrarPaciente(dto dtos.RegistrarPacienteDTOIn) (*dominio.Paciente, error)
+	RegistrarProfissional(dtoIn *dtos.RegistrarProfissionalDTOIn) (*dtos.ProfissionalDTOOut, error)
+	RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (*dtos.PacienteDTOOut, error)
 	Login(email, senha string) (string, error)
-	BuscarUsuarioPorID(id uint) (*dominio.Usuario, error)
-	ProprioPerfilPaciente(id uint) (*dominio.Paciente, error)
-	ProprioPerfilProfissional(id uint) (*dominio.Profissional, error)
-	ListarPacientesDoProfissional(userID uint) ([]dominio.Paciente, error)
-	AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDTOIn) (*dominio.Usuario, error)
-	AlterarSenha(userID uint, dto dtos.AlterarSenhaDTOIn) error
+	BuscarUsuarioPorID(userID uint) (*dtos.UsuarioDTOOut, error)
+	ProprioPerfilPaciente(pacID uint) (*dtos.PacienteDTOOut, error)
+	ProprioPerfilProfissional(profID uint) (*dtos.ProfissionalDTOOut, error)
+	ListarPacientesDoProfissional(userID uint) ([]dtos.PacienteDTOOut, error)
+	AtualizarPerfil(userID uint, dtoIn *dtos.AtualizarPerfilDTOIn) error
+	AlterarSenha(userID uint, dtoIn *dtos.AlterarSenhaDTOIn) error
 	DeletarPerfil(userID uint) error
 }
 
@@ -46,18 +46,18 @@ func NovoUsuarioServico(db *gorm.DB, repo repositorios.UsuarioRepositorio) Usuar
 }
 
 // RegistrarProfissional registra um novo profissional no sistema
-func (s *usuarioServico) RegistrarProfissional(dto dtos.RegistrarProfissionalDTOIn) (*dominio.Profissional, error) {
+func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissionalDTOIn) (*dtos.ProfissionalDTOOut, error) {
 	var profissionalRegistrado *dominio.Profissional
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		// Verifica se o e-mail já está cadastrado
-		_, err := s.repositorio.BuscarPorEmail(dto.Email)
+		_, err := s.repositorio.BuscarPorEmail(dtoIn.Email)
 		if err == nil {
 			return ErrEmailJaCadastrado
 		}
 
-		// Usa o mapper para criar as entidades a partir do DTO
-		novoUsuario, novoProfissional := mappers.RegistrarProfissionalDTOInParaEntidade(&dto)
+		// Usa o mapper para criar as entidades a partir do DTOIn
+		novoUsuario, novoProfissional := mappers.RegistrarProfissionalDTOInParaEntidade(dtoIn)
 
 		// Hash da senha
 		hashSenha, err := bcrypt.GenerateFromPassword([]byte(novoUsuario.Senha), bcrypt.DefaultCost)
@@ -86,21 +86,21 @@ func (s *usuarioServico) RegistrarProfissional(dto dtos.RegistrarProfissionalDTO
 		return nil
 	})
 
-	return profissionalRegistrado, err
+	return mappers.ProfissionalParaDTOOut(profissionalRegistrado), err
 }
 
-func (s *usuarioServico) RegistrarPaciente(dto dtos.RegistrarPacienteDTOIn) (*dominio.Paciente, error) {
+func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (*dtos.PacienteDTOOut, error) {
 	var pacienteCompleto *dominio.Paciente
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		// Verifica se o e-mail já está cadastrado
-		_, err := s.repositorio.BuscarPorEmail(dto.Email)
+		_, err := s.repositorio.BuscarPorEmail(dtoIn.Email)
 		if err == nil {
 			return ErrEmailJaCadastrado
 		}
 
-		// Usa o mapper para criar as entidades a partir do DTO
-		novoUsuario, novoPaciente := mappers.RegistrarPacienteDTOInParaEntidade(&dto)
+		// Usa o mapper para criar as entidades a partir do DTOIn
+		novoUsuario, novoPaciente := mappers.RegistrarPacienteDTOInParaEntidade(dtoIn)
 
 		// Hash da senha
 		hashSenha, err := bcrypt.GenerateFromPassword([]byte(novoUsuario.Senha), bcrypt.DefaultCost)
@@ -129,7 +129,7 @@ func (s *usuarioServico) RegistrarPaciente(dto dtos.RegistrarPacienteDTOIn) (*do
 		return nil
 	})
 
-	return pacienteCompleto, err
+	return mappers.PacienteParaDTOOut(pacienteCompleto), err
 }
 
 // Login autentica o usuario e retorna um token JWT
@@ -168,24 +168,24 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 }
 
 // BuscarUsuarioPorID busca um usuario pelo ID
-func (s *usuarioServico) BuscarUsuarioPorID(id uint) (*dominio.Usuario, error) {
-	usuario, err := s.repositorio.BuscarUsuarioPorID(id)
+func (s *usuarioServico) BuscarUsuarioPorID(userID uint) (*dtos.UsuarioDTOOut, error) {
+	usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrUsuarioNaoEncontrado
 		}
 		return nil, err
 	}
-	return usuario, nil
+	return mappers.UsuarioParaDTOOut(usuario), nil
 }
 
 // ProprioPerfilPaciente busca o perfil proprio do paciente
-func (s *usuarioServico) ProprioPerfilPaciente(id uint) (*dominio.Paciente, error) {
+func (s *usuarioServico) ProprioPerfilPaciente(pacID uint) (*dtos.PacienteDTOOut, error) {
 	var pacienteEncontado *dominio.Paciente
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 
-		paciente, err := s.repositorio.BuscarPacientePorUsuarioID(tx, id)
+		paciente, err := s.repositorio.BuscarPacientePorUsuarioID(tx, pacID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrUsuarioNaoEncontrado
@@ -195,15 +195,15 @@ func (s *usuarioServico) ProprioPerfilPaciente(id uint) (*dominio.Paciente, erro
 		pacienteEncontado = paciente
 		return nil
 	})
-	return pacienteEncontado, err
+	return mappers.PacienteParaDTOOut(pacienteEncontado), err
 }
 
-func (s *usuarioServico) ProprioPerfilProfissional(id uint) (*dominio.Profissional, error) {
+func (s *usuarioServico) ProprioPerfilProfissional(profID uint) (*dtos.ProfissionalDTOOut, error) {
 	var profissionalEncontrado *dominio.Profissional
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 
-		profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, id)
+		profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, profID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return ErrUsuarioNaoEncontrado
@@ -213,20 +213,19 @@ func (s *usuarioServico) ProprioPerfilProfissional(id uint) (*dominio.Profission
 		profissionalEncontrado = profissional
 		return nil
 	})
-	return profissionalEncontrado, err
+	return mappers.ProfissionalParaDTOOut(profissionalEncontrado), err
 }
 
 // AtualizarPerfil atualiza o perfil do usuario
-func (s *usuarioServico) AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDTOIn) (*dominio.Usuario, error) {
-	var usuarioAtualizado *dominio.Usuario
+func (s *usuarioServico) AtualizarPerfil(userID uint, dtoIn *dtos.AtualizarPerfilDTOIn) error {
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
 		if err != nil {
 			return err
 		}
-		usuario.Nome = dto.Nome
-		usuario.Contato = dto.Contato
-		usuario.Bio = dto.Bio
+		usuario.Nome = dtoIn.Nome
+		usuario.Contato = dtoIn.Contato
+		usuario.Bio = dtoIn.Bio
 		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
 			return err
 		}
@@ -237,11 +236,11 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDT
 			if err != nil {
 				return err
 			}
-			if dto.Especialidade != "" {
-				profissional.Especialidade = dto.Especialidade
+			if dtoIn.Especialidade != "" {
+				profissional.Especialidade = dtoIn.Especialidade
 			}
-			if dto.RegistroProfissional != "" {
-				profissional.RegistroProfissional = dto.RegistroProfissional
+			if dtoIn.RegistroProfissional != "" {
+				profissional.RegistroProfissional = dtoIn.RegistroProfissional
 			}
 
 			if err := s.repositorio.AtualizarProfissional(tx, profissional); err != nil {
@@ -252,32 +251,31 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dto dtos.AtualizarPerfilDT
 			if err != nil {
 				return err
 			}
-			if dto.DataNascimento != nil {
-				paciente.DataNascimento = *dto.DataNascimento
+			if dtoIn.DataNascimento != nil {
+				paciente.DataNascimento = *dtoIn.DataNascimento
 			}
-			if dto.Dependente != nil {
-				paciente.Dependente = *dto.Dependente
+			if dtoIn.Dependente != nil {
+				paciente.Dependente = *dtoIn.Dependente
 			}
-			if dto.NomeResponsavel != "" {
-				paciente.NomeResponsavel = dto.NomeResponsavel
+			if dtoIn.NomeResponsavel != "" {
+				paciente.NomeResponsavel = dtoIn.NomeResponsavel
 			}
-			if dto.ContatoResponsavel != "" {
-				paciente.ContatoResponsavel = dto.ContatoResponsavel
+			if dtoIn.ContatoResponsavel != "" {
+				paciente.ContatoResponsavel = dtoIn.ContatoResponsavel
 			}
 			if err := s.repositorio.AtualizarPaciente(tx, paciente); err != nil {
 				return err
 			}
 		}
-		usuarioAtualizado = usuario
 		return nil
 	})
-	return usuarioAtualizado, err
+	return err
 }
 
 // AlterarSenha altera a senha do usuario
-func (s *usuarioServico) AlterarSenha(userID uint, dto dtos.AlterarSenhaDTOIn) error {
+func (s *usuarioServico) AlterarSenha(userID uint, dtoIn *dtos.AlterarSenhaDTOIn) error {
 
-	if dto.NovaSenha != dto.NovaSenhaRe {
+	if dtoIn.NovaSenha != dtoIn.NovaSenhaRe {
 		return ErrSenhaNaoConfere
 	}
 
@@ -290,11 +288,11 @@ func (s *usuarioServico) AlterarSenha(userID uint, dto dtos.AlterarSenhaDTOIn) e
 			return err
 		}
 
-		if err := bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(dto.SenhaAtual)); err != nil {
+		if err := bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(dtoIn.SenhaAtual)); err != nil {
 			return ErrCrendenciaisInvalidas
 		}
 
-		novaSenhaHash, err := bcrypt.GenerateFromPassword([]byte(dto.NovaSenha), bcrypt.DefaultCost)
+		novaSenhaHash, err := bcrypt.GenerateFromPassword([]byte(dtoIn.NovaSenha), bcrypt.DefaultCost)
 		if err != nil {
 			return err
 		}
@@ -307,7 +305,7 @@ func (s *usuarioServico) AlterarSenha(userID uint, dto dtos.AlterarSenhaDTOIn) e
 	return err
 }
 
-func (s *usuarioServico) ListarPacientesDoProfissional(userID uint) ([]dominio.Paciente, error) {
+func (s *usuarioServico) ListarPacientesDoProfissional(userID uint) ([]dtos.PacienteDTOOut, error) {
 	var pacientes []dominio.Paciente
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, userID)
@@ -320,7 +318,8 @@ func (s *usuarioServico) ListarPacientesDoProfissional(userID uint) ([]dominio.P
 		pacientes, err = s.repositorio.BuscarPacientesDoProfissional(tx, profissional.ID)
 		return err
 	})
-	return pacientes, err
+
+	return mappers.PacientesParaDTOOut(pacientes), err
 }
 
 // DeletarPerfil deleta o perfil do usuario
