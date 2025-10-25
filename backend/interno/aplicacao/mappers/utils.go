@@ -127,7 +127,7 @@ func RegistrarPacienteDTOInParaEntidade(dto *dtos.RegistrarPacienteDTOIn) (*domi
 
 	paciente := &dominio.Paciente{
 		DataNascimento:       dto.DataNascimento,
-		Dependente:           dto.Dependente,
+		Dependente:           *dto.Dependente,
 		NomeResponsavel:      dto.NomeResponsavel,
 		ContatoResponsavel:   dto.ContatoResponsavel,
 		DataInicioTratamento: dto.DataInicioTratamento,

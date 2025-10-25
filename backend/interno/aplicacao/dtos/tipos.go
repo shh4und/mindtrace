@@ -36,7 +36,7 @@ type RegistrarPacienteDTOIn struct {
 	Nome                 string     `json:"nome" binding:"required"`
 	Email                string     `json:"email" binding:"required,email"`
 	Senha                string     `json:"senha" binding:"required,min=8"`
-	Dependente           bool       `json:"dependente"`
+	Dependente           *bool      `json:"dependente"`
 	DataNascimento       time.Time  `json:"data_nascimento" binding:"required"`
 	DataInicioTratamento *time.Time `json:"data_inicio_tratamento,omitempty"`
 	HistoricoSaude       string     `json:"historico_saude,omitempty"`
