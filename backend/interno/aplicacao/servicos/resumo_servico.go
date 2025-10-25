@@ -3,6 +3,7 @@ package servicos
 import (
 	"errors"
 	"mindtrace/backend/interno/aplicacao/dtos"
+	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/persistencia/repositorios"
 
 	"gorm.io/gorm"
@@ -12,8 +13,8 @@ import (
 
 // ResumoServico define os metodos para gerar resumos
 type ResumoServico interface {
-	GerarResumoPaciente(userID uint) (*dtos.ResumoPacienteDTOout, error)
-	// GerarResumoPacienteDoProfissional(pacienteID uint, filtroPeriodo int64) (*dtos.ResumoPacienteDTOout, error)
+	GerarResumoPaciente(userID uint) (*dtos.ResumoPacienteDTOOut, error)
+	// GerarResumoPacienteDoProfissional(pacienteID uint, filtroPeriodo int64) (*dtos.ResumoPacienteDTOOut, error)
 }
 
 // resumoServico implementa a interface ResumoServico
@@ -33,8 +34,8 @@ func NovoResumoServico(db *gorm.DB, registroHumorRepo repositorios.RegistroHumor
 }
 
 // GerarResumoPaciente gera um resumo para o paciente autenticado
-func (rs *resumoServico) GerarResumoPaciente(userID uint) (*dtos.ResumoPacienteDTOout, error) {
-	resumoPacienteFeito := &dtos.ResumoPacienteDTOout{}
+func (rs *resumoServico) GerarResumoPaciente(userID uint) (*dtos.ResumoPacienteDTOOut, error) {
+	resumoPacienteFeito := &dtos.ResumoPacienteDTOOut{}
 
 	paciente, err := rs.usuarioRepositorio.BuscarPacientePorUsuarioID(rs.db, userID)
 	if err != nil {
@@ -52,9 +53,5 @@ func (rs *resumoServico) GerarResumoPaciente(userID uint) (*dtos.ResumoPacienteD
 		return nil, err
 	}
 
-	resumoPacienteFeito.Data = registroHumor.DataHoraRegistro
-	resumoPacienteFeito.Humor = registroHumor.NivelHumor
-	resumoPacienteFeito.Anotacao = registroHumor.Observacoes
-
-	return resumoPacienteFeito, nil
+	return mappers.ResumoPacienteParaDTOOut(registroHumor), nil
 }

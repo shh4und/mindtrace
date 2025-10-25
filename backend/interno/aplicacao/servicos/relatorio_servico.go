@@ -11,8 +11,8 @@ import (
 
 // RelatorioServico define os metodos para gerar relatorios
 type RelatorioServico interface {
-	GerarRelatorioPaciente(userID uint, filtroPeriodo int64) (*dtos.RelatorioPacienteDTOout, error)
-	GerarRelatorioPacienteDoProfissional(pacienteID uint, filtroPeriodo int64) (*dtos.RelatorioPacienteDTOout, error)
+	GerarRelatorioPaciente(userID uint, filtroPeriodo int64) (*dtos.RelatorioPacienteDTOOut, error)
+	GerarRelatorioPacienteDoProfissional(pacID uint, filtroPeriodo int64) (*dtos.RelatorioPacienteDTOOut, error)
 }
 
 // relatorioServico implementa a interface RelatorioServico
@@ -32,11 +32,11 @@ func NovoRelatorioServico(db *gorm.DB, registroHumorRepo repositorios.RegistroHu
 }
 
 // GerarRelatorioPaciente gera um relatorio para o paciente autenticado
-func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo int64) (*dtos.RelatorioPacienteDTOout, error) {
-	relatorioPacienteFeito := &dtos.RelatorioPacienteDTOout{
-		GraficoSono:    make([]dtos.PontoDeDadosDTOout, 0),
-		GraficoEnergia: make([]dtos.PontoDeDadosDTOout, 0),
-		GraficoStress:  make([]dtos.PontoDeDadosDTOout, 0),
+func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo int64) (*dtos.RelatorioPacienteDTOOut, error) {
+	relatorioPacienteFeito := &dtos.RelatorioPacienteDTOOut{
+		GraficoSono:    make([]dtos.PontoDeDadosDTOOut, 0),
+		GraficoEnergia: make([]dtos.PontoDeDadosDTOOut, 0),
+		GraficoStress:  make([]dtos.PontoDeDadosDTOOut, 0),
 	}
 
 	paciente, err := rs.usuarioRepositorio.BuscarPacientePorUsuarioID(rs.db, userID)
@@ -69,7 +69,7 @@ func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo in
 		totalEnergia += int(registro.NivelEnergia)
 		totalStress += int(registro.NivelStress)
 
-		pontoDeDadosSono := dtos.PontoDeDadosDTOout{
+		pontoDeDadosSono := dtos.PontoDeDadosDTOOut{
 			Data:     registro.DataHoraRegistro,
 			Valor:    registro.HorasSono,
 			Humor:    registro.NivelHumor,
@@ -77,7 +77,7 @@ func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo in
 		}
 		relatorioPacienteFeito.GraficoSono = append(relatorioPacienteFeito.GraficoSono, pontoDeDadosSono)
 
-		pontoDeDadosEnergia := dtos.PontoDeDadosDTOout{
+		pontoDeDadosEnergia := dtos.PontoDeDadosDTOOut{
 			Data:     registro.DataHoraRegistro,
 			Valor:    registro.NivelEnergia,
 			Humor:    registro.NivelHumor,
@@ -85,7 +85,7 @@ func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo in
 		}
 		relatorioPacienteFeito.GraficoEnergia = append(relatorioPacienteFeito.GraficoEnergia, pontoDeDadosEnergia)
 
-		pontoDeDadosStress := dtos.PontoDeDadosDTOout{
+		pontoDeDadosStress := dtos.PontoDeDadosDTOOut{
 			Data:     registro.DataHoraRegistro,
 			Valor:    registro.NivelStress,
 			Humor:    registro.NivelHumor,
@@ -105,18 +105,18 @@ func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo in
 }
 
 // GerarRelatorioPacienteDoProfissional gera um relatorio para um paciente especifico pelo profissional
-func (rs *relatorioServico) GerarRelatorioPacienteDoProfissional(pacienteID uint, filtroPeriodo int64) (*dtos.RelatorioPacienteDTOout, error) {
-	relatorioPacienteFeito := &dtos.RelatorioPacienteDTOout{
-		GraficoSono:    make([]dtos.PontoDeDadosDTOout, 0),
-		GraficoEnergia: make([]dtos.PontoDeDadosDTOout, 0),
-		GraficoStress:  make([]dtos.PontoDeDadosDTOout, 0),
+func (rs *relatorioServico) GerarRelatorioPacienteDoProfissional(pacID uint, filtroPeriodo int64) (*dtos.RelatorioPacienteDTOOut, error) {
+	relatorioPacienteFeito := &dtos.RelatorioPacienteDTOOut{
+		GraficoSono:    make([]dtos.PontoDeDadosDTOOut, 0),
+		GraficoEnergia: make([]dtos.PontoDeDadosDTOOut, 0),
+		GraficoStress:  make([]dtos.PontoDeDadosDTOOut, 0),
 	}
 
 	now := time.Now()
 	dataFim := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
 	dataInicio := dataFim.AddDate(0, 0, -int(filtroPeriodo))
 
-	registrosHumor, err := rs.registroHumorRepositorio.BuscarPorPacienteEPeriodo(pacienteID, dataInicio, dataFim)
+	registrosHumor, err := rs.registroHumorRepositorio.BuscarPorPacienteEPeriodo(pacID, dataInicio, dataFim)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return relatorioPacienteFeito, nil
@@ -134,7 +134,7 @@ func (rs *relatorioServico) GerarRelatorioPacienteDoProfissional(pacienteID uint
 		totalEnergia += int(registro.NivelEnergia)
 		totalStress += int(registro.NivelStress)
 
-		pontoDeDadosSono := dtos.PontoDeDadosDTOout{
+		pontoDeDadosSono := dtos.PontoDeDadosDTOOut{
 			Data:     registro.DataHoraRegistro,
 			Valor:    registro.HorasSono,
 			Humor:    registro.NivelHumor,
@@ -142,7 +142,7 @@ func (rs *relatorioServico) GerarRelatorioPacienteDoProfissional(pacienteID uint
 		}
 		relatorioPacienteFeito.GraficoSono = append(relatorioPacienteFeito.GraficoSono, pontoDeDadosSono)
 
-		pontoDeDadosEnergia := dtos.PontoDeDadosDTOout{
+		pontoDeDadosEnergia := dtos.PontoDeDadosDTOOut{
 			Data:     registro.DataHoraRegistro,
 			Valor:    registro.NivelEnergia,
 			Humor:    registro.NivelHumor,
@@ -150,7 +150,7 @@ func (rs *relatorioServico) GerarRelatorioPacienteDoProfissional(pacienteID uint
 		}
 		relatorioPacienteFeito.GraficoEnergia = append(relatorioPacienteFeito.GraficoEnergia, pontoDeDadosEnergia)
 
-		pontoDeDadosStress := dtos.PontoDeDadosDTOout{
+		pontoDeDadosStress := dtos.PontoDeDadosDTOOut{
 			Data:     registro.DataHoraRegistro,
 			Valor:    registro.NivelStress,
 			Humor:    registro.NivelHumor,
