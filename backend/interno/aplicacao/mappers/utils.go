@@ -67,6 +67,14 @@ func RegistroHumorParaDTOOut(reg *dominio.RegistroHumor) *dtos.RegistroHumorDTOO
 	}
 }
 
+func ResumoPacienteParaDTOOut(reg *dominio.RegistroHumor) *dtos.ResumoPacienteDTOOut {
+	return &dtos.ResumoPacienteDTOOut{
+		Data:     reg.DataHoraRegistro,
+		Humor:    reg.NivelHumor,
+		Anotacao: reg.Observacoes,
+	}
+}
+
 // ===== MAPEADORES PARA SAÍDA SIMPLIFICADA (Para APIs) =====
 
 // PacientesParaDTOOut converte um slice de Pacientes para DTOs de saída
