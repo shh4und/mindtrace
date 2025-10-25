@@ -2,7 +2,6 @@ package controladores
 
 import (
 	"mindtrace/backend/interno/aplicacao/dtos"
-	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
 
@@ -28,13 +27,11 @@ func (uc *UsuarioControlador) BuscarPerfil(c *gin.Context) {
 		return
 	}
 
-	usuario, err := uc.usuarioServico.BuscarUsuarioPorID(userID.(uint))
+	usuarioOut, err := uc.usuarioServico.BuscarUsuarioPorID(userID.(uint))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"erro": err.Error()})
 		return
 	}
-
-	usuarioOut := mappers.UsuarioParaDTOOut(usuario)
 
 	c.JSON(http.StatusOK, usuarioOut)
 }
@@ -53,19 +50,13 @@ func (uc *UsuarioControlador) AtualizarPerfil(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
 	}
-	/*
-		TO-DO
-		Melhorar AtualizarPerfil para saber lidar com diferentes TIPOS de Usuario (paciente, profissional)
-		ou
-		Fazer 2 Metodos Diferentes
-	*/
-	usuario, err := uc.usuarioServico.AtualizarPerfil(userID.(uint), req)
+
+	err := uc.usuarioServico.AtualizarPerfil(userID.(uint), &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
 		return
 	}
-	usuarioOut := mappers.UsuarioParaDTOOut(usuario)
-	c.JSON(http.StatusOK, usuarioOut)
+	c.JSON(http.StatusOK, gin.H{"msg": "Perfil atualizado com sucesso"})
 }
 
 // AlterarSenha altera a senha do usuario autenticado
@@ -83,7 +74,7 @@ func (uc *UsuarioControlador) AlterarSenha(c *gin.Context) {
 		return
 	}
 
-	err := uc.usuarioServico.AlterarSenha(userID.(uint), req)
+	err := uc.usuarioServico.AlterarSenha(userID.(uint), &req)
 	if err != nil {
 		if err == servicos.ErrSenhaNaoConfere || err == servicos.ErrCrendenciaisInvalidas {
 			c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
@@ -105,13 +96,11 @@ func (uc *UsuarioControlador) ListarPacientesDoProfissional(c *gin.Context) {
 		return
 	}
 
-	pacientes, err := uc.usuarioServico.ListarPacientesDoProfissional(userID.(uint))
+	pacientesOut, err := uc.usuarioServico.ListarPacientesDoProfissional(userID.(uint))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
 		return
 	}
-
-	pacientesOut := mappers.PacientesParaDTOOut(pacientes)
 
 	c.JSON(http.StatusOK, pacientesOut)
 }

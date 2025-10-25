@@ -2,7 +2,6 @@ package controladores
 
 import (
 	"mindtrace/backend/interno/aplicacao/dtos"
-	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
 	"regexp"
@@ -20,31 +19,10 @@ func NovoProfissionalControlador(us servicos.UsuarioServico) *ProfissionalContro
 	return &ProfissionalControlador{usuarioServico: us}
 }
 
-// RegistrarProfissionalRequest representa o payload da requisicao para registrar um novo profissional
-type RegistrarProfissionalRequest struct {
-	Nome                 string `json:"nome" binding:"required"`
-	Email                string `json:"email" binding:"required,email"`
-	Senha                string `json:"senha" binding:"required,min=8"`
-	Especialidade        string `json:"especialidade" binding:"required"`
-	RegistroProfissional string `json:"registro_profissional" binding:"required"`
-	CPF                  string `json:"cpf" binding:"required"`
-	Contato              string `json:"contato"`
-}
-
-// ProprioProfissionalRequest representa o payload da resposta para o perfil proprio do profissional
-type ProprioProfissionalRequest struct {
-	Nome                 string `json:"nome"`
-	Email                string `json:"email" `
-	Especialidade        string `json:"especialidade" `
-	RegistroProfissional string `json:"registro_profissional" `
-	CPF                  string `json:"cpf"`
-	Contato              string `json:"contato"`
-}
-
 // Registrar lida com o registro de um novo profissional
 // Valida a entrada verifica a forca da senha e chama o servico para registrar o profissional
 func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
-	var req RegistrarProfissionalRequest
+	var req dtos.RegistrarProfissionalDTOIn
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
@@ -68,17 +46,7 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 		return
 	}
 
-	dto := dtos.RegistrarProfissionalDTOIn{
-		Nome:                 req.Nome,
-		Email:                req.Email,
-		Senha:                req.Senha,
-		Especialidade:        req.Especialidade,
-		RegistroProfissional: req.RegistroProfissional,
-		CPF:                  req.CPF,
-		Contato:              req.Contato,
-	}
-
-	profissional, err := pc.usuarioServico.RegistrarProfissional(dto)
+	profissionalOut, err := pc.usuarioServico.RegistrarProfissional(&req)
 	if err != nil {
 		if err == servicos.ErrEmailJaCadastrado {
 			c.JSON(http.StatusConflict, gin.H{"erro": err.Error()})
@@ -87,8 +55,6 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 		}
 		return
 	}
-
-	profissionalOut := mappers.ProfissionalParaDTOOut(profissional)
 
 	c.JSON(http.StatusCreated, profissionalOut)
 }
@@ -102,13 +68,11 @@ func (uc *ProfissionalControlador) ProprioPerfilProfissional(c *gin.Context) {
 		return
 	}
 
-	profissional, err := uc.usuarioServico.ProprioPerfilProfissional(userID.(uint))
+	proprioProfissional, err := uc.usuarioServico.ProprioPerfilProfissional(userID.(uint))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"erro": err.Error()})
 		return
 	}
-
-	proprioProfissional := mappers.ProfissionalParaDTOOut(profissional)
 
 	c.JSON(http.StatusOK, proprioProfissional)
 }
