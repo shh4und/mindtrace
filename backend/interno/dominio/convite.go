@@ -7,6 +7,16 @@ import (
 	"gorm.io/gorm"
 )
 
+// Erros de validacao - Convite
+var (
+	ErrTokenConviteVazio      = errors.New("token do convite nao pode estar vazio")
+	ErrTokenConviteInvalido   = errors.New("token deve ter no minimo 10 caracteres")
+	ErrDataExpiracaoVazia     = errors.New("data de expiracao e obrigatoria")
+	ErrDataExpiracaoNoPassado = errors.New("data de expiracao nao pode ser no passado")
+	ErrConviteExpirado        = errors.New("convite expirado")
+	ErrConviteJaUtilizado     = errors.New("convite ja foi utilizado")
+)
+
 type Convite struct {
 	gorm.Model
 	ProfissionalID uint         `gorm:"not null"`
@@ -21,20 +31,20 @@ type Convite struct {
 // Metodos de validacao - LOGICA DE NEGOCIO (Convite)
 func (c *Convite) ValidarToken() error {
 	if c.Token == "" {
-		return errors.New("token do convite nao pode estar vazio")
+		return ErrTokenConviteVazio
 	}
 	if len(c.Token) < 10 {
-		return errors.New("token deve ter no minimo 10 caracteres")
+		return ErrTokenConviteInvalido
 	}
 	return nil
 }
 
 func (c *Convite) ValidarDataExpiracao() error {
 	if c.DataExpiracao.IsZero() {
-		return errors.New("data de expiracao e obrigatoria")
+		return ErrDataExpiracaoVazia
 	}
 	if c.DataExpiracao.Before(time.Now()) {
-		return errors.New("data de expiracao nao pode ser no passado")
+		return ErrDataExpiracaoNoPassado
 	}
 	return nil
 }
@@ -69,10 +79,10 @@ func (c *Convite) JaFoiUtilizado() bool {
 func (c *Convite) UtilizarConvite(pacienteID uint) error {
 	if !c.EstaValido() {
 		if c.EstaExpirado() {
-			return errors.New("convite expirado")
+			return ErrConviteExpirado
 		}
 		if c.JaFoiUtilizado() {
-			return errors.New("convite ja foi utilizado")
+			return ErrConviteJaUtilizado
 		}
 	}
 	c.Usado = true

@@ -5,6 +5,23 @@ import (
 	"time"
 )
 
+// Constantes para status de notificacao
+const (
+	NotificacaoNaoLida   = "Nao lida"
+	NotificacaoLida      = "Lida"
+	NotificacaoArquivada = "Arquivada"
+)
+
+// Erros de validacao - Notificacao
+var (
+	ErrConteudoNotificacaoVazio      = errors.New("conteudo da notificacao nao pode estar vazio")
+	ErrConteudoNotificacaoMuitoCurto = errors.New("conteudo deve ter no minimo 3 caracteres")
+	ErrConteudoNotificacaoMuitoLongo = errors.New("conteudo nao pode exceder 5000 caracteres")
+	ErrStatusNotificacaoInvalido     = errors.New("status de notificacao invalido")
+	ErrDataEnvioVazia                = errors.New("data de envio e obrigatoria")
+	ErrDataEnvioNoFuturo             = errors.New("data de envio nao pode ser no futuro")
+)
+
 // Notificacao representa uma notificacao enviada a um usuario.
 type Notificacao struct {
 	ID        uint      `gorm:"primaryKey"`
@@ -20,23 +37,16 @@ func (Notificacao) TableName() string {
 	return "notificacoes"
 }
 
-// Constantes para status de notificacao
-const (
-	NotificacaoNaoLida   = "Nao lida"
-	NotificacaoLida      = "Lida"
-	NotificacaoArquivada = "Arquivada"
-)
-
 // Metodos de validacao - LOGICA DE NEGOCIO (Notificacao)
 func (n *Notificacao) ValidarConteudo() error {
 	if n.Conteudo == "" {
-		return errors.New("conteudo da notificacao nao pode estar vazio")
+		return ErrConteudoNotificacaoVazio
 	}
 	if len(n.Conteudo) < 3 {
-		return errors.New("conteudo deve ter no minimo 3 caracteres")
+		return ErrConteudoNotificacaoMuitoCurto
 	}
 	if len(n.Conteudo) > 5000 {
-		return errors.New("conteudo nao pode exceder 5000 caracteres")
+		return ErrConteudoNotificacaoMuitoLongo
 	}
 	return nil
 }
@@ -48,17 +58,17 @@ func (n *Notificacao) ValidarStatus() error {
 		NotificacaoArquivada: true,
 	}
 	if !statusValidos[n.Status] {
-		return errors.New("status de notificacao invalido")
+		return ErrStatusNotificacaoInvalido
 	}
 	return nil
 }
 
 func (n *Notificacao) ValidarDataEnvio() error {
 	if n.DataEnvio.IsZero() {
-		return errors.New("data de envio e obrigatoria")
+		return ErrDataEnvioVazia
 	}
 	if n.DataEnvio.After(time.Now()) {
-		return errors.New("data de envio nao pode ser no futuro")
+		return ErrDataEnvioNoFuturo
 	}
 	return nil
 }
