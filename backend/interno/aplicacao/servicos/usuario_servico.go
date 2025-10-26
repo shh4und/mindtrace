@@ -15,11 +15,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var ErrEmailJaCadastrado = errors.New("e-mail existente")
-var ErrCrendenciaisInvalidas = errors.New("credenciais invalidas")
-var ErrUsuarioNaoEncontrado = errors.New("usuario nao encontrado")
-var ErrSenhaNaoConfere = errors.New("a nova senha e a senha de confirmacao nao conferem")
-
 // UsuarioServico define os metodos para gerenciamento de usuarios
 type UsuarioServico interface {
 	RegistrarProfissional(dtoIn *dtos.RegistrarProfissionalDTOIn) (*dtos.ProfissionalDTOOut, error)
@@ -50,14 +45,30 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 	var profissionalRegistrado *dominio.Profissional
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
-		// Verifica se o e-mail já está cadastrado
+		// Verifica se o e-mail ja esta cadastrado
 		_, err := s.repositorio.BuscarPorEmail(dtoIn.Email)
 		if err == nil {
-			return ErrEmailJaCadastrado
+			return dominio.ErrEmailJaCadastrado
 		}
 
 		// Usa o mapper para criar as entidades a partir do DTOIn
 		novoUsuario, novoProfissional := mappers.RegistrarProfissionalDTOInParaEntidade(dtoIn)
+
+		// Validar usuario
+		if err := novoUsuario.Validar(); err != nil {
+			return err
+		}
+
+		// Validar senha
+		if err := novoUsuario.ValidarSenha(dtoIn.Senha); err != nil {
+			return err
+		}
+
+		// Validar profissional
+		novoProfissional.Usuario = *novoUsuario
+		if err := novoProfissional.Validar(); err != nil {
+			return err
+		}
 
 		// Hash da senha
 		hashSenha, err := bcrypt.GenerateFromPassword([]byte(novoUsuario.Senha), bcrypt.DefaultCost)
@@ -65,8 +76,9 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 			return err
 		}
 		novoUsuario.Senha = string(hashSenha)
+		novoUsuario.TipoUsuario = 2 // Profissional
 
-		// Cria o usuário
+		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
 		}
@@ -93,14 +105,30 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 	var pacienteCompleto *dominio.Paciente
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
-		// Verifica se o e-mail já está cadastrado
+		// Verifica se o e-mail ja esta cadastrado
 		_, err := s.repositorio.BuscarPorEmail(dtoIn.Email)
 		if err == nil {
-			return ErrEmailJaCadastrado
+			return dominio.ErrEmailJaCadastrado
 		}
 
 		// Usa o mapper para criar as entidades a partir do DTOIn
 		novoUsuario, novoPaciente := mappers.RegistrarPacienteDTOInParaEntidade(dtoIn)
+
+		// Validar usuario
+		if err := novoUsuario.Validar(); err != nil {
+			return err
+		}
+
+		// Validar senha
+		if err := novoUsuario.ValidarSenha(dtoIn.Senha); err != nil {
+			return err
+		}
+
+		// Validar paciente
+		novoPaciente.Usuario = *novoUsuario
+		if err := novoPaciente.Validar(); err != nil {
+			return err
+		}
 
 		// Hash da senha
 		hashSenha, err := bcrypt.GenerateFromPassword([]byte(novoUsuario.Senha), bcrypt.DefaultCost)
@@ -108,8 +136,9 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 			return err
 		}
 		novoUsuario.Senha = string(hashSenha)
+		novoUsuario.TipoUsuario = 3 // Paciente
 
-		// Cria o usuário
+		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
 		}
@@ -138,14 +167,14 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 	usuario, err := s.repositorio.BuscarPorEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", ErrUsuarioNaoEncontrado
+			return "", dominio.ErrUsuarioNaoEncontrado
 		}
 		return "", err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(senha))
 	if err != nil {
-		return "", ErrCrendenciaisInvalidas
+		return "", dominio.ErrCrendenciaisInvalidas
 	}
 
 	// Gera o token JWT
@@ -172,7 +201,7 @@ func (s *usuarioServico) BuscarUsuarioPorID(userID uint) (*dtos.UsuarioDTOOut, e
 	usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrUsuarioNaoEncontrado
+			return nil, dominio.ErrUsuarioNaoEncontrado
 		}
 		return nil, err
 	}
@@ -188,7 +217,7 @@ func (s *usuarioServico) ProprioPerfilPaciente(pacID uint) (*dtos.PacienteDTOOut
 		paciente, err := s.repositorio.BuscarPacientePorUsuarioID(tx, pacID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrUsuarioNaoEncontrado
+				return dominio.ErrUsuarioNaoEncontrado
 			}
 			return err
 		}
@@ -206,7 +235,7 @@ func (s *usuarioServico) ProprioPerfilProfissional(profID uint) (*dtos.Profissio
 		profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, profID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrUsuarioNaoEncontrado
+				return dominio.ErrUsuarioNaoEncontrado
 			}
 			return err
 		}
@@ -226,6 +255,12 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dtoIn *dtos.AtualizarPerfi
 		usuario.Nome = dtoIn.Nome
 		usuario.Contato = dtoIn.Contato
 		usuario.Bio = dtoIn.Bio
+
+		// Validar nome atualizado
+		if err := usuario.ValidarNome(); err != nil {
+			return err
+		}
+
 		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
 			return err
 		}
@@ -241,6 +276,12 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dtoIn *dtos.AtualizarPerfi
 			}
 			if dtoIn.RegistroProfissional != "" {
 				profissional.RegistroProfissional = dtoIn.RegistroProfissional
+			}
+
+			// Validar dados do profissional
+			profissional.Usuario = *usuario
+			if err := profissional.Validar(); err != nil {
+				return err
 			}
 
 			if err := s.repositorio.AtualizarProfissional(tx, profissional); err != nil {
@@ -263,6 +304,13 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dtoIn *dtos.AtualizarPerfi
 			if dtoIn.ContatoResponsavel != "" {
 				paciente.ContatoResponsavel = dtoIn.ContatoResponsavel
 			}
+
+			// Validar dados do paciente
+			paciente.Usuario = *usuario
+			if err := paciente.Validar(); err != nil {
+				return err
+			}
+
 			if err := s.repositorio.AtualizarPaciente(tx, paciente); err != nil {
 				return err
 			}
@@ -276,20 +324,25 @@ func (s *usuarioServico) AtualizarPerfil(userID uint, dtoIn *dtos.AtualizarPerfi
 func (s *usuarioServico) AlterarSenha(userID uint, dtoIn *dtos.AlterarSenhaDTOIn) error {
 
 	if dtoIn.NovaSenha != dtoIn.NovaSenhaRe {
-		return ErrSenhaNaoConfere
+		return dominio.ErrSenhaNaoConfere
 	}
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrUsuarioNaoEncontrado
+				return dominio.ErrUsuarioNaoEncontrado
 			}
 			return err
 		}
 
 		if err := bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(dtoIn.SenhaAtual)); err != nil {
-			return ErrCrendenciaisInvalidas
+			return dominio.ErrCrendenciaisInvalidas
+		}
+
+		// Validar nova senha
+		if err := usuario.ValidarSenha(dtoIn.NovaSenha); err != nil {
+			return err
 		}
 
 		novaSenhaHash, err := bcrypt.GenerateFromPassword([]byte(dtoIn.NovaSenha), bcrypt.DefaultCost)
@@ -311,7 +364,7 @@ func (s *usuarioServico) ListarPacientesDoProfissional(userID uint) ([]dtos.Paci
 		profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, userID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrUsuarioNaoEncontrado
+				return dominio.ErrUsuarioNaoEncontrado
 			}
 			return err
 		}
@@ -328,7 +381,7 @@ func (s *usuarioServico) DeletarPerfil(userID uint) error {
 		_, err := s.repositorio.BuscarUsuarioPorID(userID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrUsuarioNaoEncontrado
+				return dominio.ErrUsuarioNaoEncontrado
 			}
 			return err
 		}
