@@ -1,9 +1,21 @@
 package dominio
 
 import (
+	"errors"
+	"regexp"
 	"time"
 
 	"gorm.io/gorm"
+)
+
+var (
+	ErrEmailJaCadastrado     = errors.New("e-mail existente")
+	ErrCrendenciaisInvalidas = errors.New("credenciais invalidas")
+	ErrUsuarioNaoEncontrado  = errors.New("usuario nao encontrado")
+	ErrSenhaNaoConfere       = errors.New("a nova senha e a senha de confirmacao nao conferem")
+	ErrEmailInvalido         = errors.New("email invalido")
+	ErrSenhaFraca            = errors.New("senha deve ter no minimo 8 caracteres")
+	ErrNomeVazio             = errors.New("nome nao pode estar vazio")
 )
 
 // Usuario e a base para todos os tipos de usuarios.
@@ -23,6 +35,40 @@ type Usuario struct {
 
 func (Usuario) TableName() string {
 	return "usuarios"
+}
+
+// Métodos de validação - LÓGICA DE NEGÓCIO
+func (u *Usuario) ValidarEmail() error {
+	regex := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
+	if !regex.MatchString(u.Email) {
+		return ErrEmailInvalido
+	}
+	return nil
+}
+
+func (u *Usuario) ValidarSenha(senhaPlana string) error {
+	if len(senhaPlana) < 8 {
+		return ErrSenhaFraca
+	}
+	return nil
+}
+
+func (u *Usuario) ValidarNome() error {
+	if u.Nome == "" {
+		return ErrNomeVazio
+	}
+	return nil
+}
+
+// Validação completa
+func (u *Usuario) Validar() error {
+	if err := u.ValidarEmail(); err != nil {
+		return err
+	}
+	if err := u.ValidarNome(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Profissional tem seus proprios dados e uma referencia ao Usuario.
