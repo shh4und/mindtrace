@@ -15,6 +15,7 @@ var (
 	ErrSenhaNaoConfere       = errors.New("a nova senha e a senha de confirmacao nao conferem")
 	ErrEmailInvalido         = errors.New("email invalido")
 	ErrSenhaFraca            = errors.New("senha deve ter no minimo 8 caracteres")
+	ErrSenhaInvalida         = errors.New("senha com caracteres invalidos")
 	ErrNomeVazio             = errors.New("nome nao pode estar vazio")
 )
 
@@ -49,6 +50,10 @@ func (u *Usuario) ValidarEmail() error {
 func (u *Usuario) ValidarSenha(senhaPlana string) error {
 	if len(senhaPlana) < 8 {
 		return ErrSenhaFraca
+	}
+	regex := regexp.MustCompile(`^[a-zA-Z0-9!@#$%^&*].{8,}$`)
+	if !regex.MatchString(senhaPlana) {
+		return ErrSenhaInvalida
 	}
 	return nil
 }
