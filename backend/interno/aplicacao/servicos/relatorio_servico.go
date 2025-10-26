@@ -33,6 +33,14 @@ func NovoRelatorioServico(db *gorm.DB, registroHumorRepo repositorios.RegistroHu
 
 // GerarRelatorioPaciente gera um relatorio para o paciente autenticado
 func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo int64) (*dtos.RelatorioPacienteDTOOut, error) {
+	// Validar periodo
+	if filtroPeriodo <= 0 {
+		return nil, errors.New("periodo de filtro deve ser maior que 0")
+	}
+	if filtroPeriodo > 90 {
+		return nil, errors.New("periodo de filtro nao pode exceder 90 dias")
+	}
+
 	relatorioPacienteFeito := &dtos.RelatorioPacienteDTOOut{
 		GraficoSono:    make([]dtos.PontoDeDadosDTOOut, 0),
 		GraficoEnergia: make([]dtos.PontoDeDadosDTOOut, 0),
@@ -42,7 +50,7 @@ func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo in
 	paciente, err := rs.usuarioRepositorio.BuscarPacientePorUsuarioID(rs.db, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return relatorioPacienteFeito, nil
+			return nil, errors.New("paciente nao encontrado")
 		}
 		return nil, err
 	}
@@ -106,6 +114,19 @@ func (rs *relatorioServico) GerarRelatorioPaciente(userID uint, filtroPeriodo in
 
 // GerarRelatorioPacienteDoProfissional gera um relatorio para um paciente especifico pelo profissional
 func (rs *relatorioServico) GerarRelatorioPacienteDoProfissional(pacID uint, filtroPeriodo int64) (*dtos.RelatorioPacienteDTOOut, error) {
+	// Validar periodo
+	if filtroPeriodo <= 0 {
+		return nil, errors.New("periodo de filtro deve ser maior que 0")
+	}
+	if filtroPeriodo > 90 {
+		return nil, errors.New("periodo de filtro nao pode exceder 90 dias")
+	}
+
+	// Validar pacID
+	if pacID == 0 {
+		return nil, errors.New("id do paciente invalido")
+	}
+
 	relatorioPacienteFeito := &dtos.RelatorioPacienteDTOOut{
 		GraficoSono:    make([]dtos.PontoDeDadosDTOOut, 0),
 		GraficoEnergia: make([]dtos.PontoDeDadosDTOOut, 0),
