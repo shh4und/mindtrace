@@ -110,7 +110,7 @@ func RegistrarProfissionalDTOInParaEntidade(dto *dtos.RegistrarProfissionalDTOIn
 		Nome:        dto.Nome,
 		Email:       dto.Email,
 		Senha:       dto.Senha, // Será hasheado no serviço!
-		TipoUsuario: "profissional",
+		TipoUsuario: 2,
 		CPF:         dto.CPF,
 		Contato:     dto.Contato,
 	}
@@ -128,7 +128,7 @@ func RegistrarPacienteDTOInParaEntidade(dto *dtos.RegistrarPacienteDTOIn) (*domi
 		Nome:        dto.Nome,
 		Email:       dto.Email,
 		Senha:       dto.Senha, // Será hasheado no serviço!
-		TipoUsuario: "paciente",
+		TipoUsuario: 3,
 		CPF:         dto.CPF,
 		Contato:     dto.Contato,
 	}
