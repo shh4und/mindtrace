@@ -82,6 +82,7 @@ type Profissional struct {
 	Pacientes            []Paciente `gorm:"many2many:profissional_paciente;constraint:OnDelete:CASCADE;"`
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
+	DeletedAt            gorm.DeletedAt `gorm:"index"`
 }
 
 func (Profissional) TableName() string {
@@ -95,12 +96,13 @@ type Paciente struct {
 	Usuario              Usuario `gorm:"foreignKey:UsuarioID;constraint:OnDelete:CASCADE"`
 	DataNascimento       time.Time
 	Dependente           bool
-	NomeResponsavel      string
-	ContatoResponsavel   string
+	NomeResponsavel      string `gorm:"type:varchar(255)"`
+	ContatoResponsavel   string `gorm:"type:varchar(11)"`
 	DataInicioTratamento *time.Time
 	Profissionais        []Profissional `gorm:"many2many:profissional_paciente;constraint:OnDelete:CASCADE;"`
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
+	DeletedAt            gorm.DeletedAt `gorm:"index"`
 }
 
 func (Paciente) TableName() string {
