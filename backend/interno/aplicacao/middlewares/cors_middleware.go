@@ -16,7 +16,7 @@ func CORSMiddleware() gin.HandlerFunc {
 	originsEnv := strings.TrimSpace(os.Getenv("FRONTEND_ORIGINS"))
 	var allowOrigins []string
 	if originsEnv != "" {
-		for _, o := range strings.Split(originsEnv, ",") {
+		for o := range strings.SplitSeq(originsEnv, ",") {
 			o = strings.TrimSpace(o)
 			if o != "" {
 				allowOrigins = append(allowOrigins, o)
