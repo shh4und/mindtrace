@@ -1,6 +1,7 @@
 package dominio
 
 import (
+	"errors"
 	"time"
 )
 
@@ -21,4 +22,76 @@ type RegistroHumor struct {
 
 func (RegistroHumor) TableName() string {
 	return "registros_humor"
+}
+
+// Metodos de validacao - LOGICA DE NEGOCIO (RegistroHumor)
+func (rh *RegistroHumor) ValidarNivelHumor() error {
+	if rh.NivelHumor < 1 || rh.NivelHumor > 5 {
+		return errors.New("nivel de humor deve estar entre 1 e 5")
+	}
+	return nil
+}
+
+func (rh *RegistroHumor) ValidarHorasSono() error {
+	if rh.HorasSono < 0 || rh.HorasSono > 12 {
+		return errors.New("horas de sono deve estar entre 0 e 12")
+	}
+	return nil
+}
+
+func (rh *RegistroHumor) ValidarNivelEnergia() error {
+	if rh.NivelEnergia < 1 || rh.NivelEnergia > 10 {
+		return errors.New("nivel de energia deve estar entre 1 e 10")
+	}
+	return nil
+}
+
+func (rh *RegistroHumor) ValidarNivelStress() error {
+	if rh.NivelStress < 1 || rh.NivelStress > 10 {
+		return errors.New("nivel de stress deve estar entre 1 e 10")
+	}
+	return nil
+}
+
+func (rh *RegistroHumor) ValidarAutoCuidado() error {
+	if rh.AutoCuidado == "" {
+		return errors.New("auto cuidado nao pode estar vazio")
+	}
+	if len(rh.AutoCuidado) < 3 {
+		return errors.New("auto cuidado deve ter no minimo 3 caracteres")
+	}
+	return nil
+}
+
+func (rh *RegistroHumor) ValidarDataHoraRegistro() error {
+	if rh.DataHoraRegistro.IsZero() {
+		return errors.New("data e hora do registro e obrigatoria")
+	}
+	if rh.DataHoraRegistro.After(time.Now()) {
+		return errors.New("data e hora do registro nao pode ser no futuro")
+	}
+	return nil
+}
+
+// Validacao completa do RegistroHumor
+func (rh *RegistroHumor) Validar() error {
+	if err := rh.ValidarNivelHumor(); err != nil {
+		return err
+	}
+	if err := rh.ValidarHorasSono(); err != nil {
+		return err
+	}
+	if err := rh.ValidarNivelEnergia(); err != nil {
+		return err
+	}
+	if err := rh.ValidarNivelStress(); err != nil {
+		return err
+	}
+	if err := rh.ValidarAutoCuidado(); err != nil {
+		return err
+	}
+	if err := rh.ValidarDataHoraRegistro(); err != nil {
+		return err
+	}
+	return nil
 }

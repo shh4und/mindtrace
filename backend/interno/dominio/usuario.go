@@ -37,7 +37,7 @@ func (Usuario) TableName() string {
 	return "usuarios"
 }
 
-// Métodos de validação - LÓGICA DE NEGÓCIO
+// Metodos de validacao - LOGICA DE NEGOCIO
 func (u *Usuario) ValidarEmail() error {
 	regex := regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
 	if !regex.MatchString(u.Email) {
@@ -60,7 +60,7 @@ func (u *Usuario) ValidarNome() error {
 	return nil
 }
 
-// Validação completa
+// Validacao completa
 func (u *Usuario) Validar() error {
 	if err := u.ValidarEmail(); err != nil {
 		return err
@@ -77,7 +77,7 @@ type Profissional struct {
 	UsuarioID            uint    `gorm:"unique;not null"`
 	Usuario              Usuario `gorm:"foreignKey:UsuarioID;constraint:OnDelete:CASCADE"`
 	DataNascimento       time.Time
-	Especialidade        string
+	Especialidade        string     `gorm:"type:varchar(255);not null"`
 	RegistroProfissional string     `gorm:"type:varchar(12);unique;not null"`
 	Pacientes            []Paciente `gorm:"many2many:profissional_paciente;constraint:OnDelete:CASCADE;"`
 	CreatedAt            time.Time
@@ -87,6 +87,64 @@ type Profissional struct {
 
 func (Profissional) TableName() string {
 	return "profissionais"
+}
+
+// Metodos de validacao - LOGICA DE NEGOCIO (Profissional)
+func (p *Profissional) ValidarRegistroProfissional() error {
+	if p.RegistroProfissional == "" {
+		return errors.New("registro profissional nao pode estar vazio")
+	}
+	if len(p.RegistroProfissional) < 4 || len(p.RegistroProfissional) > 12 {
+		return errors.New("registro profissional deve ter entre 4 e 12 caracteres")
+	}
+	return nil
+}
+
+func (p *Profissional) ValidarEspecialidade() error {
+	if p.Especialidade == "" {
+		return errors.New("especialidade nao pode estar vazia")
+	}
+	if len(p.Especialidade) < 3 || len(p.Especialidade) > 255 {
+		return errors.New("especialidade deve ter entre 3 e 255 caracteres")
+	}
+	return nil
+}
+
+func (p *Profissional) ValidarDataNascimento() error {
+	if p.DataNascimento.IsZero() {
+		return errors.New("data de nascimento e obrigatoria")
+	}
+	if p.DataNascimento.After(time.Now().AddDate(-18, 0, 0)) {
+		return errors.New("profissional deve ter no minimo 18 anos")
+	}
+	return nil
+}
+
+// Validacao completa do Profissional
+func (p *Profissional) Validar() error {
+	if err := p.Usuario.Validar(); err != nil {
+		return err
+	}
+	if err := p.ValidarRegistroProfissional(); err != nil {
+		return err
+	}
+	if err := p.ValidarEspecialidade(); err != nil {
+		return err
+	}
+	if err := p.ValidarDataNascimento(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// PossuiPaciente verifica se o profissional ja esta associado a um paciente
+func (p *Profissional) PossuiPaciente(pacienteID uint) bool {
+	for _, pac := range p.Pacientes {
+		if pac.ID == pacienteID {
+			return true
+		}
+	}
+	return false
 }
 
 // Paciente tem seus proprios dados e uma referencia ao Usuario.
@@ -107,4 +165,67 @@ type Paciente struct {
 
 func (Paciente) TableName() string {
 	return "pacientes"
+}
+
+// Metodos de validacao - LOGICA DE NEGOCIO (Paciente)
+func (pc *Paciente) ValidarDataNascimento() error {
+	if pc.DataNascimento.IsZero() {
+		return errors.New("data de nascimento e obrigatoria")
+	}
+	if pc.DataNascimento.After(time.Now()) {
+		return errors.New("data de nascimento nao pode ser no futuro")
+	}
+	return nil
+}
+
+func (pc *Paciente) ValidarResponsavel() error {
+	if pc.Dependente && pc.NomeResponsavel == "" {
+		return errors.New("paciente dependente deve ter nome do responsavel")
+	}
+	if pc.Dependente && pc.ContatoResponsavel == "" {
+		return errors.New("paciente dependente deve ter contato do responsavel")
+	}
+	if pc.Dependente && len(pc.ContatoResponsavel) < 10 {
+		return errors.New("contato do responsavel invalido")
+	}
+	return nil
+}
+
+func (pc *Paciente) ValidarDataInicioTratamento() error {
+	if pc.DataInicioTratamento != nil {
+		if pc.DataInicioTratamento.After(time.Now()) {
+			return errors.New("data de inicio do tratamento nao pode ser no futuro")
+		}
+		if pc.DataInicioTratamento.Before(pc.DataNascimento) {
+			return errors.New("data de inicio do tratamento nao pode ser anterior a data de nascimento")
+		}
+	}
+	return nil
+}
+
+// Validacao completa do Paciente
+func (pc *Paciente) Validar() error {
+	if err := pc.Usuario.Validar(); err != nil {
+		return err
+	}
+	if err := pc.ValidarDataNascimento(); err != nil {
+		return err
+	}
+	if err := pc.ValidarResponsavel(); err != nil {
+		return err
+	}
+	if err := pc.ValidarDataInicioTratamento(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// PossuiProfissional verifica se o paciente ja esta associado a um profissional
+func (pc *Paciente) PossuiProfissional(profissionalID uint) bool {
+	for _, prof := range pc.Profissionais {
+		if prof.ID == profissionalID {
+			return true
+		}
+	}
+	return false
 }
