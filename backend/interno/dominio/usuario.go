@@ -94,33 +94,43 @@ func (Profissional) TableName() string {
 	return "profissionais"
 }
 
+// Erros de validacao - Profissional
+var (
+	ErrRegistroProfissionalVazio    = errors.New("registro profissional nao pode estar vazio")
+	ErrRegistroProfissionalInvalido = errors.New("registro profissional deve ter entre 4 e 12 caracteres")
+	ErrEspecialidadeVazia           = errors.New("especialidade nao pode estar vazia")
+	ErrEspecialidadeInvalida        = errors.New("especialidade deve ter entre 3 e 255 caracteres")
+	ErrDataNascimentoVazia          = errors.New("data de nascimento e obrigatoria")
+	ErrProfissionalMenorDeIdade     = errors.New("profissional deve ter no minimo 18 anos")
+)
+
 // Metodos de validacao - LOGICA DE NEGOCIO (Profissional)
 func (p *Profissional) ValidarRegistroProfissional() error {
 	if p.RegistroProfissional == "" {
-		return errors.New("registro profissional nao pode estar vazio")
+		return ErrRegistroProfissionalVazio
 	}
 	if len(p.RegistroProfissional) < 4 || len(p.RegistroProfissional) > 12 {
-		return errors.New("registro profissional deve ter entre 4 e 12 caracteres")
+		return ErrRegistroProfissionalInvalido
 	}
 	return nil
 }
 
 func (p *Profissional) ValidarEspecialidade() error {
 	if p.Especialidade == "" {
-		return errors.New("especialidade nao pode estar vazia")
+		return ErrEspecialidadeVazia
 	}
 	if len(p.Especialidade) < 3 || len(p.Especialidade) > 255 {
-		return errors.New("especialidade deve ter entre 3 e 255 caracteres")
+		return ErrEspecialidadeInvalida
 	}
 	return nil
 }
 
 func (p *Profissional) ValidarDataNascimento() error {
 	if p.DataNascimento.IsZero() {
-		return errors.New("data de nascimento e obrigatoria")
+		return ErrDataNascimentoVazia
 	}
 	if p.DataNascimento.After(time.Now().AddDate(-18, 0, 0)) {
-		return errors.New("profissional deve ter no minimo 18 anos")
+		return ErrProfissionalMenorDeIdade
 	}
 	return nil
 }
@@ -172,26 +182,37 @@ func (Paciente) TableName() string {
 	return "pacientes"
 }
 
+// Erros de validacao - Paciente
+var (
+	ErrDataNascimentoPacienteVazia            = errors.New("data de nascimento e obrigatoria")
+	ErrDataNascimentoPacienteNoFuturo         = errors.New("data de nascimento nao pode ser no futuro")
+	ErrResponsavelVazio                       = errors.New("paciente dependente deve ter nome do responsavel")
+	ErrContatoResponsavelVazio                = errors.New("paciente dependente deve ter contato do responsavel")
+	ErrContatoResponsavelInvalido             = errors.New("contato do responsavel invalido")
+	ErrDataInicioTratamentoNoFuturo           = errors.New("data de inicio do tratamento nao pode ser no futuro")
+	ErrDataInicioTratamentoAnteriorNascimento = errors.New("data de inicio do tratamento nao pode ser anterior a data de nascimento")
+)
+
 // Metodos de validacao - LOGICA DE NEGOCIO (Paciente)
 func (pc *Paciente) ValidarDataNascimento() error {
 	if pc.DataNascimento.IsZero() {
-		return errors.New("data de nascimento e obrigatoria")
+		return ErrDataNascimentoPacienteVazia
 	}
 	if pc.DataNascimento.After(time.Now()) {
-		return errors.New("data de nascimento nao pode ser no futuro")
+		return ErrDataNascimentoPacienteNoFuturo
 	}
 	return nil
 }
 
 func (pc *Paciente) ValidarResponsavel() error {
 	if pc.Dependente && pc.NomeResponsavel == "" {
-		return errors.New("paciente dependente deve ter nome do responsavel")
+		return ErrResponsavelVazio
 	}
 	if pc.Dependente && pc.ContatoResponsavel == "" {
-		return errors.New("paciente dependente deve ter contato do responsavel")
+		return ErrContatoResponsavelVazio
 	}
 	if pc.Dependente && len(pc.ContatoResponsavel) < 10 {
-		return errors.New("contato do responsavel invalido")
+		return ErrContatoResponsavelInvalido
 	}
 	return nil
 }
@@ -199,10 +220,10 @@ func (pc *Paciente) ValidarResponsavel() error {
 func (pc *Paciente) ValidarDataInicioTratamento() error {
 	if pc.DataInicioTratamento != nil {
 		if pc.DataInicioTratamento.After(time.Now()) {
-			return errors.New("data de inicio do tratamento nao pode ser no futuro")
+			return ErrDataInicioTratamentoNoFuturo
 		}
 		if pc.DataInicioTratamento.Before(pc.DataNascimento) {
-			return errors.New("data de inicio do tratamento nao pode ser anterior a data de nascimento")
+			return ErrDataInicioTratamentoAnteriorNascimento
 		}
 	}
 	return nil
