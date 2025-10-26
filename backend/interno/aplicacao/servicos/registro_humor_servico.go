@@ -10,8 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var ErrPacienteNaoEncontrado = errors.New("usuario nao encontrado")
-
 // RegistroHumorServico define os metodos para gerenciamento de registros de humor
 type RegistroHumorServico interface {
 	CriarRegistroHumor(dto dtos.CriarRegistroHumorDTOIn, userID uint) (*dominio.RegistroHumor, error)
@@ -37,24 +35,17 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto dtos.CriarRegistroHumorD
 		paciente, err := rhs.usuarioRepositorio.BuscarPacientePorUsuarioID(tx, userID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrPacienteNaoEncontrado
+				return dominio.ErrUsuarioNaoEncontrado
 			}
 			return err
 		}
 
 		novoRegistroHumor := mappers.CriarRegistroHumorDTOInParaEntidade(&dto, paciente.ID)
 
-		// novoRegistroHumor = &dominio.RegistroHumor{
-		// 	PacienteID:       paciente.ID,
-		// 	Paciente:         *paciente,
-		// 	NivelHumor:       dto.NivelHumor,
-		// 	HorasSono:        dto.HorasSono,
-		// 	NivelEnergia:     dto.NivelEnergia,
-		// 	NivelStress:      dto.NivelStress,
-		// 	AutoCuidado:      string(autoCuidadoJSON),
-		// 	Observacoes:      dto.Observacoes,
-		// 	DataHoraRegistro: dto.DataHoraRegistro,
-		// }
+		// Validar o registro de humor antes de criar
+		if err := novoRegistroHumor.Validar(); err != nil {
+			return err
+		}
 
 		if err := rhs.repositorio.CriarRegistroHumor(tx, novoRegistroHumor); err != nil {
 			return err
