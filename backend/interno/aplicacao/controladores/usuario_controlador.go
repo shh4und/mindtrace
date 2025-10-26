@@ -3,6 +3,7 @@ package controladores
 import (
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
+	"mindtrace/backend/interno/dominio"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -76,7 +77,7 @@ func (uc *UsuarioControlador) AlterarSenha(c *gin.Context) {
 
 	err := uc.usuarioServico.AlterarSenha(userID.(uint), &req)
 	if err != nil {
-		if err == servicos.ErrSenhaNaoConfere || err == servicos.ErrCrendenciaisInvalidas {
+		if err == dominio.ErrSenhaNaoConfere || err == dominio.ErrCrendenciaisInvalidas {
 			c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})

@@ -3,8 +3,8 @@ package controladores
 import (
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
+	"mindtrace/backend/interno/dominio"
 	"net/http"
-	"regexp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,29 +28,18 @@ func (pc *ProfissionalControlador) Registrar(c *gin.Context) {
 		return
 	}
 
-	/********************
-
-		Verficicar a possibilidade das checagens feitas em controladores
-		serem implementadas como regras de negocios nos dominios
-
-	*********************/
-
-	if len(req.Senha) < 8 {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": "Senha inválida. Use 8 ou mais caracteres com letras, números e os símbolos: !@#$%^&*"})
-		return
-	}
-
-	passwordRegex := `^[a-zA-Z0-9!@#$%^&*].{8,}$`
-	if match, _ := regexp.MatchString(passwordRegex, req.Senha); !match {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": "Senha inválida. Use 8 ou mais caracteres com letras, números e os símbolos: !@#$%^&*"})
-		return
-	}
-
 	profissionalOut, err := pc.usuarioServico.RegistrarProfissional(&req)
 	if err != nil {
-		if err == servicos.ErrEmailJaCadastrado {
+		switch err {
+		case dominio.ErrEmailJaCadastrado:
 			c.JSON(http.StatusConflict, gin.H{"erro": err.Error()})
-		} else {
+		case dominio.ErrSenhaFraca:
+			c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		case dominio.ErrEmailInvalido:
+			c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		case dominio.ErrNomeVazio:
+			c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		default:
 			c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
 		}
 		return
