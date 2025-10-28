@@ -5,6 +5,7 @@
 Foram criados testes unitários abrangentes para as camadas de domínio, serviço e mappers do sistema MindTrace, cobrindo as funcionalidades relacionadas a:
 - **Usuários** (profissionais e pacientes)
 - **Registros de Humor**
+- **Convites** (geração e vinculação de pacientes)
 - **Conversões de dados (DTOs e Entidades)**
 
 ## Estrutura de Organização
@@ -15,11 +16,13 @@ Todos os testes foram organizados em pastas `/tests` dentro de seus respectivos 
 backend/interno/
 ├── dominio/tests/
 │   ├── usuario_test.go
-│   └── registro_humor_test.go
+│   ├── registro_humor_test.go
+│   └── convite_test.go
 ├── aplicacao/
 │   ├── servicos/tests/
 │   │   ├── usuario_servico_test.go
-│   │   └── registro_humor_servico_test.go
+│   │   ├── registro_humor_servico_test.go
+│   │   └── convite_servico_test.go
 │   └── mappers/tests/
 │       └── utils_test.go
 ```
@@ -28,10 +31,10 @@ backend/interno/
 
 | Camada | Arquivos | Total de Testes |
 |--------|----------|-----------------|
-| **Domínio** | 2 | 137 |
-| **Serviços** | 2 | 44 |
-| **Mappers** | 1 | 22 |
-| **TOTAL** | **5** | **~203** |
+| **Domínio** | 3 | 184 |
+| **Serviços** | 3 | 57 |
+| **Mappers** | 1 | 23 |
+| **TOTAL** | **7** | **~264** |
 
 ## Arquivos Criados
 
@@ -214,7 +217,66 @@ backend/interno/
 
 ---
 
-### 3. `/backend/interno/aplicacao/mappers/tests/utils_test.go`
+#### `/backend/interno/dominio/tests/convite_test.go`
+**Testes de Validação do Domínio Convite**
+
+##### ValidarToken:
+- ✅ 7 casos de teste (tokens válidos 10+ caracteres, inválidos vazios ou curtos)
+
+##### ValidarDataExpiracao:
+- ✅ 6 casos de teste (datas futuras válidas, vazias ou passadas inválidas)
+
+##### Validar (Completo):
+- ✅ 6 casos de teste (validação completa, combinações de erros)
+
+##### EstaValido:
+- ✅ 4 casos de teste (convite válido/inválido por uso ou expiração)
+
+##### EstaExpirado:
+- ✅ 4 casos de teste (convites expirados ou válidos)
+
+##### JaFoiUtilizado:
+- ✅ 2 casos de teste (convite usado ou não usado)
+
+##### UtilizarConvite:
+- ✅ 2 casos de teste (marcar convite como usado por diferentes pacientes)
+
+##### Casos Extremos:
+- ✅ Token com exatamente 10 caracteres (limite)
+- ✅ Convite que expira em segundos
+- ✅ Combinações de estado (usado/expirado em diferentes situações)
+
+**Total de Testes de Domínio (Convite): 35 casos de teste**
+
+---
+
+### 3. Camada de Serviços
+
+#### `/backend/interno/aplicacao/servicos/tests/convite_servico_test.go`
+**Testes do Serviço de Convites**
+
+##### GerarConvite:
+- ✅ Sucesso na geração
+- ✅ Profissional não encontrado
+- ✅ Erro ao buscar profissional
+- ✅ Erro ao criar convite no banco
+- ✅ Token aleatório (verificação de unicidade)
+
+##### VincularPaciente:
+- ✅ Sucesso no vínculo
+- ✅ Token não encontrado
+- ✅ Convite expirado
+- ✅ Convite já utilizado
+- ✅ Paciente não encontrado
+- ✅ Erro ao buscar paciente
+- ✅ Erro ao marcar convite como usado
+- ✅ Convite que expira em segundos (ainda válido)
+
+**Total de Testes de Serviço (Convite): 13 casos de teste**
+
+---
+
+### 4. `/backend/interno/aplicacao/mappers/tests/utils_test.go`
 **Testes da Camada de Mappers**
 
 #### Funcionalidades Testadas:
@@ -237,6 +299,7 @@ backend/interno/
 - ✅ `TestProfissionaisParaDTOOut_ListaVazia` - Lista vazia
 - ✅ `TestConviteParaDTOOut` - Convite ativo
 - ✅ `TestConviteParaDTOOut_Usado` - Convite usado/expirado
+- ✅ `TestConviteParaDTOOut_ComNil` - Tratamento de nil
 
 ##### Mappers de Entrada (DTO → Entidade):
 - ✅ `TestRegistrarUsuarioDTOInParaEntidade` - Criação de usuário
@@ -245,7 +308,7 @@ backend/interno/
 - ✅ `TestRegistrarPacienteDTOInParaEntidade_Dependente` - Paciente dependente
 - ✅ `TestCriarRegistroHumorDTOInParaEntidade` - Criação de registro de humor
 
-**Total de Testes de Mappers: 22 casos de teste**
+**Total de Testes de Mappers: 23 casos de teste**
 
 ---
 
@@ -257,13 +320,14 @@ backend/interno/
 |--------|---------|---------|---------|-------|
 | **Usuario** | 62 | 28 | - | 90 |
 | **RegistroHumor** | 45 | 13 | - | 58 |
-| **Mappers (Geral)** | - | - | 22 | 22 |
-| **Subtotal** | **107** | **41** | **22** | **170** |
+| **Convite** | 35 | 13 | - | 48 |
+| **Mappers (Geral)** | - | - | 23 | 23 |
+| **Subtotal** | **142** | **54** | **23** | **219** |
 
 ### Estatísticas de Execução
 
-- **Total de Testes Principais**: ~170 casos de teste
-- **Total com Subcasos**: ~203 (incluindo testes table-driven)
+- **Total de Testes Principais**: ~219 casos de teste
+- **Total com Subcasos**: ~264 (incluindo testes table-driven)
 - **Status**: ✅ **TODOS PASSANDO**
 - **Tempo de Execução Total**: < 1 segundo
 - **Cobertura**: Domínio (validações), Serviços (lógica de negócio), Mappers (conversões)
@@ -337,7 +401,16 @@ func PacienteParaDTOOut(pac *dominio.Paciente) *dtos.PacienteDTOOut {
     }
     // ... resto do código
 }
+
+func ConviteParaDTOOut(convite *dominio.Convite) *dtos.ConviteDTOOut {
+    if convite == nil {
+        return nil
+    }
+    // ... resto do código
+}
 ```
+
+**Total de Bugs Corrigidos Durante os Testes: 3**
 
 ---
 
