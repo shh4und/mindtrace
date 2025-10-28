@@ -22,7 +22,8 @@ backend/interno/
 │   ├── servicos/tests/
 │   │   ├── usuario_servico_test.go
 │   │   ├── registro_humor_servico_test.go
-│   │   └── convite_servico_test.go
+│   │   ├── convite_servico_test.go
+│   │   └── relatorio_servico_test.go
 │   └── mappers/tests/
 │       └── utils_test.go
 ```
@@ -32,9 +33,9 @@ backend/interno/
 | Camada | Arquivos | Total de Testes |
 |--------|----------|-----------------|
 | **Domínio** | 3 | 184 |
-| **Serviços** | 3 | 57 |
+| **Serviços** | 4 | 74 |
 | **Mappers** | 1 | 23 |
-| **TOTAL** | **7** | **~264** |
+| **TOTAL** | **8** | **~281** |
 
 ## Arquivos Criados
 
@@ -276,6 +277,34 @@ backend/interno/
 
 ---
 
+#### `/backend/interno/aplicacao/servicos/tests/relatorio_servico_test.go`
+**Testes do Serviço de Relatórios**
+
+##### GerarRelatorioPaciente:
+- ✅ Sucesso na geração
+- ✅ Validação: Período inválido (zero)
+- ✅ Validação: Período inválido (negativo)
+- ✅ Validação: Período excede limite (> 90 dias)
+- ✅ Paciente não encontrado
+- ✅ Erro ao buscar paciente
+- ✅ Sem registros de humor (retorna relatório vazio)
+- ✅ Um único registro
+- ✅ Cálculo correto de médias (sono, energia, stress)
+- ✅ Período limite máximo (90 dias)
+
+##### GerarRelatorioPacienteDoProfissional:
+- ✅ Sucesso na geração
+- ✅ Validação: Período inválido (zero)
+- ✅ Validação: Período excede limite
+- ✅ Validação: PacienteID inválido (zero)
+- ✅ Sem registros de humor
+- ✅ Erro ao buscar registros
+- ✅ Muitos registros (30 registros)
+
+**Total de Testes de Serviço (Relatorio): 17 casos de teste**
+
+---
+
 ### 4. `/backend/interno/aplicacao/mappers/tests/utils_test.go`
 **Testes da Camada de Mappers**
 
@@ -321,13 +350,14 @@ backend/interno/
 | **Usuario** | 62 | 28 | - | 90 |
 | **RegistroHumor** | 45 | 13 | - | 58 |
 | **Convite** | 35 | 13 | - | 48 |
+| **Relatorio** | - | 17 | - | 17 |
 | **Mappers (Geral)** | - | - | 23 | 23 |
-| **Subtotal** | **142** | **54** | **23** | **219** |
+| **Subtotal** | **142** | **71** | **23** | **236** |
 
 ### Estatísticas de Execução
 
-- **Total de Testes Principais**: ~219 casos de teste
-- **Total com Subcasos**: ~264 (incluindo testes table-driven)
+- **Total de Testes Principais**: ~236 casos de teste
+- **Total com Subcasos**: ~281 (incluindo testes table-driven)
 - **Status**: ✅ **TODOS PASSANDO**
 - **Tempo de Execução Total**: < 1 segundo
 - **Cobertura**: Domínio (validações), Serviços (lógica de negócio), Mappers (conversões)
