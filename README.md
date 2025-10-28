@@ -375,36 +375,10 @@ cd frontend
 npm run test
 ```
 
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Por favor, siga estas diretrizes:
-
-### Configuração para Desenvolvimento
-1. Faça fork do repositório
-2. Crie uma branch de feature
-3. Faça suas alterações seguindo os padrões de código
-4. Adicione testes para novas funcionalidades
-5. Certifique-se de que todos os testes passam
-6. Submeta um pull request
-
-### Exemplos de Código
-- **Padrão Controller**: Controllers leves que delegam para serviços
-- **Padrão Service**: Lógica de negócio separada de preocupações HTTP
-- **Padrão Repository**: Acesso a dados abstraído através de interfaces
-- **Composição de Componentes**: Componentes Vue reutilizáveis com props/emits claros
-
-### Processo de Pull Request
-1. **Título**: Use formato de commit convencional
-2. **Descrição**: Explique o que e por quê, referencie issues
-3. **Testes**: Inclua cobertura de testes para mudanças
-4. **Documentação**: Atualize docs se necessário
-5. **Revisão**: Atenda ao feedback dos revisores
-
 ## 📚 Documentação Adicional
 
 - **[Arquitetura MindTrace](./docs/ARQUITETURA_MINDTRACE.md)** - Documento principal de arquitetura (PT-BR)
 - **[Relatório de Testes Unitários](./docs/TESTES_UNITARIOS_RELATORIO.md)** - Documentação detalhada dos testes
-- **[Project Architecture Blueprint](./docs/Project_Architecture_Blueprint.md)** - Blueprint técnico complementar (EN)
 - **[Especificação API](./frontend/swagger-output.json)** - Especificação OpenAPI
 - **[Schema do Banco de Dados](./schema_dump.sql)** - Schema PostgreSQL
 
