@@ -13,12 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
-	ErrConviteExpirado      = errors.New("o convite expirou")
-	ErrConviteNaoEncontrado = errors.New("convite não encontrado ou já utilizado")
-	ErrPerfilNaoEncontrado  = errors.New("perfil de profissional ou paciente não encontrado")
-)
-
 // ConviteServico define os metodos para gerenciamento de convites
 type ConviteServico interface {
 	GerarConvite(userID uint) (*dtos.ConviteDTOOut, error)
@@ -92,7 +86,7 @@ func (s *conviteServico) VincularPaciente(userID uint, token string) error {
 		convite, err := s.conviteRepositorio.BuscarConvitePorToken(tx, token)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return ErrConviteNaoEncontrado
+				return dominio.ErrTokenConviteInvalido
 			}
 			return err
 		}
