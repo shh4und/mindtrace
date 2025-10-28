@@ -79,16 +79,7 @@ func (c *Convite) JaFoiUtilizado() bool {
 }
 
 // UtilizarConvite marca o convite como utilizado por um paciente
-func (c *Convite) UtilizarConvite(pacienteID uint) error {
-	if !c.EstaValido() {
-		if c.EstaExpirado() {
-			return ErrConviteExpirado
-		}
-		if c.JaFoiUtilizado() {
-			return ErrConviteJaUtilizado
-		}
-	}
+func (c *Convite) UtilizarConvite(pacienteID uint) {
 	c.Usado = true
 	c.PacienteID = &pacienteID
-	return nil
 }
