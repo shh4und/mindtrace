@@ -467,6 +467,11 @@ func TestConviteParaDTOOut_Usado(t *testing.T) {
 	assert.Equal(t, convite.Token, result.Token)
 }
 
+func TestConviteParaDTOOut_ComNil(t *testing.T) {
+	result := mappers.ConviteParaDTOOut(nil)
+	assert.Nil(t, result)
+}
+
 // ========== Testes de Casos Extremos ==========
 
 func TestPacienteParaDTOOut_SemProfissionais(t *testing.T) {
