@@ -18,7 +18,7 @@ var (
 )
 
 type Convite struct {
-	gorm.Model
+	ID             uint         `gorm:"primarykey"`
 	ProfissionalID uint         `gorm:"not null"`
 	Profissional   Profissional `gorm:"foreignKey:ProfissionalID;constraint:OnDelete:CASCADE"`
 	Token          string       `gorm:"unique;not null"`
@@ -26,6 +26,9 @@ type Convite struct {
 	Usado          bool         `gorm:"default:false"`
 	PacienteID     *uint        // Ponteiro para permitir nulo, indica qual paciente usou o convite
 	Paciente       Paciente     `gorm:"foreignKey:PacienteID;constraint:OnDelete:CASCADE"`
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	DeletedAt      gorm.DeletedAt `gorm:"index"`
 }
 
 // Metodos de validacao - LOGICA DE NEGOCIO (Convite)
