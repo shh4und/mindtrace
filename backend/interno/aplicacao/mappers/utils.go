@@ -156,3 +156,12 @@ func CriarRegistroHumorDTOInParaEntidade(dto *dtos.CriarRegistroHumorDTOIn, paci
 		DataHoraRegistro: dto.DataHoraRegistro,
 	}
 }
+
+func ConviteParaDTOOut(convite *dominio.Convite) *dtos.ConviteDTOOut {
+	return &dtos.ConviteDTOOut{
+		Token:         convite.Token,
+		DataExpiracao: convite.DataExpiracao,
+		Usado:         convite.Usado,
+		CreatedAt:     convite.CreatedAt,
+	}
+}
