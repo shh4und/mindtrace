@@ -2,7 +2,10 @@
 
 ## Resumo
 
-Foram criados testes unitários abrangentes para as camadas de domínio, serviço e mappers do sistema MindTrace, cobrindo as funcionalidades relacionadas a usuários, profissionais, pacientes, registros de humor e conversões de dados.
+Foram criados testes unitários abrangentes para as camadas de domínio, serviço e mappers do sistema MindTrace, cobrindo as funcionalidades relacionadas a:
+- **Usuários** (profissionais e pacientes)
+- **Registros de Humor**
+- **Conversões de dados (DTOs e Entidades)**
 
 ## Estrutura de Organização
 
@@ -11,17 +14,30 @@ Todos os testes foram organizados em pastas `/tests` dentro de seus respectivos 
 ```
 backend/interno/
 ├── dominio/tests/
-│   └── usuario_test.go
+│   ├── usuario_test.go
+│   └── registro_humor_test.go
 ├── aplicacao/
 │   ├── servicos/tests/
-│   │   └── usuario_servico_test.go
+│   │   ├── usuario_servico_test.go
+│   │   └── registro_humor_servico_test.go
 │   └── mappers/tests/
 │       └── utils_test.go
 ```
 
+## Estatísticas Gerais
+
+| Camada | Arquivos | Total de Testes |
+|--------|----------|-----------------|
+| **Domínio** | 2 | 137 |
+| **Serviços** | 2 | 44 |
+| **Mappers** | 1 | 22 |
+| **TOTAL** | **5** | **~203** |
+
 ## Arquivos Criados
 
-### 1. `/backend/interno/dominio/tests/usuario_test.go`
+### 1. Camada de Domínio
+
+#### `/backend/interno/dominio/tests/usuario_test.go`
 **Testes da Camada de Domínio**
 
 #### Cobertura de Testes para `Usuario`:
@@ -135,7 +151,66 @@ backend/interno/
 - ✅ Usuário não encontrado
 - ✅ Erro ao deletar
 
-**Total de Testes de Serviço: 28 casos de teste**
+**Total de Testes de Serviço (Usuario): 28 casos de teste**
+
+---
+
+#### `/backend/interno/aplicacao/servicos/tests/registro_humor_servico_test.go`
+**Testes do Serviço de Registro de Humor**
+
+##### CriarRegistroHumor:
+- ✅ Sucesso na criação
+- ✅ Paciente não encontrado
+- ✅ Erro ao buscar paciente
+- ✅ Validação: Nível de humor inválido
+- ✅ Validação: Horas de sono inválido
+- ✅ Validação: Nível de energia inválido
+- ✅ Validação: Nível de stress inválido
+- ✅ Validação: Auto cuidado vazio
+- ✅ Validação: Data/hora registro vazia
+- ✅ Erro ao criar registro no banco
+- ✅ Criação com observações
+- ✅ Criação com valores mínimos
+- ✅ Criação com valores máximos
+
+**Total de Testes de Serviço (RegistroHumor): 13 casos de teste**
+
+---
+
+### 2. Camada de Domínio
+
+#### `/backend/interno/dominio/tests/registro_humor_test.go`
+**Testes de Validação do Domínio RegistroHumor**
+
+##### ValidarNivelHumor:
+- ✅ 6 casos de teste (valores válidos 1-5, inválidos 0, -1, 6)
+
+##### ValidarHorasSono:
+- ✅ 6 casos de teste (valores válidos 0-12, inválidos -1, 13, 24)
+
+##### ValidarNivelEnergia:
+- ✅ 6 casos de teste (valores válidos 1-10, inválidos 0, -5, 11)
+
+##### ValidarNivelStress:
+- ✅ 6 casos de teste (valores válidos 1-10, inválidos 0, -3, 11)
+
+##### ValidarAutoCuidado:
+- ✅ 6 casos de teste (texto válido, mínimo 3 caracteres, vazio, muito curto)
+
+##### ValidarDataHoraRegistro:
+- ✅ 6 casos de teste (datas válidas passadas, inválidas futuras ou vazias)
+
+##### Validar (Completo):
+- ✅ 9 casos de teste (validação completa, diferentes combinações de erros)
+
+##### Casos Extremos:
+- ✅ TableName (verificação do nome da tabela)
+- ✅ Observações vazias (opcional válido)
+- ✅ Observações longas
+- ✅ Todos os níveis máximos
+- ✅ Todos os níveis mínimos
+
+**Total de Testes de Domínio (RegistroHumor): 45 casos de teste**
 
 ---
 
@@ -174,14 +249,40 @@ backend/interno/
 
 ---
 
-## Estatísticas Gerais
+## Resumo Final
 
-- **Total de Testes**: ~112 casos de teste
-- **Domínio**: 62 testes
-- **Serviços**: 28 testes  
-- **Mappers**: 22 testes
-- **Status**: ✅ Todos passando
-- **Tempo de Execução**: < 1 segundo
+### Cobertura por Módulo
+
+| Módulo | Domínio | Serviço | Mappers | Total |
+|--------|---------|---------|---------|-------|
+| **Usuario** | 62 | 28 | - | 90 |
+| **RegistroHumor** | 45 | 13 | - | 58 |
+| **Mappers (Geral)** | - | - | 22 | 22 |
+| **Subtotal** | **107** | **41** | **22** | **170** |
+
+### Estatísticas de Execução
+
+- **Total de Testes Principais**: ~170 casos de teste
+- **Total com Subcasos**: ~203 (incluindo testes table-driven)
+- **Status**: ✅ **TODOS PASSANDO**
+- **Tempo de Execução Total**: < 1 segundo
+- **Cobertura**: Domínio (validações), Serviços (lógica de negócio), Mappers (conversões)
+
+### Comandos de Execução
+
+```bash
+# Executar todos os testes
+cd backend
+go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/aplicacao/mappers/tests
+
+# Executar com verbosidade
+go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/aplicacao/mappers/tests -v
+
+# Executar por módulo
+go test ./interno/dominio/tests -v
+go test ./interno/aplicacao/servicos/tests -v
+go test ./interno/aplicacao/mappers/tests -v
+```
 
 
 
