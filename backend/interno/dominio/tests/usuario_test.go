@@ -1,6 +1,7 @@
-package dominio
+package tests
 
 import (
+	"mindtrace/backend/interno/dominio"
 	"testing"
 	"time"
 
@@ -33,33 +34,33 @@ func TestUsuario_ValidarEmail(t *testing.T) {
 		{
 			name:    "email invalido sem @",
 			email:   "usuarioexample.com",
-			wantErr: ErrEmailInvalido,
+			wantErr: dominio.ErrEmailInvalido,
 		},
 		{
 			name:    "email invalido sem dominio",
 			email:   "usuario@",
-			wantErr: ErrEmailInvalido,
+			wantErr: dominio.ErrEmailInvalido,
 		},
 		{
 			name:    "email invalido sem usuario",
 			email:   "@example.com",
-			wantErr: ErrEmailInvalido,
+			wantErr: dominio.ErrEmailInvalido,
 		},
 		{
 			name:    "email vazio",
 			email:   "",
-			wantErr: ErrEmailInvalido,
+			wantErr: dominio.ErrEmailInvalido,
 		},
 		{
 			name:    "email com espacos",
 			email:   "user name@example.com",
-			wantErr: ErrEmailInvalido,
+			wantErr: dominio.ErrEmailInvalido,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := &Usuario{Email: tt.email}
+			u := &dominio.Usuario{Email: tt.email}
 			err := u.ValidarEmail()
 			assert.Equal(t, tt.wantErr, err)
 		})
@@ -90,28 +91,28 @@ func TestUsuario_ValidarSenha(t *testing.T) {
 		{
 			name:       "senha com menos de 8 caracteres",
 			senhaPlana: "Senh@1",
-			wantErr:    ErrSenhaFraca,
+			wantErr:    dominio.ErrSenhaFraca,
 		},
 		{
 			name:       "senha vazia",
 			senhaPlana: "",
-			wantErr:    ErrSenhaFraca,
+			wantErr:    dominio.ErrSenhaFraca,
 		},
 		{
 			name:       "senha com 7 caracteres",
 			senhaPlana: "Senha12",
-			wantErr:    ErrSenhaFraca,
+			wantErr:    dominio.ErrSenhaFraca,
 		},
 		{
 			name:       "senha com 8 caracteres exatos",
 			senhaPlana: "Senha123",
-			wantErr:    ErrSenhaInvalida,
+			wantErr:    dominio.ErrSenhaInvalida,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := &Usuario{}
+			u := &dominio.Usuario{}
 			err := u.ValidarSenha(tt.senhaPlana)
 			assert.Equal(t, tt.wantErr, err)
 		})
@@ -137,13 +138,13 @@ func TestUsuario_ValidarNome(t *testing.T) {
 		{
 			name:    "nome vazio",
 			nome:    "",
-			wantErr: ErrNomeVazio,
+			wantErr: dominio.ErrNomeVazio,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := &Usuario{Nome: tt.nome}
+			u := &dominio.Usuario{Nome: tt.nome}
 			err := u.ValidarNome()
 			assert.Equal(t, tt.wantErr, err)
 		})
@@ -153,12 +154,12 @@ func TestUsuario_ValidarNome(t *testing.T) {
 func TestUsuario_Validar(t *testing.T) {
 	tests := []struct {
 		name    string
-		usuario Usuario
+		usuario dominio.Usuario
 		wantErr error
 	}{
 		{
 			name: "usuario valido",
-			usuario: Usuario{
+			usuario: dominio.Usuario{
 				Nome:  "João Silva",
 				Email: "joao@example.com",
 			},
@@ -166,19 +167,19 @@ func TestUsuario_Validar(t *testing.T) {
 		},
 		{
 			name: "usuario com email invalido",
-			usuario: Usuario{
+			usuario: dominio.Usuario{
 				Nome:  "João Silva",
 				Email: "email-invalido",
 			},
-			wantErr: ErrEmailInvalido,
+			wantErr: dominio.ErrEmailInvalido,
 		},
 		{
 			name: "usuario com nome vazio",
-			usuario: Usuario{
+			usuario: dominio.Usuario{
 				Nome:  "",
 				Email: "joao@example.com",
 			},
-			wantErr: ErrNomeVazio,
+			wantErr: dominio.ErrNomeVazio,
 		},
 	}
 
@@ -216,23 +217,23 @@ func TestProfissional_ValidarRegistroProfissional(t *testing.T) {
 		{
 			name:     "registro vazio",
 			registro: "",
-			wantErr:  ErrRegistroProfissionalVazio,
+			wantErr:  dominio.ErrRegistroProfissionalVazio,
 		},
 		{
 			name:     "registro com menos de 4 caracteres",
 			registro: "123",
-			wantErr:  ErrRegistroProfissionalInvalido,
+			wantErr:  dominio.ErrRegistroProfissionalInvalido,
 		},
 		{
 			name:     "registro com mais de 12 caracteres",
 			registro: "1234567890123",
-			wantErr:  ErrRegistroProfissionalInvalido,
+			wantErr:  dominio.ErrRegistroProfissionalInvalido,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Profissional{RegistroProfissional: tt.registro}
+			p := &dominio.Profissional{RegistroProfissional: tt.registro}
 			err := p.ValidarRegistroProfissional()
 			assert.Equal(t, tt.wantErr, err)
 		})
@@ -258,23 +259,23 @@ func TestProfissional_ValidarEspecialidade(t *testing.T) {
 		{
 			name:          "especialidade vazia",
 			especialidade: "",
-			wantErr:       ErrEspecialidadeVazia,
+			wantErr:       dominio.ErrEspecialidadeVazia,
 		},
 		{
 			name:          "especialidade com menos de 3 caracteres",
 			especialidade: "Ps",
-			wantErr:       ErrEspecialidadeInvalida,
+			wantErr:       dominio.ErrEspecialidadeInvalida,
 		},
 		{
 			name:          "especialidade com mais de 255 caracteres",
 			especialidade: string(make([]byte, 256)),
-			wantErr:       ErrEspecialidadeInvalida,
+			wantErr:       dominio.ErrEspecialidadeInvalida,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Profissional{Especialidade: tt.especialidade}
+			p := &dominio.Profissional{Especialidade: tt.especialidade}
 			err := p.ValidarEspecialidade()
 			assert.Equal(t, tt.wantErr, err)
 		})
@@ -300,23 +301,23 @@ func TestProfissional_ValidarDataNascimento(t *testing.T) {
 		{
 			name:           "data de nascimento vazia",
 			dataNascimento: time.Time{},
-			wantErr:        ErrDataNascimentoVazia,
+			wantErr:        dominio.ErrDataNascimentoVazia,
 		},
 		{
 			name:           "profissional menor de idade (17 anos)",
 			dataNascimento: time.Now().AddDate(-17, 0, 0),
-			wantErr:        ErrProfissionalMenorDeIdade,
+			wantErr:        dominio.ErrProfissionalMenorDeIdade,
 		},
 		{
 			name:           "profissional menor de idade (1 dia antes de 18 anos)",
 			dataNascimento: time.Now().AddDate(-18, 0, 1),
-			wantErr:        ErrProfissionalMenorDeIdade,
+			wantErr:        dominio.ErrProfissionalMenorDeIdade,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Profissional{DataNascimento: tt.dataNascimento}
+			p := &dominio.Profissional{DataNascimento: tt.dataNascimento}
 			err := p.ValidarDataNascimento()
 			assert.Equal(t, tt.wantErr, err)
 		})
@@ -328,13 +329,13 @@ func TestProfissional_Validar(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		profissional Profissional
+		profissional dominio.Profissional
 		wantErr      error
 	}{
 		{
 			name: "profissional valido",
-			profissional: Profissional{
-				Usuario: Usuario{
+			profissional: dominio.Profissional{
+				Usuario: dominio.Usuario{
 					Nome:  "Dr. João Silva",
 					Email: "joao@example.com",
 				},
@@ -346,8 +347,8 @@ func TestProfissional_Validar(t *testing.T) {
 		},
 		{
 			name: "profissional com email invalido",
-			profissional: Profissional{
-				Usuario: Usuario{
+			profissional: dominio.Profissional{
+				Usuario: dominio.Usuario{
 					Nome:  "Dr. João Silva",
 					Email: "email-invalido",
 				},
@@ -355,12 +356,12 @@ func TestProfissional_Validar(t *testing.T) {
 				Especialidade:        "Psicologia Clínica",
 				RegistroProfissional: "CRP12345",
 			},
-			wantErr: ErrEmailInvalido,
+			wantErr: dominio.ErrEmailInvalido,
 		},
 		{
 			name: "profissional com registro vazio",
-			profissional: Profissional{
-				Usuario: Usuario{
+			profissional: dominio.Profissional{
+				Usuario: dominio.Usuario{
 					Nome:  "Dr. João Silva",
 					Email: "joao@example.com",
 				},
@@ -368,12 +369,12 @@ func TestProfissional_Validar(t *testing.T) {
 				Especialidade:        "Psicologia Clínica",
 				RegistroProfissional: "",
 			},
-			wantErr: ErrRegistroProfissionalVazio,
+			wantErr: dominio.ErrRegistroProfissionalVazio,
 		},
 		{
 			name: "profissional com especialidade vazia",
-			profissional: Profissional{
-				Usuario: Usuario{
+			profissional: dominio.Profissional{
+				Usuario: dominio.Usuario{
 					Nome:  "Dr. João Silva",
 					Email: "joao@example.com",
 				},
@@ -381,12 +382,12 @@ func TestProfissional_Validar(t *testing.T) {
 				Especialidade:        "",
 				RegistroProfissional: "CRP12345",
 			},
-			wantErr: ErrEspecialidadeVazia,
+			wantErr: dominio.ErrEspecialidadeVazia,
 		},
 		{
 			name: "profissional menor de idade",
-			profissional: Profissional{
-				Usuario: Usuario{
+			profissional: dominio.Profissional{
+				Usuario: dominio.Usuario{
 					Nome:  "Dr. João Silva",
 					Email: "joao@example.com",
 				},
@@ -394,7 +395,7 @@ func TestProfissional_Validar(t *testing.T) {
 				Especialidade:        "Psicologia Clínica",
 				RegistroProfissional: "CRP12345",
 			},
-			wantErr: ErrProfissionalMenorDeIdade,
+			wantErr: dominio.ErrProfissionalMenorDeIdade,
 		},
 	}
 
@@ -407,11 +408,11 @@ func TestProfissional_Validar(t *testing.T) {
 }
 
 func TestProfissional_PossuiPaciente(t *testing.T) {
-	paciente1 := Paciente{ID: 1}
-	paciente2 := Paciente{ID: 2}
+	paciente1 := dominio.Paciente{ID: 1}
+	paciente2 := dominio.Paciente{ID: 2}
 
-	profissional := Profissional{
-		Pacientes: []Paciente{paciente1, paciente2},
+	profissional := dominio.Profissional{
+		Pacientes: []dominio.Paciente{paciente1, paciente2},
 	}
 
 	tests := []struct {
@@ -465,18 +466,18 @@ func TestPaciente_ValidarDataNascimento(t *testing.T) {
 		{
 			name:           "data de nascimento vazia",
 			dataNascimento: time.Time{},
-			wantErr:        ErrDataNascimentoPacienteVazia,
+			wantErr:        dominio.ErrDataNascimentoPacienteVazia,
 		},
 		{
 			name:           "data de nascimento no futuro",
 			dataNascimento: time.Now().AddDate(1, 0, 0),
-			wantErr:        ErrDataNascimentoPacienteNoFuturo,
+			wantErr:        dominio.ErrDataNascimentoPacienteNoFuturo,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Paciente{DataNascimento: tt.dataNascimento}
+			p := &dominio.Paciente{DataNascimento: tt.dataNascimento}
 			err := p.ValidarDataNascimento()
 			assert.Equal(t, tt.wantErr, err)
 		})
@@ -510,27 +511,27 @@ func TestPaciente_ValidarResponsavel(t *testing.T) {
 			dependente:         true,
 			nomeResponsavel:    "",
 			contatoResponsavel: "11987654321",
-			wantErr:            ErrResponsavelVazio,
+			wantErr:            dominio.ErrResponsavelVazio,
 		},
 		{
 			name:               "paciente dependente sem contato do responsavel",
 			dependente:         true,
 			nomeResponsavel:    "Maria Silva",
 			contatoResponsavel: "",
-			wantErr:            ErrContatoResponsavelVazio,
+			wantErr:            dominio.ErrContatoResponsavelVazio,
 		},
 		{
 			name:               "paciente dependente com contato do responsavel invalido",
 			dependente:         true,
 			nomeResponsavel:    "Maria Silva",
 			contatoResponsavel: "119876543",
-			wantErr:            ErrContatoResponsavelInvalido,
+			wantErr:            dominio.ErrContatoResponsavelInvalido,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Paciente{
+			p := &dominio.Paciente{
 				Dependente:         tt.dependente,
 				NomeResponsavel:    tt.nomeResponsavel,
 				ContatoResponsavel: tt.contatoResponsavel,
@@ -569,19 +570,19 @@ func TestPaciente_ValidarDataInicioTratamento(t *testing.T) {
 			name:                 "data de inicio de tratamento no futuro",
 			dataNascimento:       dataNascimento,
 			dataInicioTratamento: &dataFutura,
-			wantErr:              ErrDataInicioTratamentoNoFuturo,
+			wantErr:              dominio.ErrDataInicioTratamentoNoFuturo,
 		},
 		{
 			name:                 "data de inicio de tratamento anterior ao nascimento",
 			dataNascimento:       dataNascimento,
 			dataInicioTratamento: &dataAnteriorNascimento,
-			wantErr:              ErrDataInicioTratamentoAnteriorNascimento,
+			wantErr:              dominio.ErrDataInicioTratamentoAnteriorNascimento,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Paciente{
+			p := &dominio.Paciente{
 				DataNascimento:       tt.dataNascimento,
 				DataInicioTratamento: tt.dataInicioTratamento,
 			}
@@ -597,13 +598,13 @@ func TestPaciente_Validar(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		paciente Paciente
+		paciente dominio.Paciente
 		wantErr  error
 	}{
 		{
 			name: "paciente valido nao dependente",
-			paciente: Paciente{
-				Usuario: Usuario{
+			paciente: dominio.Paciente{
+				Usuario: dominio.Usuario{
 					Nome:  "João Silva",
 					Email: "joao@example.com",
 				},
@@ -615,8 +616,8 @@ func TestPaciente_Validar(t *testing.T) {
 		},
 		{
 			name: "paciente valido dependente",
-			paciente: Paciente{
-				Usuario: Usuario{
+			paciente: dominio.Paciente{
+				Usuario: dominio.Usuario{
 					Nome:  "Maria Silva",
 					Email: "maria@example.com",
 				},
@@ -630,37 +631,37 @@ func TestPaciente_Validar(t *testing.T) {
 		},
 		{
 			name: "paciente com email invalido",
-			paciente: Paciente{
-				Usuario: Usuario{
+			paciente: dominio.Paciente{
+				Usuario: dominio.Usuario{
 					Nome:  "João Silva",
 					Email: "email-invalido",
 				},
 				DataNascimento: dataNascimentoValida,
 			},
-			wantErr: ErrEmailInvalido,
+			wantErr: dominio.ErrEmailInvalido,
 		},
 		{
 			name: "paciente com data de nascimento vazia",
-			paciente: Paciente{
-				Usuario: Usuario{
+			paciente: dominio.Paciente{
+				Usuario: dominio.Usuario{
 					Nome:  "João Silva",
 					Email: "joao@example.com",
 				},
 				DataNascimento: time.Time{},
 			},
-			wantErr: ErrDataNascimentoPacienteVazia,
+			wantErr: dominio.ErrDataNascimentoPacienteVazia,
 		},
 		{
 			name: "paciente dependente sem responsavel",
-			paciente: Paciente{
-				Usuario: Usuario{
+			paciente: dominio.Paciente{
+				Usuario: dominio.Usuario{
 					Nome:  "Maria Silva",
 					Email: "maria@example.com",
 				},
 				DataNascimento: dataNascimentoValida,
 				Dependente:     true,
 			},
-			wantErr: ErrResponsavelVazio,
+			wantErr: dominio.ErrResponsavelVazio,
 		},
 	}
 
@@ -673,11 +674,11 @@ func TestPaciente_Validar(t *testing.T) {
 }
 
 func TestPaciente_PossuiProfissional(t *testing.T) {
-	prof1 := Profissional{ID: 1}
-	prof2 := Profissional{ID: 2}
+	prof1 := dominio.Profissional{ID: 1}
+	prof2 := dominio.Profissional{ID: 2}
 
-	paciente := Paciente{
-		Profissionais: []Profissional{prof1, prof2},
+	paciente := dominio.Paciente{
+		Profissionais: []dominio.Profissional{prof1, prof2},
 	}
 
 	tests := []struct {

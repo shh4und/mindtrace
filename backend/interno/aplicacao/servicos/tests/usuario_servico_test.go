@@ -1,8 +1,9 @@
-package servicos
+package tests
 
 import (
 	"errors"
 	"mindtrace/backend/interno/aplicacao/dtos"
+	"mindtrace/backend/interno/aplicacao/servicos"
 	"mindtrace/backend/interno/dominio"
 	"testing"
 	"time"
@@ -126,7 +127,7 @@ func (m *MockUsuarioRepositorio) DeletarUsuario(tx *gorm.DB, userID uint) error 
 func TestUsuarioServico_RegistrarProfissional_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	dtoIn := &dtos.RegistrarProfissionalDTOIn{
 		Nome:                 "Dr. João Silva",
@@ -163,7 +164,7 @@ func TestUsuarioServico_RegistrarProfissional_Sucesso(t *testing.T) {
 func TestUsuarioServico_RegistrarProfissional_EmailJaCadastrado(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	dtoIn := &dtos.RegistrarProfissionalDTOIn{
 		Nome:                 "Dr. João Silva",
@@ -188,7 +189,7 @@ func TestUsuarioServico_RegistrarProfissional_EmailJaCadastrado(t *testing.T) {
 func TestUsuarioServico_RegistrarProfissional_EmailInvalido(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	dtoIn := &dtos.RegistrarProfissionalDTOIn{
 		Nome:                 "Dr. João Silva",
@@ -212,7 +213,7 @@ func TestUsuarioServico_RegistrarProfissional_EmailInvalido(t *testing.T) {
 func TestUsuarioServico_RegistrarProfissional_SenhaFraca(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	dtoIn := &dtos.RegistrarProfissionalDTOIn{
 		Nome:                 "Dr. João Silva",
@@ -236,7 +237,7 @@ func TestUsuarioServico_RegistrarProfissional_SenhaFraca(t *testing.T) {
 func TestUsuarioServico_RegistrarProfissional_MenorDeIdade(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	dtoIn := &dtos.RegistrarProfissionalDTOIn{
 		Nome:                 "Dr. João Silva",
@@ -262,7 +263,7 @@ func TestUsuarioServico_RegistrarProfissional_MenorDeIdade(t *testing.T) {
 func TestUsuarioServico_RegistrarPaciente_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	dependente := false
 	dtoIn := &dtos.RegistrarPacienteDTOIn{
@@ -289,7 +290,7 @@ func TestUsuarioServico_RegistrarPaciente_Sucesso(t *testing.T) {
 func TestUsuarioServico_RegistrarPaciente_Dependente_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	dependente := true
 	dtoIn := &dtos.RegistrarPacienteDTOIn{
@@ -320,7 +321,7 @@ func TestUsuarioServico_RegistrarPaciente_Dependente_Sucesso(t *testing.T) {
 func TestUsuarioServico_RegistrarPaciente_EmailJaCadastrado(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	dtoIn := &dtos.RegistrarPacienteDTOIn{
 		Nome:           "Maria Silva",
@@ -343,7 +344,7 @@ func TestUsuarioServico_RegistrarPaciente_EmailJaCadastrado(t *testing.T) {
 func TestUsuarioServico_RegistrarPaciente_DependenteSemResponsavel(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	dependente := true
 	dtoIn := &dtos.RegistrarPacienteDTOIn{
@@ -369,7 +370,7 @@ func TestUsuarioServico_RegistrarPaciente_DependenteSemResponsavel(t *testing.T)
 func TestUsuarioServico_Login_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	senha := "Senha123!"
 	hashSenha, _ := bcrypt.GenerateFromPassword([]byte(senha), bcrypt.DefaultCost)
@@ -393,7 +394,7 @@ func TestUsuarioServico_Login_Sucesso(t *testing.T) {
 func TestUsuarioServico_Login_UsuarioNaoEncontrado(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	mockRepo.On("BuscarPorEmail", "invalido@example.com").Return(nil, gorm.ErrRecordNotFound)
 
@@ -408,7 +409,7 @@ func TestUsuarioServico_Login_UsuarioNaoEncontrado(t *testing.T) {
 func TestUsuarioServico_Login_SenhaInvalida(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	senhaCorreta := "Senha123!"
 	hashSenha, _ := bcrypt.GenerateFromPassword([]byte(senhaCorreta), bcrypt.DefaultCost)
@@ -435,7 +436,7 @@ func TestUsuarioServico_Login_SenhaInvalida(t *testing.T) {
 func TestUsuarioServico_BuscarUsuarioPorID_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	usuario := &dominio.Usuario{
 		ID:    1,
@@ -457,7 +458,7 @@ func TestUsuarioServico_BuscarUsuarioPorID_Sucesso(t *testing.T) {
 func TestUsuarioServico_BuscarUsuarioPorID_NaoEncontrado(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	mockRepo.On("BuscarUsuarioPorID", uint(999)).Return(nil, gorm.ErrRecordNotFound)
 
@@ -474,7 +475,7 @@ func TestUsuarioServico_BuscarUsuarioPorID_NaoEncontrado(t *testing.T) {
 func TestUsuarioServico_ProprioPerfilPaciente_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	paciente := &dominio.Paciente{
 		ID:        1,
@@ -500,7 +501,7 @@ func TestUsuarioServico_ProprioPerfilPaciente_Sucesso(t *testing.T) {
 func TestUsuarioServico_ProprioPerfilPaciente_NaoEncontrado(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	mockRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(999)).Return(nil, gorm.ErrRecordNotFound)
 
@@ -517,7 +518,7 @@ func TestUsuarioServico_ProprioPerfilPaciente_NaoEncontrado(t *testing.T) {
 func TestUsuarioServico_ProprioPerfilProfissional_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	profissional := &dominio.Profissional{
 		ID:        1,
@@ -545,7 +546,7 @@ func TestUsuarioServico_ProprioPerfilProfissional_Sucesso(t *testing.T) {
 func TestUsuarioServico_ProprioPerfilProfissional_NaoEncontrado(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	mockRepo.On("BuscarProfissionalPorUsuarioID", mock.Anything, uint(999)).Return(nil, gorm.ErrRecordNotFound)
 
@@ -562,7 +563,7 @@ func TestUsuarioServico_ProprioPerfilProfissional_NaoEncontrado(t *testing.T) {
 func TestUsuarioServico_AtualizarPerfil_UsuarioSimples_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	usuario := &dominio.Usuario{
 		ID:          1,
@@ -589,7 +590,7 @@ func TestUsuarioServico_AtualizarPerfil_UsuarioSimples_Sucesso(t *testing.T) {
 func TestUsuarioServico_AtualizarPerfil_Profissional_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	usuario := &dominio.Usuario{
 		ID:          1,
@@ -626,7 +627,7 @@ func TestUsuarioServico_AtualizarPerfil_Profissional_Sucesso(t *testing.T) {
 func TestUsuarioServico_AtualizarPerfil_Paciente_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	usuario := &dominio.Usuario{
 		ID:          1,
@@ -663,7 +664,7 @@ func TestUsuarioServico_AtualizarPerfil_Paciente_Sucesso(t *testing.T) {
 func TestUsuarioServico_AtualizarPerfil_NomeVazio_Erro(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	usuario := &dominio.Usuario{
 		ID:          1,
@@ -690,7 +691,7 @@ func TestUsuarioServico_AtualizarPerfil_NomeVazio_Erro(t *testing.T) {
 func TestUsuarioServico_AlterarSenha_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	senhaAtual := "Senha123!"
 	hashSenha, _ := bcrypt.GenerateFromPassword([]byte(senhaAtual), bcrypt.DefaultCost)
@@ -719,7 +720,7 @@ func TestUsuarioServico_AlterarSenha_Sucesso(t *testing.T) {
 func TestUsuarioServico_AlterarSenha_SenhasNaoConferem(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	dtoIn := &dtos.AlterarSenhaDTOIn{
 		SenhaAtual:  "Senha123!",
@@ -736,7 +737,7 @@ func TestUsuarioServico_AlterarSenha_SenhasNaoConferem(t *testing.T) {
 func TestUsuarioServico_AlterarSenha_SenhaAtualInvalida(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	senhaAtual := "Senha123!"
 	hashSenha, _ := bcrypt.GenerateFromPassword([]byte(senhaAtual), bcrypt.DefaultCost)
@@ -765,7 +766,7 @@ func TestUsuarioServico_AlterarSenha_SenhaAtualInvalida(t *testing.T) {
 func TestUsuarioServico_AlterarSenha_NovaSenhaFraca(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	senhaAtual := "Senha123!"
 	hashSenha, _ := bcrypt.GenerateFromPassword([]byte(senhaAtual), bcrypt.DefaultCost)
@@ -796,7 +797,7 @@ func TestUsuarioServico_AlterarSenha_NovaSenhaFraca(t *testing.T) {
 func TestUsuarioServico_ListarPacientesDoProfissional_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	profissional := &dominio.Profissional{
 		ID:        1,
@@ -839,7 +840,7 @@ func TestUsuarioServico_ListarPacientesDoProfissional_Sucesso(t *testing.T) {
 func TestUsuarioServico_ListarPacientesDoProfissional_ProfissionalNaoEncontrado(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	mockRepo.On("BuscarProfissionalPorUsuarioID", mock.Anything, uint(999)).Return(nil, gorm.ErrRecordNotFound)
 
@@ -857,7 +858,7 @@ func TestUsuarioServico_ListarPacientesDoProfissional_ProfissionalNaoEncontrado(
 func TestUsuarioServico_DeletarPerfil_Sucesso(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	usuario := &dominio.Usuario{
 		ID:    1,
@@ -877,7 +878,7 @@ func TestUsuarioServico_DeletarPerfil_Sucesso(t *testing.T) {
 func TestUsuarioServico_DeletarPerfil_UsuarioNaoEncontrado(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	mockRepo.On("BuscarUsuarioPorID", uint(999)).Return(nil, gorm.ErrRecordNotFound)
 
@@ -891,7 +892,7 @@ func TestUsuarioServico_DeletarPerfil_UsuarioNaoEncontrado(t *testing.T) {
 func TestUsuarioServico_DeletarPerfil_ErroAoDeletar(t *testing.T) {
 	mockRepo := new(MockUsuarioRepositorio)
 	db := setupTestDB(t)
-	servico := NovoUsuarioServico(db, mockRepo)
+	servico := servicos.NovoUsuarioServico(db, mockRepo)
 
 	usuario := &dominio.Usuario{
 		ID:    1,
