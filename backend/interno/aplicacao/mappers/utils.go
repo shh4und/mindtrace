@@ -20,6 +20,9 @@ func UsuarioParaDTOOut(usuario *dominio.Usuario) *dtos.UsuarioDTOOut {
 }
 
 func ProfissionalParaDTOOut(prof *dominio.Profissional) *dtos.ProfissionalDTOOut {
+	if prof == nil {
+		return nil
+	}
 	usuarioDTO := UsuarioParaDTOOut(&prof.Usuario)
 
 	return &dtos.ProfissionalDTOOut{
@@ -34,6 +37,9 @@ func ProfissionalParaDTOOut(prof *dominio.Profissional) *dtos.ProfissionalDTOOut
 }
 
 func PacienteParaDTOOut(pac *dominio.Paciente) *dtos.PacienteDTOOut {
+	if pac == nil {
+		return nil
+	}
 	usuarioDTO := UsuarioParaDTOOut(&pac.Usuario)
 
 	profissionalDTOs := make([]dtos.ProfissionalDTOOut, len(pac.Profissionais))
@@ -116,6 +122,7 @@ func RegistrarProfissionalDTOInParaEntidade(dto *dtos.RegistrarProfissionalDTOIn
 	}
 
 	profissional := &dominio.Profissional{
+		DataNascimento:       dto.DataNascimento,
 		Especialidade:        dto.Especialidade,
 		RegistroProfissional: dto.RegistroProfissional,
 	}
@@ -158,6 +165,9 @@ func CriarRegistroHumorDTOInParaEntidade(dto *dtos.CriarRegistroHumorDTOIn, paci
 }
 
 func ConviteParaDTOOut(convite *dominio.Convite) *dtos.ConviteDTOOut {
+	if convite == nil {
+		return nil
+	}
 	return &dtos.ConviteDTOOut{
 		Token:         convite.Token,
 		DataExpiracao: convite.DataExpiracao,
