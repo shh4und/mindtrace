@@ -1,7 +1,9 @@
 package controladores
 
 import (
+	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
+	"mindtrace/backend/interno/dominio"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,21 +27,17 @@ func (cc *ConviteControlador) GerarConvite(c *gin.Context) {
 		return
 	}
 
-	convite, err := cc.conviteServico.GerarConvite(userID.(uint))
+	conviteOut, err := cc.conviteServico.GerarConvite(userID.(uint))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
+		if err == dominio.ErrUsuarioNaoEncontrado {
+			c.JSON(http.StatusNotFound, gin.H{"erro": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
+		}
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"token":          convite.Token,
-		"data_expiracao": convite.DataExpiracao,
-	})
-}
-
-// VincularRequest representa o payload da requisicao para vincular paciente
-type VincularRequest struct {
-	Token string `json:"token" binding:"required"`
+	c.JSON(http.StatusOK, conviteOut)
 }
 
 // VincularPaciente vincula um paciente usando um token de convite
@@ -51,7 +49,7 @@ func (cc *ConviteControlador) VincularPaciente(c *gin.Context) {
 		return
 	}
 
-	var req VincularRequest
+	var req dtos.VincularPacienteDTOIn
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
@@ -60,7 +58,7 @@ func (cc *ConviteControlador) VincularPaciente(c *gin.Context) {
 	err := cc.conviteServico.VincularPaciente(userID.(uint), req.Token)
 	if err != nil {
 		switch err {
-		case servicos.ErrConviteNaoEncontrado, servicos.ErrConviteExpirado, servicos.ErrPerfilNaoEncontrado:
+		case dominio.ErrTokenConviteInvalido, dominio.ErrConviteExpirado, dominio.ErrConviteExpirado, dominio.ErrUsuarioNaoEncontrado:
 			c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		default:
 			c.JSON(http.StatusInternalServerError, gin.H{"erro": "Falha ao vincular paciente"})
@@ -68,5 +66,5 @@ func (cc *ConviteControlador) VincularPaciente(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"mensagem": "Paciente vinculado com sucesso!"})
+	c.JSON(http.StatusOK, gin.H{"mensagem": "Paciente vinculado com sucesso"})
 }
