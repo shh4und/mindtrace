@@ -107,7 +107,7 @@ func (r *gormUsuarioRepositorio) DeletarUsuario(tx *gorm.DB, id uint) error {
 
 	// Deleta registros especificos conforme o tipo
 	switch usuario.TipoUsuario {
-	case "profissional":
+	case 2: // tipo de usuario 2 = profissional
 		// Busca o profissional para limpar associacoes
 		profissional, err := r.BuscarProfissionalPorUsuarioID(tx, id)
 		if err != nil {
@@ -121,7 +121,7 @@ func (r *gormUsuarioRepositorio) DeletarUsuario(tx *gorm.DB, id uint) error {
 		if err := tx.Where("usuario_id = ?", id).Delete(&dominio.Profissional{}).Error; err != nil {
 			return err
 		}
-	case "paciente":
+	case 3: // tipo de usuario 3 = paciente
 		// Busca o paciente para limpar associacoes
 		paciente, err := r.BuscarPacientePorUsuarioID(tx, id)
 		if err != nil {

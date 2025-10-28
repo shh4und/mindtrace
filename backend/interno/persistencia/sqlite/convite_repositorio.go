@@ -25,9 +25,9 @@ func (r *gormConviteRepositorio) BuscarConvitePorToken(tx *gorm.DB, token string
 	return &convite, nil
 }
 
-func (r *gormConviteRepositorio) MarcarConviteComoUsado(tx *gorm.DB, conviteID uint, pacienteID uint) error {
-	return tx.Model(&dominio.Convite{}).Where("id = ?", conviteID).Updates(map[string]interface{}{
-		"usado":       true,
-		"paciente_id": pacienteID,
+func (r *gormConviteRepositorio) MarcarConviteComoUsado(tx *gorm.DB, convite *dominio.Convite) error {
+	return tx.Model(&dominio.Convite{}).Where("id = ?", convite.ID).Updates(map[string]interface{}{
+		"usado":       convite.Usado,
+		"paciente_id": convite.PacienteID,
 	}).Error
 }

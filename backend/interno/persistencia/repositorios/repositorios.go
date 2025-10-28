@@ -10,7 +10,7 @@ import (
 type ConviteRepositorio interface {
 	CriarConvite(tx *gorm.DB, convite *dominio.Convite) error
 	BuscarConvitePorToken(tx *gorm.DB, token string) (*dominio.Convite, error)
-	MarcarConviteComoUsado(tx *gorm.DB, conviteID uint, pacienteID uint) error
+	MarcarConviteComoUsado(tx *gorm.DB, convite *dominio.Convite) error
 }
 
 type RegistroHumorRepositorio interface {

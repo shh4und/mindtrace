@@ -69,6 +69,10 @@ type AlterarSenhaDTOIn struct {
 	NovaSenhaRe string `json:"nova_senha_re" binding:"required,min=8"`
 }
 
+type VincularPacienteDTOIn struct {
+	Token string `json:"token" binding:"required,min=10"`
+}
+
 // PontoDeDadosDTOOut representa um ponto de dados para graficos
 type PontoDeDadosDTOOut struct {
 	Data     time.Time `json:"data"`
@@ -136,4 +140,11 @@ type PacienteDTOOut struct {
 	Profissionais  []ProfissionalDTOOut `json:"profissionais,omitempty"`
 	CreatedAt      time.Time            `json:"created_at"`
 	UpdatedAt      time.Time            `json:"updated_at"`
+}
+
+type ConviteDTOOut struct {
+	Token         string    `json:"token"`
+	DataExpiracao time.Time `json:"data_expiracao"`
+	Usado         bool      `json:"usado"`
+	CreatedAt     time.Time `json:"created_at"`
 }

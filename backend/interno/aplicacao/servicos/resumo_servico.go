@@ -9,8 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// PontoDeDadosDTO representa um ponto de dados para graficos
-
 // ResumoServico define os metodos para gerar resumos
 type ResumoServico interface {
 	GerarResumoPaciente(userID uint) (*dtos.ResumoPacienteDTOOut, error)
@@ -35,12 +33,17 @@ func NovoResumoServico(db *gorm.DB, registroHumorRepo repositorios.RegistroHumor
 
 // GerarResumoPaciente gera um resumo para o paciente autenticado
 func (rs *resumoServico) GerarResumoPaciente(userID uint) (*dtos.ResumoPacienteDTOOut, error) {
+	// Validar userID
+	if userID == 0 {
+		return nil, errors.New("id do usuario invalido")
+	}
+
 	resumoPacienteFeito := &dtos.ResumoPacienteDTOOut{}
 
 	paciente, err := rs.usuarioRepositorio.BuscarPacientePorUsuarioID(rs.db, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return resumoPacienteFeito, nil
+			return nil, errors.New("paciente nao encontrado")
 		}
 		return nil, err
 	}
@@ -48,9 +51,15 @@ func (rs *resumoServico) GerarResumoPaciente(userID uint) (*dtos.ResumoPacienteD
 	registroHumor, err := rs.registroHumorRepositorio.BuscarUltimoRegistroDePaciente(paciente.ID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// Sem registros e ok, retorna resumo vazio
 			return resumoPacienteFeito, nil
 		}
 		return nil, err
+	}
+
+	// Validar o registro antes de mapear
+	if err := registroHumor.Validar(); err != nil {
+		return nil, errors.New("dados do registro invalidos: " + err.Error())
 	}
 
 	return mappers.ResumoPacienteParaDTOOut(registroHumor), nil
