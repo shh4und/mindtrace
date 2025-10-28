@@ -2,11 +2,26 @@
 
 ## Resumo
 
-Foram criados testes unitários abrangentes para as camadas de domínio e serviço do sistema MindTrace, cobrindo as funcionalidades relacionadas a usuários, profissionais e pacientes.
+Foram criados testes unitários abrangentes para as camadas de domínio, serviço e mappers do sistema MindTrace, cobrindo as funcionalidades relacionadas a usuários, profissionais, pacientes, registros de humor e conversões de dados.
+
+## Estrutura de Organização
+
+Todos os testes foram organizados em pastas `/tests` dentro de seus respectivos diretórios:
+
+```
+backend/interno/
+├── dominio/tests/
+│   └── usuario_test.go
+├── aplicacao/
+│   ├── servicos/tests/
+│   │   └── usuario_servico_test.go
+│   └── mappers/tests/
+│       └── utils_test.go
+```
 
 ## Arquivos Criados
 
-### 1. `/backend/interno/dominio/usuario_test.go`
+### 1. `/backend/interno/dominio/tests/usuario_test.go`
 **Testes da Camada de Domínio**
 
 #### Cobertura de Testes para `Usuario`:
@@ -66,7 +81,7 @@ Foram criados testes unitários abrangentes para as camadas de domínio e servi�
 
 ---
 
-### 2. `/backend/interno/aplicacao/servicos/usuario_servico_test.go`
+### 2. `/backend/interno/aplicacao/servicos/tests/usuario_servico_test.go`
 **Testes da Camada de Serviço**
 
 #### Funcionalidades Testadas:
@@ -123,6 +138,52 @@ Foram criados testes unitários abrangentes para as camadas de domínio e servi�
 **Total de Testes de Serviço: 28 casos de teste**
 
 ---
+
+### 3. `/backend/interno/aplicacao/mappers/tests/utils_test.go`
+**Testes da Camada de Mappers**
+
+#### Funcionalidades Testadas:
+
+##### Mappers de Saída (Entidade → DTO):
+- ✅ `TestUsuarioParaDTOOut` - Conversão básica de usuário
+- ✅ `TestProfissionalParaDTOOut_ComDadosCompletos` - Profissional completo
+- ✅ `TestProfissionalParaDTOOut_ComNil` - Tratamento de nil
+- ✅ `TestProfissionalParaDTOOut_SemContato` - Campos opcionais vazios
+- ✅ `TestPacienteParaDTOOut_ComDadosCompletos` - Paciente com profissionais
+- ✅ `TestPacienteParaDTOOut_Dependente` - Paciente dependente
+- ✅ `TestPacienteParaDTOOut_ComNil` - Tratamento de nil
+- ✅ `TestPacienteParaDTOOut_SemProfissionais` - Paciente sem vínculos
+- ✅ `TestRegistroHumorParaDTOOut` - Registro de humor completo
+- ✅ `TestRegistroHumorParaDTOOut_SemObservacoes` - Campos opcionais
+- ✅ `TestResumoPacienteParaDTOOut` - Resumo simplificado
+- ✅ `TestPacientesParaDTOOut` - Lista de pacientes
+- ✅ `TestPacientesParaDTOOut_ListaVazia` - Lista vazia
+- ✅ `TestProfissionaisParaDTOOut` - Lista de profissionais
+- ✅ `TestProfissionaisParaDTOOut_ListaVazia` - Lista vazia
+- ✅ `TestConviteParaDTOOut` - Convite ativo
+- ✅ `TestConviteParaDTOOut_Usado` - Convite usado/expirado
+
+##### Mappers de Entrada (DTO → Entidade):
+- ✅ `TestRegistrarUsuarioDTOInParaEntidade` - Criação de usuário
+- ✅ `TestRegistrarProfissionalDTOInParaEntidade` - Registro de profissional
+- ✅ `TestRegistrarPacienteDTOInParaEntidade` - Registro de paciente normal
+- ✅ `TestRegistrarPacienteDTOInParaEntidade_Dependente` - Paciente dependente
+- ✅ `TestCriarRegistroHumorDTOInParaEntidade` - Criação de registro de humor
+
+**Total de Testes de Mappers: 22 casos de teste**
+
+---
+
+## Estatísticas Gerais
+
+- **Total de Testes**: ~112 casos de teste
+- **Domínio**: 62 testes
+- **Serviços**: 28 testes  
+- **Mappers**: 22 testes
+- **Status**: ✅ Todos passando
+- **Tempo de Execução**: < 1 segundo
+
+
 
 ## Tecnologias e Padrões Utilizados
 
@@ -184,22 +245,27 @@ func PacienteParaDTOOut(pac *dominio.Paciente) *dtos.PacienteDTOOut {
 ### Todos os Testes:
 ```bash
 cd /home/dnxx/mindtrace/backend
-go test ./interno/dominio ./interno/aplicacao/servicos -v
+go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/aplicacao/mappers/tests -v
 ```
 
 ### Apenas Testes de Domínio:
 ```bash
-go test ./interno/dominio -v
+go test ./interno/dominio/tests -v
 ```
 
 ### Apenas Testes de Serviço:
 ```bash
-go test ./interno/aplicacao/servicos -v
+go test ./interno/aplicacao/servicos/tests -v
+```
+
+### Apenas Testes de Mappers:
+```bash
+go test ./interno/aplicacao/mappers/tests -v
 ```
 
 ### Com Cobertura:
 ```bash
-go test ./interno/dominio ./interno/aplicacao/servicos -cover
+go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/aplicacao/mappers/tests -cover
 ```
 
 ---
@@ -207,9 +273,10 @@ go test ./interno/dominio ./interno/aplicacao/servicos -cover
 ## Resultados
 
 ✅ **Todos os testes passando**
-- Testes de Domínio: **PASS** (~62 casos)
+- Testes de Domínio: **PASS** (62 casos)
 - Testes de Serviço: **PASS** (28 casos)
-- **Total: ~90 casos de teste**
+- Testes de Mappers: **PASS** (22 casos)
+- **Total: ~112 casos de teste**
 
 ---
 
@@ -220,19 +287,36 @@ go test ./interno/dominio ./interno/aplicacao/servicos -cover
 3. **Testes de Performance**: Adicionar benchmarks para operações críticas
 4. **CI/CD**: Integrar os testes no pipeline de integração contínua
 5. **Coverage Report**: Configurar relatórios de cobertura de código
+6. **Testes de API**: Adicionar testes para os handlers HTTP
 
 ---
 
 ## Observações Técnicas
 
 - Os testes de serviço usam **SQLite em memória** para simular transações reais
-- Os mocks implementam completamente a interface `UsuarioRepositorio`
+- Os mocks implementam completamente as interfaces necessárias
 - Validações de senha seguem o regex: `^[a-zA-Z0-9!@#$%^&*].{8,}$` (9+ caracteres)
 - Os testes cobrem tanto cenários de sucesso quanto de falha
 - Todos os erros de domínio são testados adequadamente
+- **Mappers tratam valores nil** para evitar panics
+- **Estrutura organizada** em pastas `/tests` para melhor separação
 
 ---
 
-**Data de Criação**: 27 de Outubro de 2025
-**Autor**: GitHub Copilot
+## Melhorias Implementadas Durante os Testes
+
+### 1. **Mapper - DataNascimento do Profissional**
+Corrigido o mapeamento que não incluía a data de nascimento.
+
+### 2. **Mappers - Tratamento de Nil**
+Adicionada verificação de nil nos mappers `ProfissionalParaDTOOut` e `PacienteParaDTOOut` para evitar panics.
+
+### 3. **Estrutura de Testes**
+Organização dos testes em pastas dedicadas `/tests` dentro de cada módulo para melhor separação e manutenção.
+
+---
+
+**Data de Criação**: 27 de Outubro de 2025  
+**Última Atualização**: 27 de Outubro de 2025  
+**Autor**: GitHub Copilot  
 **Projeto**: MindTrace - Sistema de Acompanhamento Psicológico
