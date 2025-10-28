@@ -165,6 +165,9 @@ func CriarRegistroHumorDTOInParaEntidade(dto *dtos.CriarRegistroHumorDTOIn, paci
 }
 
 func ConviteParaDTOOut(convite *dominio.Convite) *dtos.ConviteDTOOut {
+	if convite == nil {
+		return nil
+	}
 	return &dtos.ConviteDTOOut{
 		Token:         convite.Token,
 		DataExpiracao: convite.DataExpiracao,
