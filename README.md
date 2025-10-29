@@ -382,17 +382,4 @@ npm run test
 - **[Especificação API](./frontend/swagger-output.json)** - Especificação OpenAPI
 - **[Schema do Banco de Dados](./schema_dump.sql)** - Schema PostgreSQL
 
-
-## 📄 Licença
-
-Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-## 🙏 Agradecimentos
-
-- Construído com Go, Vue.js e tecnologias web modernas
-- Inspirado pelas melhores práticas de rastreamento de saúde mental
-- Contribuições da comunidade e ecossistema open-source
-
----
-
 **MindTrace** - Capacitando profissionais de saúde mental e pacientes através da tecnologia.
