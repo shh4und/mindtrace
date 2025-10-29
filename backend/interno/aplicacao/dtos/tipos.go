@@ -8,6 +8,12 @@ type RegistrarUsuarioDTOIn struct {
 	Nome  string `json:"nome" binding:"required"`
 }
 
+// LoginRequest representa o payload da requisicao para login
+type LoginDTOIn struct {
+	Email string `json:"email" binding:"required,email"`
+	Senha string `json:"senha" binding:"required,min=8"`
+}
+
 // CriarRegistroHumorDTOOut representa os dados para criar um registro de humor
 type CriarRegistroHumorDTOIn struct {
 	NivelHumor       int16     `json:"nivel_humor" binding:"required,min=1,max=5"`
