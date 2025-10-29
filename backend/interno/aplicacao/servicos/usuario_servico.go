@@ -210,7 +210,7 @@ func (s *usuarioServico) BuscarUsuarioPorID(userID uint) (*dtos.UsuarioDTOOut, e
 
 // ProprioPerfilPaciente busca o perfil proprio do paciente
 func (s *usuarioServico) ProprioPerfilPaciente(pacID uint) (*dtos.PacienteDTOOut, error) {
-	var pacienteEncontado *dominio.Paciente
+	var pacienteEncontrado *dominio.Paciente
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 
@@ -221,10 +221,10 @@ func (s *usuarioServico) ProprioPerfilPaciente(pacID uint) (*dtos.PacienteDTOOut
 			}
 			return err
 		}
-		pacienteEncontado = paciente
+		pacienteEncontrado = paciente
 		return nil
 	})
-	return mappers.PacienteParaDTOOut(pacienteEncontado), err
+	return mappers.PacienteParaDTOOut(pacienteEncontrado), err
 }
 
 func (s *usuarioServico) ProprioPerfilProfissional(profID uint) (*dtos.ProfissionalDTOOut, error) {
