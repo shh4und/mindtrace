@@ -8,6 +8,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// Constantes para tipos de usuario
+const (
+	TipoUsuarioProfissional uint8 = 2
+	TipoUsuarioPaciente     uint8 = 3
+)
+
 var (
 	ErrEmailJaCadastrado     = errors.New("e-mail existente")
 	ErrCrendenciaisInvalidas = errors.New("credenciais invalidas")
@@ -36,6 +42,30 @@ type Usuario struct {
 
 func (Usuario) TableName() string {
 	return "usuarios"
+}
+
+// TipoUsuarioParaString converte o tipo numerico para string
+func TipoUsuarioParaString(tipo uint8) string {
+	switch tipo {
+	case TipoUsuarioProfissional:
+		return "profissional"
+	case TipoUsuarioPaciente:
+		return "paciente"
+	default:
+		return "desconhecido"
+	}
+}
+
+// StringParaTipoUsuario converte string para tipo numerico
+func StringParaTipoUsuario(tipo string) uint8 {
+	switch tipo {
+	case "profissional":
+		return TipoUsuarioProfissional
+	case "paciente":
+		return TipoUsuarioPaciente
+	default:
+		return 0
+	}
 }
 
 // Metodos de validacao - LOGICA DE NEGOCIO

@@ -76,14 +76,12 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 			return err
 		}
 		novoUsuario.Senha = string(hashSenha)
-		novoUsuario.TipoUsuario = 2 // Profissional
+		novoUsuario.TipoUsuario = dominio.TipoUsuarioProfissional
 
 		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
-		}
-
-		// Define o UsuarioID do profissional
+		} // Define o UsuarioID do profissional
 		novoProfissional.UsuarioID = novoUsuario.ID
 
 		// Cria o profissional
@@ -136,7 +134,7 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 			return err
 		}
 		novoUsuario.Senha = string(hashSenha)
-		novoUsuario.TipoUsuario = 3 // Paciente
+		novoUsuario.TipoUsuario = dominio.TipoUsuarioPaciente
 
 		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
@@ -144,9 +142,7 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 		}
 
 		// Define o UsuarioID do paciente
-		novoPaciente.UsuarioID = novoUsuario.ID
-
-		// Cria o paciente
+		novoPaciente.UsuarioID = novoUsuario.ID // Cria o paciente
 		if err := s.repositorio.CriarPaciente(tx, novoPaciente); err != nil {
 			return err
 		}
@@ -179,10 +175,10 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 
 	// Gera o token JWT
 	claims := jwt.MapClaims{
-		"sub":  usuario.ID,                           // Subject com o ID do usuario
-		"role": usuario.TipoUsuario,                  // Adiciona o tipo de usuario como role
-		"iat":  time.Now().Unix(),                    // Issued At indica quando o token foi criado
-		"exp":  time.Now().Add(time.Hour * 1).Unix(), // Define expiracao do token em uma hora
+		"sub":  usuario.ID,                                         // Subject com o ID do usuario
+		"role": dominio.TipoUsuarioParaString(usuario.TipoUsuario), // Adiciona o tipo de usuario como role (string)
+		"iat":  time.Now().Unix(),                                  // Issued At indica quando o token foi criado
+		"exp":  time.Now().Add(time.Hour * 1).Unix(),               // Define expiracao do token em uma hora
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")

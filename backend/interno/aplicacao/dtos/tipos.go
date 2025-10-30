@@ -119,13 +119,14 @@ type RegistroHumorDTOOut struct {
 }
 
 type UsuarioDTOOut struct {
-	ID        uint      `json:"id"`
-	Email     string    `json:"email"`
-	Nome      string    `json:"nome"`
-	Contato   string    `json:"contato,omitempty"`
-	Bio       string    `json:"bio,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID          uint      `json:"id"`
+	Email       string    `json:"email"`
+	Nome        string    `json:"nome"`
+	TipoUsuario string    `json:"tipo_usuario"`
+	Contato     string    `json:"contato,omitempty"`
+	Bio         string    `json:"bio,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type ProfissionalDTOOut struct {
