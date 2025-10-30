@@ -10,7 +10,7 @@ import (
 	"mindtrace/backend/interno/persistencia/repositorios"
 	sqlite_repo "mindtrace/backend/interno/persistencia/sqlite"
 	"os"
-//testando psuh
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
