@@ -10,12 +10,12 @@
 
           <!-- Seletor tipo conta -->
           <div class="grid grid-cols-2 gap-4 mb-8">
-            <button @click="form.userType = 'paciente'"
-              :class="['p-4 rounded-lg border-2 text-center transition', form.userType === 'paciente' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 bg-white hover:border-emerald-400']">
+            <button @click="form.userType = TipoUsuario.Paciente"
+              :class="['p-4 rounded-lg border-2 text-center transition', form.userType === TipoUsuario.Paciente ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 bg-white hover:border-emerald-400']">
               <span class="text-lg font-medium">Sou Paciente</span>
             </button>
-            <button @click="form.userType = 'profissional'"
-              :class="['p-4 rounded-lg border-2 text-center transition', form.userType === 'profissional' ? 'border-rose-500 bg-rose-50' : 'border-gray-300 bg-white hover:border-rose-400']">
+            <button @click="form.userType = TipoUsuario.Profissional"
+              :class="['p-4 rounded-lg border-2 text-center transition', form.userType === TipoUsuario.Profissional ? 'border-rose-500 bg-rose-50' : 'border-gray-300 bg-white hover:border-rose-400']">
               <span class="text-lg font-medium">Sou Profissional</span>
             </button>
           </div>
@@ -60,7 +60,7 @@
             </div>
 
             <!-- Campos profissional -->
-            <div v-if="form.userType === 'profissional'"
+            <div v-if="form.userType === TipoUsuario.Profissional"
               class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t  border-gray-300">
               <div>
                 <label for="especialidade" class="block text-base font-medium text-gray-700 mb-1">Especialidade</label>
@@ -76,7 +76,7 @@
             </div>
 
             <!-- Campos paciente -->
-            <div v-if="form.userType === 'paciente'"
+            <div v-if="form.userType === TipoUsuario.Paciente"
               class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-300">
 
               <div class="flex flex-row items-center gap-2">
@@ -105,7 +105,7 @@
             <button type="submit" :disabled="isSubmitDisabled"
               class="w-full font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-offset-2 outline-none"
               :class="isSubmitDisabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white'">
-              Criar Conta de {{ form.userType === 'paciente' ? 'Paciente' : 'Profissional' }}
+              Criar Conta de {{ form.userType === TipoUsuario.Paciente ? 'Paciente' : 'Profissional' }}
             </button>
           </form>
 
@@ -125,6 +125,7 @@ import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { useUserStore } from '../../store/user';
+import { TipoUsuario } from '../../types/usuario.js';
 import NavbarPublic from '../../components/layout/NavbarPublic.vue';
 
 const router = useRouter();
@@ -195,14 +196,14 @@ const handleRegister = async () => {
     };
 
     let data;
-    if (form.userType === 'paciente') {
+    if (form.userType === TipoUsuario.Paciente) {
       data = {
         ...commonData,
         dependente: form.dependente,
         nome_responsavel: form.nome_responsavel,
         contato_responsavel: form.contato_responsavel,
       };
-    } else if (form.userType === 'profissional') {
+    } else if (form.userType === TipoUsuario.Profissional) {
       data = {
         ...commonData,
         especialidade: form.especialidade,
