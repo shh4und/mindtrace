@@ -16,12 +16,12 @@
             class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <font-awesome-icon 
-              :icon="userType === 'profissional' ? faUserDoctor : faUser" 
+              :icon="userType === TipoUsuario.Profissional ? faUserDoctor : faUser" 
               class="w-8 h-8 p-2 rounded-full bg-emerald-100 text-emerald-600"
             />
             <div v-if="user" class="hidden sm:block text-left">
               <p class="text-sm font-semibold text-gray-900 leading-tight">{{ user.nome }}</p>
-              <p class="text-xs text-gray-500">{{ userType === 'profissional' ? 'Profissional' : 'Paciente' }}</p>
+              <p class="text-xs text-gray-500">{{ userType === TipoUsuario.Profissional ? 'Profissional' : 'Paciente' }}</p>
             </div>
             <font-awesome-icon :icon="faChevronDown" class="w-3 h-3 text-gray-400 hidden sm:block" />
           </button>
@@ -44,7 +44,7 @@
               <div class="px-4 py-3 border-b border-gray-100">
                 <div class="flex items-center space-x-3">
                   <font-awesome-icon 
-                    :icon="userType === 'profissional' ? faUserDoctor : faUser" 
+                    :icon="userType === TipoUsuario.Profissional ? faUserDoctor : faUser" 
                     class="w-10 h-10 p-2 rounded-full bg-emerald-100 text-emerald-600"
                   />
                   <div class="flex-1">
@@ -56,7 +56,7 @@
 
               <!-- Detalhes complementares -->
               <div class="px-4 py-3 space-y-2 text-sm border-b border-gray-100">
-                <template v-if="userType === 'paciente'">
+                <template v-if="userType === TipoUsuario.Paciente">
                   <p><strong class="font-medium text-gray-700">Idade:</strong> <span class="text-gray-600">{{ calculateAge(user.data_nascimento) }}</span></p>
                   <p><strong class="font-medium text-gray-700">Contato:</strong> <span class="text-gray-600">{{ user.contato || 'Não informado' }}</span></p>
                   <p v-if="user.dependente"><strong class="font-medium text-gray-700">Responsável:</strong> <span class="text-gray-600">{{ user.nome_responsavel }}</span></p>
@@ -107,13 +107,14 @@ import {
   faRightFromBracket 
 } from '@fortawesome/free-solid-svg-icons';
 import { useUserStore } from '../../store/user';
+import { TipoUsuario } from '../../types/usuario.js';
 
 // Propriedades esperadas pelo layout
 const props = defineProps({
   userType: {
     type: String,
     required: true,
-    validator: (value) => ['paciente', 'profissional'].includes(value)
+    validator: (value) => [TipoUsuario.Paciente, TipoUsuario.Profissional].includes(value)
   }
 });
 
