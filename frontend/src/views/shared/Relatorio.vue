@@ -52,6 +52,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import api from '../../services/api';
 import { useToast } from 'vue-toastification';
+import { TipoUsuario } from '../../types/usuario.js';
 
 const props = defineProps({
   patientId: {
@@ -60,7 +61,8 @@ const props = defineProps({
   },
   userType: {
     type: String,
-    default: "paciente"
+    default: TipoUsuario.Paciente,
+    validator: (value) => [TipoUsuario.Paciente, TipoUsuario.Profissional].includes(value)
   }
 });
 
@@ -100,9 +102,9 @@ const fetchReportData = async () => {
   isLoading.value = true;
   try {
     let report;
-    if (props.userType == "paciente"){
+    if (props.userType === TipoUsuario.Paciente){
       report = (await api.buscarRelatorio(selectedRange.value)).data;
-    }else{
+    } else {
       report = (await api.buscarRelatorioPacienteDoProfissional(selectedRange.value, props.patientId)).data;
     }
     

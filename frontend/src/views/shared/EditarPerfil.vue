@@ -30,30 +30,30 @@
 
 
           <!-- (Apenas para Profissional) -->
-          <div v-if="props.userType === 'profissional'">
+          <div v-if="props.userType === TipoUsuario.Profissional">
             <label for="especialidade" class="block text-sm font-medium text-gray-700">Especialidade</label>
             <input type="text" id="especialidade" v-model="profile.especialidade"
               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
           </div>
-          <div v-if="props.userType === 'profissional'">
+          <div v-if="props.userType === TipoUsuario.Profissional">
             <label for="registro_profissional" class="block text-sm font-medium text-gray-700">Registro
               Profissional</label>
             <input type="text" id="registro_profissional" v-model="profile.registro_profissional"
               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
           </div>
 
-          <!-- (Apenas para Profissional) -->
-          <div v-if="props.userType === 'paciente'">
+          <!-- (Apenas para Paciente) -->
+          <div v-if="props.userType === TipoUsuario.Paciente">
             <label for="dependente" class="block text-sm font-medium text-gray-700">Dependente</label>
             <input type="checkbox" id="dependente" v-model="profile.dependente"
               class="w-5 h-5 mt-3 px-4 py-5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
           </div>
-          <div v-if="props.userType === 'paciente'">
+          <div v-if="props.userType === TipoUsuario.Paciente">
             <label for="nome_responsavel" class="block text-sm font-medium text-gray-700">Nome Responsável</label>
             <input type="text" id="nome_responsavel" v-model="profile.nome_responsavel"
               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
           </div>
-          <div v-if="props.userType === 'paciente'">
+          <div v-if="props.userType === TipoUsuario.Paciente">
             <label for="contato_responsavel" class="block text-sm font-medium text-gray-700">Contato Responsável</label>
             <input type="text" id="contato_responsavel" v-model="profile.contato_responsavel"
               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
@@ -120,11 +120,13 @@ import { ref, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 import api from '../../services/api';
 import { useUserStore } from '../../store/user';
+import { TipoUsuario } from '../../types/usuario.js';
 
 const props = defineProps({
   userType: {
     type: String,
     required: true,
+    validator: (value) => [TipoUsuario.Paciente, TipoUsuario.Profissional].includes(value)
   }
 });
 
@@ -157,14 +159,14 @@ onMounted(async () => {
     profile.value.contato = userData.contato;
     profile.value.bio = userData.bio;
 
-    if (props.userType === 'profissional') {
+    if (props.userType === TipoUsuario.Profissional) {
       const profResponse = await api.proprioPerfilProfissional();
       profile.value.especialidade = profResponse.data.especialidade;
       profile.value.registro_profissional = profResponse.data.registro_profissional;
       if (profResponse.data.data_nascimento) {
         profile.value.data_nascimento = profResponse.data.data_nascimento.split('T')[0];
       }
-    } else if (props.userType === 'paciente') {
+    } else if (props.userType === TipoUsuario.Paciente) {
       const pacResponse = await api.proprioPerfilPaciente();
       if (pacResponse.data.data_nascimento) {
         profile.value.data_nascimento = pacResponse.data.data_nascimento.split('T')[0];
@@ -187,10 +189,10 @@ const saveProfile = async () => {
     bio: profile.value.bio,
     data_nascimento: profile.value.data_nascimento,
   };
-  if (props.userType === 'profissional') {
+  if (props.userType === TipoUsuario.Profissional) {
     profileData.especialidade = profile.value.especialidade;
     profileData.registro_profissional = profile.value.registro_profissional;
-  } else if (props.userType === 'paciente') {
+  } else if (props.userType === TipoUsuario.Paciente) {
     profileData.dependente = profile.value.dependente;
     profileData.nome_responsavel = profile.value.nome_responsavel;
     profileData.contato_responsavel = profile.value.contato_responsavel;
