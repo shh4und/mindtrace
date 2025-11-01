@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-50 font-sans antialiased flex flex-col">
   <!-- Navbar superior -->
     <TopNavbar 
-      user-type="profissional" 
+      :user-type="TipoUsuario.Profissional" 
       @edit-profile="handleNavigation('editar-perfil')"
       @logout="handleLogout"
     />
@@ -25,13 +25,13 @@
               <i class="fa-solid fa-arrow-left mr-2"></i>
               Voltar para a lista de pacientes
             </button>
-            <Relatorio @view-relatorios="showPatientReport" user-type="profissional" :patient-id="selectedPatientId" />
+            <Relatorio @view-relatorios="showPatientReport" :user-type="TipoUsuario.Profissional" :patient-id="selectedPatientId" />
           </div>
         </div>
 
   <!-- Outras views disponiveis -->
         <GerarConvite v-if="activeView === 'convite'" />
-        <EditarPerfil v-if="activeView === 'editar-perfil'" user-type="profissional" />
+        <EditarPerfil v-if="activeView === 'editar-perfil'" :user-type="TipoUsuario.Profissional" />
       </main>
     </div>
   </div>
@@ -40,6 +40,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useUserStore } from '../../store/user';
+import { TipoUsuario } from '../../types/usuario.js';
 import TopNavbar from '../../components/layout/TopNavbar.vue';
 import SidebarProfissional from '../../components/layout/SidebarProfissional.vue';
 import ListaPacientes from './ListaPacientes.vue';
@@ -72,7 +73,7 @@ const handleLogout = () => {
 onMounted(async () => {
   // Busca dados do usuario se ainda nao estiverem carregados
   if (!userStore.user) {
-    await userStore.fetchUser('profissional');
+    await userStore.fetchUser(TipoUsuario.Profissional);
   }
 });
 </script>

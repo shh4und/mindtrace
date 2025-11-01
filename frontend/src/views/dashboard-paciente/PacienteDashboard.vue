@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-50 font-sans antialiased flex flex-col">
   <!-- Navbar superior -->
     <TopNavbar 
-      user-type="paciente" 
+      :user-type="TipoUsuario.Paciente" 
       @edit-profile="handleNavigation('editar-perfil')"
       @logout="handleLogout"
     />
@@ -19,9 +19,9 @@
       <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <Resumo v-if="activeView === 'resumo'" />
         <RegistroHumor v-if="activeView === 'humor'" />
-        <Relatorio v-if="activeView === 'relatorios'" user-type="paciente"/>
+        <Relatorio v-if="activeView === 'relatorios'" :user-type="TipoUsuario.Paciente"/>
         <VincularProfissional v-if="activeView === 'vincular'"/>
-        <EditarPerfil v-if="activeView === 'editar-perfil'" user-type="paciente" />
+        <EditarPerfil v-if="activeView === 'editar-perfil'" :user-type="TipoUsuario.Paciente" />
       </main>
     </div>
   </div>
@@ -30,6 +30,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useUserStore } from '../../store/user';
+import { TipoUsuario } from '../../types/usuario.js';
 import TopNavbar from '../../components/layout/TopNavbar.vue';
 import SidebarPaciente from '../../components/layout/SidebarPaciente.vue';
 import RegistroHumor from './RegistroHumor.vue';
@@ -52,7 +53,7 @@ const handleLogout = () => {
 onMounted(async () => {
   // Busca dados do usuario se ainda nao estiverem carregados
   if (!userStore.user) {
-    await userStore.fetchUser('paciente');
+    await userStore.fetchUser(TipoUsuario.Paciente);
   }
 });
 </script>

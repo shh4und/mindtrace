@@ -333,7 +333,7 @@ func TestRegistrarProfissionalDTOInParaEntidade(t *testing.T) {
 	assert.Equal(t, dtoIn.Nome, usuario.Nome)
 	assert.Equal(t, dtoIn.Email, usuario.Email)
 	assert.Equal(t, dtoIn.Senha, usuario.Senha)
-	assert.Equal(t, uint8(2), usuario.TipoUsuario)
+	assert.Equal(t, dominio.TipoUsuarioProfissional, usuario.TipoUsuario)
 	assert.Equal(t, dtoIn.CPF, usuario.CPF)
 	assert.Equal(t, dtoIn.Contato, usuario.Contato)
 
@@ -368,7 +368,7 @@ func TestRegistrarPacienteDTOInParaEntidade(t *testing.T) {
 	assert.Equal(t, dtoIn.Nome, usuario.Nome)
 	assert.Equal(t, dtoIn.Email, usuario.Email)
 	assert.Equal(t, dtoIn.Senha, usuario.Senha)
-	assert.Equal(t, uint8(3), usuario.TipoUsuario)
+	assert.Equal(t, dominio.TipoUsuarioPaciente, usuario.TipoUsuario)
 	assert.Equal(t, dtoIn.CPF, usuario.CPF)
 	assert.Equal(t, dtoIn.Contato, usuario.Contato)
 

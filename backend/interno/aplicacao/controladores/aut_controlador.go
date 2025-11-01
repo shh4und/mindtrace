@@ -1,6 +1,7 @@
 package controladores
 
 import (
+	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
 
@@ -17,16 +18,10 @@ func NovoAutControlador(us servicos.UsuarioServico) *AutControlador {
 	return &AutControlador{usuarioServico: us}
 }
 
-// LoginRequest representa o payload da requisicao para login
-type LoginRequest struct {
-	Email string `json:"email" binding:"required,email"`
-	Senha string `json:"senha" binding:"required"`
-}
-
 // Login lida com o login do usuario
 // Valida a entrada e chama o servico para autenticar o usuario
 func (ac *AutControlador) Login(c *gin.Context) {
-	var req LoginRequest
+	var req dtos.LoginDTOIn
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return

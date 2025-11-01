@@ -68,6 +68,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { useUserStore } from '../../store/user';
+import { TipoUsuario } from '../../types/usuario.js';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import NavbarPublic from '../../components/layout/NavbarPublic.vue';
 
@@ -95,23 +96,26 @@ const parseJwt = (token) => {
 };
 
 const handleLogin = async () => {
-  const result = await userStore.login({ email: email.value, senha: password.value });
-  if (result.success) {
+  try {
+    await userStore.login({ email: email.value, senha: password.value });
     toast.success('Login realizado com sucesso!');
-  // O redirecionamento eh baseado no role que ja foi determinado no store
+    
+    // O redirecionamento é baseado no role do token (agora string)
     const token = localStorage.getItem('token');
     const decodedToken = parseJwt(token);
+    
     if (decodedToken && decodedToken.role) {
-      if (decodedToken.role === 'profissional') {
+      // Usa o enum para comparação type-safe
+      if (decodedToken.role === TipoUsuario.Profissional) {
         router.push('/dashboard-profissional');
-      } else {
+      } else if (decodedToken.role === TipoUsuario.Paciente) {
         router.push('/dashboard-paciente');
       }
     } else {
       toast.error('Token inválido ou tipo de usuário não encontrado.');
     }
-  } else {
-    toast.error(result.error);
+  } catch (error) {
+    toast.error(error.response?.data?.erro || 'Erro ao fazer login');
   }
 };
 </script>

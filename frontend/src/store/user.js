@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import api from '../services/api';
-import router from '../router'; // Importa roteador para redirecionamento
+import router from '../router';
+import { TipoUsuario, isProfissional, isPaciente } from '../types/usuario.js';
 
 export const useUserStore = defineStore('user', () => {
   // estado centralizado do usuario autenticado
@@ -11,65 +12,77 @@ export const useUserStore = defineStore('user', () => {
 
   // --- GETTERS (como computed properties) ---
   const isLoggedIn = computed(() => isAuthenticated.value);
+  const userType = computed(() => user.value?.tipo_usuario || null);
+  const isProfissionalUser = computed(() => user.value ? isProfissional(user.value) : false);
+  const isPacienteUser = computed(() => user.value ? isPaciente(user.value) : false);
 
   // --- ACTIONS (como funcoes) ---
 
   /**
    * Busca os dados do perfil do usuario logado paciente ou profissional
-   * @param {string} userType - tipo de usuario paciente ou profissional
+   * @param {string} userType - tipo de usuario: 'paciente' ou 'profissional'
    */
   async function fetchUser(userType) {
     // Busca dados apenas se estiver autenticado e perfil ainda nao foi carregado
     if (isAuthenticated.value && !user.value) {
       try {
         let response;
-        if (userType === 'paciente') {
+        
+        // Usa o enum para comparação type-safe
+        if (userType === TipoUsuario.Paciente) {
           response = await api.proprioPerfilPaciente();
-        } else if (userType === 'profissional') {
+        } else if (userType === TipoUsuario.Profissional) {
           response = await api.proprioPerfilProfissional();
         } else {
-          throw new Error('Tipo de usuário inválido para buscar perfil.');
+          throw new Error(`Tipo de usuário inválido: ${userType}`);
         }
+        
         user.value = response.data;
       } catch (error) {
-        console.error('Falha ao buscar dados do usuário:', error);
-        // Se o token for invalido erro 401 403 desloga o usuario
-        if (error.response && [401, 403].includes(error.response.status)) {
-          logout();
-        }
+        console.error('Erro ao buscar dados do usuário:', error);
+        logout();
       }
     }
   }
+
   async function deleteAccount() {
-      try {
-        await api.deletarConta();
-        logout(); // Logout apos exclusao
-        return { success: true };
-      } catch (error) {
-        console.error('Falha ao deletar conta:', error);
-        return { success: false, error: error.response?.data?.erro || 'Erro ao deletar conta' };
-      }
+    try {
+      await api.deletarConta();
+      logout();
+    } catch (error) {
+      console.error('Erro ao deletar conta:', error);
+      throw error;
     }
+  }
+
   /**
    * Realiza o registro de um novo usuario
    * @param {Object} data - dados do registro
-   * @param {string} userType - tipo de usuario paciente ou profissional
+   * @param {string} userType - tipo de usuario: 'paciente' ou 'profissional'
    */
   async function register(data, userType) {
     try {
       let response;
-      if (userType === 'paciente') {
+      
+      // Usa o enum para comparação type-safe
+      if (userType === TipoUsuario.Paciente) {
         response = await api.registrarPaciente(data);
-      } else if (userType === 'profissional') {
+      } else if (userType === TipoUsuario.Profissional) {
         response = await api.registrarProfissional(data);
       } else {
-        throw new Error('Tipo de usuário inválido para registro.');
+        throw new Error(`Tipo de usuário inválido: ${userType}`);
       }
-      return { success: true, message: response.data.mensagem || 'Registro realizado com sucesso!' };
+
+      // Armazena o token retornado no localStorage
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        isAuthenticated.value = true;
+      }
+
+      return response;
     } catch (error) {
-      console.error('Falha no registro:', error);
-      console.log('Data:', data)
-      return { success: false, error: error.response?.data?.erro || 'Erro no registro' };
+      console.error('Erro ao registrar usuário:', error);
+      throw error;
     }
   }
 
@@ -80,18 +93,27 @@ export const useUserStore = defineStore('user', () => {
   async function login(credentials) {
     try {
       const response = await api.login(credentials);
-      const token = response.data.token;
-      localStorage.setItem('token', token);
-    isAuthenticated.value = true;
-    // Opcional buscar dados do usuario apos login
-      const decodedToken = JSON.parse(atob(token.split('.')[1]));
-      if (decodedToken && decodedToken.role) {
-        await fetchUser(decodedToken.role === 'profissional' ? 'profissional' : 'paciente');
+      
+      // Armazena o token retornado no localStorage
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        isAuthenticated.value = true;
+
+        // Decodifica o token para obter o tipo de usuário
+        const token = response.data.token;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        
+        // Agora o role vem como string: "profissional" ou "paciente"
+        const role = payload.role;
+
+        // Busca os dados completos do usuário
+        await fetchUser(role);
       }
-      return { success: true };
+
+      return response;
     } catch (error) {
-      console.error('Falha no login:', error);
-      return { success: false, error: error.response?.data?.erro || 'Erro no login' };
+      console.error('Erro ao fazer login:', error);
+      throw error;
     }
   }
 
@@ -102,7 +124,6 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('token');
     user.value = null;
     isAuthenticated.value = false;
-    // Redireciona para pagina de login para uma experiencia de usuario mais fluida
     router.push('/login');
   }
 
@@ -111,6 +132,9 @@ export const useUserStore = defineStore('user', () => {
     user,
     isAuthenticated,
     isLoggedIn,
+    userType,
+    isProfissionalUser,
+    isPacienteUser,
     fetchUser,
     login,
     register,

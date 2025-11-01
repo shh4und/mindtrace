@@ -9,13 +9,14 @@ import (
 
 func UsuarioParaDTOOut(usuario *dominio.Usuario) *dtos.UsuarioDTOOut {
 	return &dtos.UsuarioDTOOut{
-		ID:        usuario.ID,
-		Email:     usuario.Email,
-		Nome:      usuario.Nome,
-		Contato:   usuario.Contato,
-		Bio:       usuario.Bio,
-		CreatedAt: usuario.CreatedAt,
-		UpdatedAt: usuario.UpdatedAt,
+		ID:          usuario.ID,
+		Email:       usuario.Email,
+		Nome:        usuario.Nome,
+		TipoUsuario: dominio.TipoUsuarioParaString(usuario.TipoUsuario),
+		Contato:     usuario.Contato,
+		Bio:         usuario.Bio,
+		CreatedAt:   usuario.CreatedAt,
+		UpdatedAt:   usuario.UpdatedAt,
 	}
 }
 
