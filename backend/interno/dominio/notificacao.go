@@ -7,9 +7,9 @@ import (
 
 // Constantes para status de notificacao
 const (
-	NotificacaoNaoLida   = "Nao lida"
-	NotificacaoLida      = "Lida"
-	NotificacaoArquivada = "Arquivada"
+	NotificacaoNaoLida   = "NAOLIDA"
+	NotificacaoLida      = "LIDA"
+	NotificacaoArquivada = "ARQUIVADA"
 )
 
 // Erros de validacao - Notificacao
@@ -29,7 +29,7 @@ type Notificacao struct {
 	Usuario   Usuario   `gorm:"foreignKey:UsuarioID;constraint:OnDelete:CASCADE"`
 	AlertaID  *uint     // Ponteiro para permitir valor NULL
 	Conteudo  string    `gorm:"type:text;not null"`
-	Status    string    `gorm:"type:varchar(50);not null;default:'Não lida'"`
+	Status    string    `gorm:"type:varchar(50);not null;default:'NAOLIDA'"`
 	DataEnvio time.Time `gorm:"not null;default:CURRENT_TIMESTAMP"`
 }
 
