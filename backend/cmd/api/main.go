@@ -79,6 +79,9 @@ func main() {
 	relatorioService := servicos.NovoRelatorioServico(db, registroHumorRepo, usuarioRepo)
 	relatorioController := controladores.NovoRelatorioControlador(relatorioService)
 
+	monitoramentoService := servicos.NovoMonitoramentoServico(db, registroHumorRepo, usuarioRepo)
+	monitoramentoController := controladores.NovoMonitoramentoControlador(monitoramentoService)
+
 	resumoService := servicos.NovoResumoServico(db, registroHumorRepo, usuarioRepo)
 	resumoController := controladores.NovoResumoControlador(resumoService)
 
@@ -139,7 +142,10 @@ func main() {
 				relatorios.GET("/", relatorioController.GerarRelatorio)
 				relatorios.GET("/paciente-lista", relatorioController.GerarRelatorioPacienteDoProfissional)
 			}
-
+			monitoramento := protegido.Group("/monitoramento")
+			{
+				monitoramento.GET("paciente-lista", monitoramentoController.RealizarMonitoramento)
+			}
 			resumo := protegido.Group("/resumo")
 			{
 				resumo.GET("/", resumoController.GerarResumo)
