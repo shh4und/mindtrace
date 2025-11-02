@@ -97,6 +97,27 @@ type RelatorioPacienteDTOOut struct {
 	MediaStress    float64              `json:"media_stress"`
 }
 
+type DadosMonitoramentoDTOOut struct {
+	Data time.Time `json:"data"`
+
+	NivelHumor   int16  `json:"nivel_humor"`
+	HorasSono    int16  `json:"horas_sono"`
+	NivelEnergia int16  `json:"nivel_energia"`
+	NivelStress  int16  `json:"nivel_stress"`
+	AutoCuidado  string `json:"auto_cuidado"`
+	Observacoes  string `json:"observacoes,omitempty"`
+}
+
+type MonitoramentoPacienteDTOOut struct {
+	DadosMonitoramento []DadosMonitoramentoDTOOut
+	MediaSono          float64   `json:"media_sono"`
+	MediaEnergia       float64   `json:"media_energia"`
+	MediaStress        float64   `json:"media_stress"`
+	MediaHumor         float64   `json:"media_humor"`
+	TipoAlerta         string    `json:"tipo_alerta"`
+	Data               time.Time `json:"data_monitoramento"`
+}
+
 // ResumoPacienteDTOOut representa o resumo de um paciente <=> ultimo registro
 type ResumoPacienteDTOOut struct {
 	Data     time.Time `json:"data"`
