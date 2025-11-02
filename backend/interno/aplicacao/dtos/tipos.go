@@ -109,13 +109,15 @@ type DadosMonitoramentoDTOOut struct {
 }
 
 type MonitoramentoPacienteDTOOut struct {
-	DadosMonitoramento []DadosMonitoramentoDTOOut
-	MediaSono          float64   `json:"media_sono"`
-	MediaEnergia       float64   `json:"media_energia"`
-	MediaStress        float64   `json:"media_stress"`
-	MediaHumor         float64   `json:"media_humor"`
-	TipoAlerta         string    `json:"tipo_alerta"`
-	Data               time.Time `json:"data_monitoramento"`
+	ProfissionalID     uint                       `json:"profissional_id"`
+	PacienteID         uint                       `json:"paciente_id"`
+	DadosMonitoramento []DadosMonitoramentoDTOOut `json:"dados_monitoramento"`
+	MediaSono          float64                    `json:"media_sono"`
+	MediaEnergia       float64                    `json:"media_energia"`
+	MediaStress        float64                    `json:"media_stress"`
+	MediaHumor         float64                    `json:"media_humor"`
+	TipoAlerta         string                     `json:"tipo_alerta"`
+	Data               time.Time                  `json:"data_monitoramento"`
 }
 
 // ResumoPacienteDTOOut representa o resumo de um paciente <=> ultimo registro
