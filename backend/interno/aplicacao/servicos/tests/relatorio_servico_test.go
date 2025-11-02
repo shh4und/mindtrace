@@ -36,6 +36,10 @@ func (m *MockRegistroHumorRepositorioRelatorio) BuscarUltimoRegistroDePaciente(p
 	return nil, nil
 }
 
+func (m *MockRegistroHumorRepositorioRelatorio) BuscarPorNUltimosRegistros(pacienteID uint, numLimite int) ([]*dominio.RegistroHumor, error) {
+	return nil, nil
+}
+
 // MockUsuarioRepositorioRelatorio simula o repositorio de usuarios
 type MockUsuarioRepositorioRelatorio struct {
 	mock.Mock
