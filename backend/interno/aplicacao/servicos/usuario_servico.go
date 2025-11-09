@@ -51,6 +51,11 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 			return dominio.ErrEmailJaCadastrado
 		}
 
+		// retorna err se diferente de "record not found"
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+
 		// Usa o mapper para criar as entidades a partir do DTOIn
 		novoUsuario, novoProfissional := mappers.RegistrarProfissionalDTOInParaEntidade(dtoIn)
 
@@ -81,16 +86,15 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
-		} // Define o UsuarioID do profissional
-		novoProfissional.UsuarioID = novoUsuario.ID
+		}
 
 		// Cria o profissional
+		novoProfissional.Usuario = *novoUsuario
 		if err := s.repositorio.CriarProfissional(tx, novoProfissional); err != nil {
 			return err
 		}
 
 		// Prepara o objeto de retorno completo
-		novoProfissional.Usuario = *novoUsuario
 		profissionalRegistrado = novoProfissional
 
 		return nil
@@ -108,7 +112,10 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 		if err == nil {
 			return dominio.ErrEmailJaCadastrado
 		}
-
+		// retorna err se diferente de "record not found"
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 		// Usa o mapper para criar as entidades a partir do DTOIn
 		novoUsuario, novoPaciente := mappers.RegistrarPacienteDTOInParaEntidade(dtoIn)
 
@@ -135,20 +142,18 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 		}
 		novoUsuario.Senha = string(hashSenha)
 		novoUsuario.TipoUsuario = dominio.TipoUsuarioPaciente
-
 		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
 		}
 
-		// Define o UsuarioID do paciente
-		novoPaciente.UsuarioID = novoUsuario.ID // Cria o paciente
+		// Cria o paciente
+		novoPaciente.Usuario = *novoUsuario
 		if err := s.repositorio.CriarPaciente(tx, novoPaciente); err != nil {
 			return err
 		}
 
 		// Prepara o objeto de retorno completo
-		novoPaciente.Usuario = *novoUsuario
 		pacienteCompleto = novoPaciente
 
 		return nil
