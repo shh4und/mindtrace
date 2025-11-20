@@ -23,7 +23,8 @@ backend/interno/
 │   │   ├── usuario_servico_test.go
 │   │   ├── registro_humor_servico_test.go
 │   │   ├── convite_servico_test.go
-│   │   └── relatorio_servico_test.go
+│   │   ├── relatorio_servico_test.go
+│   │   └── monitoramento_servico_test.go
 │   └── mappers/tests/
 │       └── utils_test.go
 ```
@@ -33,9 +34,9 @@ backend/interno/
 | Camada | Arquivos | Total de Testes |
 |--------|----------|-----------------|
 | **Domínio** | 3 | 184 |
-| **Serviços** | 4 | 74 |
+| **Serviços** | 5 | 92 |
 | **Mappers** | 1 | 23 |
-| **TOTAL** | **8** | **~281** |
+| **TOTAL** | **9** | **~299** |
 
 ## Arquivos Criados
 
@@ -341,6 +342,33 @@ backend/interno/
 
 ---
 
+#### `/backend/interno/aplicacao/servicos/tests/monitoramento_servico_test.go`
+**Testes do Serviço de Monitoramento**
+
+##### RealizarMonitoramentoPaciente:
+- ✅ Sucesso no monitoramento
+- ✅ Validação: Período inválido (zero)
+- ✅ Validação: Período inválido (negativo)
+- ✅ Validação: Período excede limite (> 14 dias)
+- ✅ Validação: PacienteID inválido (zero)
+- ✅ Profissional não encontrado
+- ✅ Erro ao buscar profissional
+- ✅ Sem registros de humor (retorna monitoramento vazio)
+- ✅ Erro ao buscar registros
+- ✅ Um único registro
+- ✅ Cálculo correto de médias (sono, humor, energia, stress)
+- ✅ Valores mínimos (todos os indicadores no mínimo)
+- ✅ Valores máximos (todos os indicadores no máximo)
+- ✅ Padrão de alerta: PREOCUPANTE (valores críticos)
+- ✅ Padrão de alerta: ATENCAO (valores abaixo da referência)
+- ✅ Padrão de alerta: REGULAR (valores saudáveis)
+- ✅ Limite máximo de 14 dias
+- ✅ Registros sem observações (campo opcional)
+
+**Total de Testes de Serviço (Monitoramento): 18 casos de teste**
+
+---
+
 ## Resumo Final
 
 ### Cobertura por Módulo
@@ -351,6 +379,7 @@ backend/interno/
 | **RegistroHumor** | 45 | 13 | - | 58 |
 | **Convite** | 35 | 13 | - | 48 |
 | **Relatorio** | - | 17 | - | 17 |
+| **Monitoramento** | - | 18 | - | 18 |
 | **Mappers (Geral)** | - | - | 23 | 23 |
 | **Subtotal** | **142** | **71** | **23** | **236** |
 
@@ -521,6 +550,6 @@ Organização dos testes em pastas dedicadas `/tests` dentro de cada módulo par
 ---
 
 **Data de Criação**: 27 de Outubro de 2025  
-**Última Atualização**: 27 de Outubro de 2025  
+**Última Atualização**: 01 de Novembro de 2025  
 **Autor**: GitHub Copilot  
 **Projeto**: MindTrace - Sistema de Acompanhamento Psicológico

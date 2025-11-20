@@ -31,3 +31,9 @@ func (r *gormRegistroHumorRepositorio) BuscarUltimoRegistroDePaciente(pacienteID
 	err := r.db.Where("paciente_id = ?", pacienteID).Last(&registro).Error
 	return registro, err
 }
+
+func (r *gormRegistroHumorRepositorio) BuscarPorNUltimosRegistros(pacienteID uint, numLimite int) ([]*dominio.RegistroHumor, error) {
+	var registros []*dominio.RegistroHumor
+	err := r.db.Where("paciente_id = ", pacienteID).Order("created_at DESC").Limit(numLimite).Find(&registros).Error
+	return registros, err
+}

@@ -20,11 +20,12 @@ type registroHumorServico struct {
 	db                 *gorm.DB
 	repositorio        repositorios.RegistroHumorRepositorio
 	usuarioRepositorio repositorios.UsuarioRepositorio
+	analiseServico     AnaliseServico
 }
 
 // NovoRegistroHumorServico cria uma nova instancia de registroHumorServico
-func NovoRegistroHumorServico(db *gorm.DB, repo repositorios.RegistroHumorRepositorio, userRepo repositorios.UsuarioRepositorio) *registroHumorServico {
-	return &registroHumorServico{db: db, repositorio: repo, usuarioRepositorio: userRepo}
+func NovoRegistroHumorServico(db *gorm.DB, repo repositorios.RegistroHumorRepositorio, userRepo repositorios.UsuarioRepositorio, analiseSvc AnaliseServico) *registroHumorServico {
+	return &registroHumorServico{db: db, repositorio: repo, usuarioRepositorio: userRepo, analiseServico: analiseSvc}
 }
 
 // CriarRegistroHumor cria um novo registro de humor para o paciente
@@ -55,5 +56,16 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto dtos.CriarRegistroHumorD
 		return nil
 	})
 
-	return registroHumorRealizado, err
+	if err != nil {
+		return nil, err
+	}
+
+	// --- TRIGGER DE MONITORAMENTO ---
+	// Executa em uma goroutine para não bloquear a resposta da API
+	go func(pacID uint) {
+		// TODO: tratar erros/logs aqui internamente
+		_ = rhs.analiseServico.ExecutarMonitoramento(pacID)
+	}(registroHumorRealizado.PacienteID)
+
+	return registroHumorRealizado, nil
 }

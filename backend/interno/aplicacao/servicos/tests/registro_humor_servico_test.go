@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -40,6 +40,14 @@ func (m *MockRegistroHumorRepositorio) BuscarUltimoRegistroDePaciente(pacienteID
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*dominio.RegistroHumor), args.Error(1)
+}
+
+func (m *MockRegistroHumorRepositorio) BuscarPorNUltimosRegistros(pacienteID uint, numLimite int) ([]*dominio.RegistroHumor, error) {
+	args := m.Called(pacienteID, numLimite)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*dominio.RegistroHumor), args.Error(1)
 }
 
 // MockUsuarioRepositorioRH simula o repositorio de usuarios para testes de registro humor
@@ -107,6 +115,24 @@ func (m *MockUsuarioRepositorioRH) DeletarUsuario(tx *gorm.DB, id uint) error {
 	return nil
 }
 
+// MockAnaliseServico simula o servico de analise
+type MockAnaliseServico struct {
+	mock.Mock
+}
+
+func (m *MockAnaliseServico) GerarAnaliseHistorica(pacienteID uint, dias int) (*dtos.AnalisePacienteDTOOut, error) {
+	args := m.Called(pacienteID, dias)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*dtos.AnalisePacienteDTOOut), args.Error(1)
+}
+
+func (m *MockAnaliseServico) ExecutarMonitoramento(pacienteID uint) error {
+	args := m.Called(pacienteID)
+	return args.Error(0)
+}
+
 // ========== Helper Functions ==========
 
 func setupTestDBRegistroHumor(t *testing.T) *gorm.DB {
@@ -129,8 +155,11 @@ func TestRegistroHumorServico_CriarRegistroHumor_Sucesso(t *testing.T) {
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	mockAnaliseServico.On("ExecutarMonitoramento", mock.Anything).Return(nil).Maybe()
+
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,
@@ -168,8 +197,9 @@ func TestRegistroHumorServico_CriarRegistroHumor_PacienteNaoEncontrado(t *testin
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
@@ -195,8 +225,9 @@ func TestRegistroHumorServico_CriarRegistroHumor_ErroAoBuscarPaciente(t *testing
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
@@ -223,8 +254,9 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoNivelHumorInvalido(t *
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,
@@ -255,8 +287,9 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoHorasSonoInvalido(t *t
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,
@@ -287,8 +320,9 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoNivelEnergiaInvalido(t
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,
@@ -319,8 +353,9 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoNivelStressInvalido(t 
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,
@@ -351,8 +386,9 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoAutoCuidadoVazio(t *te
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,
@@ -383,8 +419,9 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoDataHoraRegistroVazia(
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,
@@ -415,8 +452,9 @@ func TestRegistroHumorServico_CriarRegistroHumor_ErroAoCriarRegistro(t *testing.
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,
@@ -449,8 +487,11 @@ func TestRegistroHumorServico_CriarRegistroHumor_ComObservacoes(t *testing.T) {
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	mockAnaliseServico.On("ExecutarMonitoramento", mock.Anything).Return(nil).Maybe()
+
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,
@@ -483,8 +524,11 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValoresMinimos(t *testing.T) {
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	mockAnaliseServico.On("ExecutarMonitoramento", mock.Anything).Return(nil).Maybe()
+
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,
@@ -519,8 +563,11 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValoresMaximos(t *testing.T) {
 	db := setupTestDBRegistroHumor(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRH)
+	mockAnaliseServico := new(MockAnaliseServico)
 
-	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	mockAnaliseServico.On("ExecutarMonitoramento", mock.Anything).Return(nil).Maybe()
+
+	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
 	pacienteExistente := &dominio.Paciente{
 		ID:        1,

@@ -1,7 +1,6 @@
 package controladores
 
 import (
-	"encoding/json"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
@@ -23,10 +22,10 @@ func NovoRegistroHumorControlador(us servicos.RegistroHumorServico) *RegistroHum
 // CriarRegistroHumorRequest representa o payload da requisicao para criar um registro de humor
 type CriarRegistroHumorRequest struct {
 	NivelHumor       int16     `json:"nivel_humor" binding:"required,gte=1"`
-	HorasSono        int16     `json:"horas_sono" binding:"gte=0"`
+	HorasSono        int16     `json:"horas_sono" binding:"required,gte=0"`
 	NivelStress      int16     `json:"nivel_stress" binding:"required,gte=1"`
 	NivelEnergia     int16     `json:"nivel_energia" binding:"required,gte=1"`
-	AutoCuidado      []string  `json:"auto_cuidado" binding:"required"`
+	AutoCuidado      string    `json:"auto_cuidado" binding:"required"`
 	Observacoes      string    `json:"observacoes"`
 	DataHoraRegistro time.Time `json:"data_hora_registro"`
 }
@@ -45,18 +44,18 @@ func (rhc *RegistroHumorControlador) Criar(c *gin.Context) {
 		return
 	}
 
-	autoCuidadoJSON, err := json.Marshal(req.AutoCuidado)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro de marshaling": err.Error()})
-		return // Retorna erro de marshaling
-	}
+	// autoCuidadoJSON, err := json.Marshal(req.AutoCuidado)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"erro de marshaling": err.Error()})
+	// 	return // Retorna erro de marshaling
+	// }
 
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       req.NivelHumor,
 		HorasSono:        req.HorasSono,
 		NivelStress:      req.NivelStress,
 		NivelEnergia:     req.NivelEnergia,
-		AutoCuidado:      string(autoCuidadoJSON),
+		AutoCuidado:      req.AutoCuidado,
 		Observacoes:      req.Observacoes,
 		DataHoraRegistro: req.DataHoraRegistro,
 	}

@@ -81,20 +81,28 @@ type VincularPacienteDTOIn struct {
 
 // PontoDeDadosDTOOut representa um ponto de dados para graficos
 type PontoDeDadosDTOOut struct {
-	Data     time.Time `json:"data"`
-	Valor    int16     `json:"valor"`
-	Humor    int16     `json:"humor"`
-	Anotacao string    `json:"anotacao,omitempty"`
+	Data  time.Time `json:"data"`
+	Valor int16     `json:"valor"`
+	// Humor é opcional, útil se quiser colorir o ponto do gráfico baseado no humor do dia
+	Humor int16 `json:"humor,omitempty"`
 }
 
-// RelatorioPacienteDTOOut representa o relatorio de um paciente
-type RelatorioPacienteDTOOut struct {
+// AnalisePacienteDTOOut unifica Relatorio e Monitoramento
+type AnalisePacienteDTOOut struct {
+	// Dados para Visualização (Antigo Relatorio)
 	GraficoSono    []PontoDeDadosDTOOut `json:"grafico_sono"`
 	GraficoEnergia []PontoDeDadosDTOOut `json:"grafico_energia"`
 	GraficoStress  []PontoDeDadosDTOOut `json:"grafico_stress"`
-	MediaSono      float64              `json:"media_sono"`
-	MediaEnergia   float64              `json:"media_energia"`
-	MediaStress    float64              `json:"media_stress"`
+
+	// Dados Estatísticos
+	MediaSono    float64 `json:"media_sono"`
+	MediaEnergia float64 `json:"media_energia"`
+	MediaStress  float64 `json:"media_stress"`
+	MediaHumor   float64 `json:"media_humor"`
+
+	// Dados de Inteligência (Antigo Monitoramento)
+	StatusAtual   string    `json:"status_atual"` // REGULAR, ATENCAO, PREOCUPANTE
+	UltimaAnalise time.Time `json:"ultima_analise"`
 }
 
 // ResumoPacienteDTOOut representa o resumo de um paciente <=> ultimo registro

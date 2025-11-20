@@ -10,12 +10,12 @@ import (
 
 // RelatorioControlador gerencia requisicoes HTTP relacionadas a relatorios
 type RelatorioControlador struct {
-	relatorioServico servicos.RelatorioServico
+	analiseServico servicos.AnaliseServico
 }
 
-// NovoRelatorioControlador cria uma nova instancia de RelatorioControlador com o RelatorioServico fornecido
-func NovoRelatorioControlador(rs servicos.RelatorioServico) *RelatorioControlador {
-	return &RelatorioControlador{relatorioServico: rs}
+// NovoRelatorioControlador cria uma nova instancia de RelatorioControlador com o AnaliseServico fornecido
+func NovoRelatorioControlador(rs servicos.AnaliseServico) *RelatorioControlador {
+	return &RelatorioControlador{analiseServico: rs}
 }
 
 // GerarRelatorio gera um relatorio para o paciente autenticado
@@ -31,7 +31,7 @@ func (rc *RelatorioControlador) GerarRelatorio(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Parametro 'periodo' invalido"})
 	}
-	relatorio, err := rc.relatorioServico.GerarRelatorioPaciente(userID.(uint), int64(periodo))
+	relatorio, err := rc.analiseServico.GerarAnaliseHistorica(userID.(uint), int(periodo))
 
 	if relatorio == nil {
 		if err != nil {
@@ -45,9 +45,9 @@ func (rc *RelatorioControlador) GerarRelatorio(c *gin.Context) {
 	c.JSON(http.StatusOK, relatorio)
 }
 
-// GerarRelatorioPacienteDoProfissional gera um relatorio para um paciente especifico pelo profissional
+// GerarAnaliseHistorica gera um relatorio para um paciente especifico pelo profissional
 // Extrai o ID do paciente e periodo da query e chama o servico para gerar o relatorio
-func (rc *RelatorioControlador) GerarRelatorioPacienteDoProfissional(c *gin.Context) {
+func (rc *RelatorioControlador) GerarAnaliseHistorica(c *gin.Context) {
 	_, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID de usuario nao encontrado no token"})
@@ -67,7 +67,7 @@ func (rc *RelatorioControlador) GerarRelatorioPacienteDoProfissional(c *gin.Cont
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Parametro 'periodo' invalido"})
 	}
-	relatorio, err := rc.relatorioServico.GerarRelatorioPacienteDoProfissional(uint(pacienteID), int64(periodo))
+	relatorio, err := rc.analiseServico.GerarAnaliseHistorica(uint(pacienteID), int(periodo))
 
 	if relatorio == nil {
 		if err != nil {

@@ -73,11 +73,16 @@ func main() {
 	autController := controladores.NovoAutControlador(usuarioService)
 	usuarioController := controladores.NovoUsuarioControlador(usuarioService)
 
-	registroHumorService := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo)
+	analiseService := servicos.NovoAnaliseServico(db, registroHumorRepo, usuarioRepo)
+
+	registroHumorService := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo, analiseService)
 	registroHumorController := controladores.NovoRegistroHumorControlador(registroHumorService)
 
-	relatorioService := servicos.NovoRelatorioServico(db, registroHumorRepo, usuarioRepo)
-	relatorioController := controladores.NovoRelatorioControlador(relatorioService)
+	relatorioController := controladores.NovoRelatorioControlador(analiseService)
+
+	/* 	monitoramentoService := servicos.NovoMonitoramentoServico(db, registroHumorRepo, usuarioRepo)
+	monitoramentoController := controladores.NovoMonitoramentoControlador(monitoramentoService)
+	*/
 
 	resumoService := servicos.NovoResumoServico(db, registroHumorRepo, usuarioRepo)
 	resumoController := controladores.NovoResumoControlador(resumoService)
@@ -137,9 +142,12 @@ func main() {
 			relatorios := protegido.Group("/relatorios")
 			{
 				relatorios.GET("/", relatorioController.GerarRelatorio)
-				relatorios.GET("/paciente-lista", relatorioController.GerarRelatorioPacienteDoProfissional)
+				relatorios.GET("/paciente-lista", relatorioController.GerarAnaliseHistorica)
 			}
-
+			/* monitoramento := protegido.Group("/monitoramento")
+			{
+				monitoramento.GET("/paciente-lista", monitoramentoController.RealizarMonitoramento)
+			} */
 			resumo := protegido.Group("/resumo")
 			{
 				resumo.GET("/", resumoController.GerarResumo)
