@@ -8,6 +8,7 @@ import (
 	"mindtrace/backend/interno/dominio"
 	postgres_repo "mindtrace/backend/interno/persistencia/postgres"
 	"mindtrace/backend/interno/persistencia/repositorios"
+	"mindtrace/backend/interno/persistencia/seeds"
 	sqlite_repo "mindtrace/backend/interno/persistencia/sqlite"
 	"os"
 
@@ -45,6 +46,11 @@ func main() {
 		&dominio.RegistroHumor{},
 		&dominio.Notificacao{},
 		&dominio.Convite{},
+		&dominio.Instrumento{},
+		&dominio.Pergunta{},
+		&dominio.OpcaoEscala{},
+		&dominio.Atribuicao{},
+		&dominio.Resposta{},
 	)
 	if err != nil {
 		log.Fatalf("falha ao migrar o banco de dados: %v", err)
@@ -65,6 +71,8 @@ func main() {
 		registroHumorRepo = sqlite_repo.NovoGormRegistroHumorRepositorio(db)
 		conviteRepo = sqlite_repo.NovoGormConviteRepositorio(db)
 	}
+
+	seeds.ExecutarSeeds(db)
 
 	// Inicializa servicos e controladores da camada de aplicacao
 	usuarioService := servicos.NovoUsuarioServico(db, usuarioRepo)
