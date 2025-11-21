@@ -65,8 +65,7 @@ jobs:
                 echo "Arquivo .env.prod ausente - crie manualmente no servidor."
                 exit 1
               fi
-              mkdir -p pgadmin-data postgres-data
-              sudo chown -R 5050:5050 pgadmin-data 
+              mkdir -p postgres-data
               DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }} \
               docker compose -f docker-compose.prod.yml --env-file .env.prod pull
               DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }} \

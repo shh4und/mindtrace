@@ -1,8 +1,7 @@
 # Variáveis
 APP_NAME = mindtrace
 DOCKER_COMPOSE = docker compose
-DATABASE = pgadmin-data 
-SGBD = postgres-data
+DATABASE = postgres-data
 
 # Alvo padrão
 .PHONY: help
@@ -12,8 +11,6 @@ help:
 	@echo "  clean-db     - apaga os arquivos do banco de dados (reseta o banco)"
 	@echo "  up           - inicia os containers docker"
 	@echo "  down         - para os containers docker"
-
-
 
 .PHONY: build
 build:
@@ -26,7 +23,7 @@ build:
 .PHONY: clean
 clean-db:
 	@echo "Resetando banco de dados..."
-	rm -rf $(DATABASE) $(SGBD) 
+	rm -rf $(DATABASE) 
 
 .PHONY: docker-up
 up:

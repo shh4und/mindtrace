@@ -39,16 +39,3 @@ services:
       - "5173:5173"
     depends_on:
       - backend
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin-server-dev
-    volumes:
-      - ./pgadmin-data:/var/lib/pgadmin
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-      - "8001:80"
-    depends_on:
-      - db
