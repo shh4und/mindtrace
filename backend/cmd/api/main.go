@@ -56,11 +56,12 @@ func main() {
 		log.Fatalf("falha ao migrar o banco de dados: %v", err)
 	}
 
-	// Seleciona implementacoes de repositorio conforme driver ativo
 	var usuarioRepo repositorios.UsuarioRepositorio
 	var registroHumorRepo repositorios.RegistroHumorRepositorio
 	var conviteRepo repositorios.ConviteRepositorio
+	// var instrumentoRepo repositorios.InstrumentoRepositorio
 
+	// Seleciona implementacoes de repositorio conforme driver ativo
 	switch dbDriver {
 	case "postgres":
 		usuarioRepo = postgres_repo.NovoGormUsuarioRepositorio(db)
@@ -72,31 +73,26 @@ func main() {
 		conviteRepo = sqlite_repo.NovoGormConviteRepositorio(db)
 	}
 
+	// Instrumentos imutaveis seedados
 	seeds.ExecutarSeeds(db)
 
-	// Inicializa servicos e controladores da camada de aplicacao
-	usuarioService := servicos.NovoUsuarioServico(db, usuarioRepo)
-	profissionalController := controladores.NovoProfissionalControlador(usuarioService)
-	pacienteController := controladores.NovoPacienteControlador(usuarioService)
-	autController := controladores.NovoAutControlador(usuarioService)
-	usuarioController := controladores.NovoUsuarioControlador(usuarioService)
+	// Inicializa servicos
+	usuarioSvc := servicos.NovoUsuarioServico(db, usuarioRepo)
+	analiseSvc := servicos.NovoAnaliseServico(db, registroHumorRepo, usuarioRepo)
+	registroHumorSvc := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo, analiseSvc)
+	resumoSvc := servicos.NovoResumoServico(db, registroHumorRepo, usuarioRepo)
+	conviteSvc := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo)
+	// instrumentoSvc := servicos.NovoInstrumentoServico(db, instrumentoRepo,)
 
-	analiseService := servicos.NovoAnaliseServico(db, registroHumorRepo, usuarioRepo)
-
-	registroHumorService := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo, analiseService)
-	registroHumorController := controladores.NovoRegistroHumorControlador(registroHumorService)
-
-	relatorioController := controladores.NovoRelatorioControlador(analiseService)
-
-	/* 	monitoramentoService := servicos.NovoMonitoramentoServico(db, registroHumorRepo, usuarioRepo)
-	monitoramentoController := controladores.NovoMonitoramentoControlador(monitoramentoService)
-	*/
-
-	resumoService := servicos.NovoResumoServico(db, registroHumorRepo, usuarioRepo)
-	resumoController := controladores.NovoResumoControlador(resumoService)
-
-	conviteService := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo)
-	conviteController := controladores.NovoConviteControlador(conviteService)
+	// Inicializa controladores
+	profissionalCtrl := controladores.NovoProfissionalControlador(usuarioSvc)
+	pacienteCtrl := controladores.NovoPacienteControlador(usuarioSvc)
+	autCtrl := controladores.NovoAutControlador(usuarioSvc)
+	usuarioCtrl := controladores.NovoUsuarioControlador(usuarioSvc)
+	registroHumorCtrl := controladores.NovoRegistroHumorControlador(registroHumorSvc)
+	relatorioCtrl := controladores.NovoRelatorioControlador(analiseSvc)
+	resumoCtrl := controladores.NovoResumoControlador(resumoSvc)
+	conviteCtrl := controladores.NovoConviteControlador(conviteSvc)
 
 	// Configura roteador http com middlewares e grupos de rotas
 	roteador := gin.Default()
@@ -109,19 +105,19 @@ func main() {
 		// --- ROTAS PUBLICAS ---
 		auth := api.Group("/entrar")
 		{
-			auth.POST("/login", autController.Login)
+			auth.POST("/login", autCtrl.Login)
 		}
 
 		profissionais := api.Group("/profissionais")
 		{
 			// Registro de profissionais acessivel sem autenticacao
-			profissionais.POST("/registrar", profissionalController.Registrar)
+			profissionais.POST("/registrar", profissionalCtrl.Registrar)
 		}
 
 		pacientes := api.Group("/pacientes")
 		{
 			// Registro de pacientes disponivel sem token
-			pacientes.POST("/registrar", pacienteController.Registrar)
+			pacientes.POST("/registrar", pacienteCtrl.Registrar)
 		}
 
 		// --- ROTAS PROTEGIDAS ---
@@ -131,40 +127,40 @@ func main() {
 		{
 			usuarios := protegido.Group("/usuarios")
 			{
-				usuarios.GET("/", usuarioController.BuscarPerfil)
-				usuarios.GET("/paciente", pacienteController.ProprioPerfilPaciente)
-				usuarios.GET("/profissional", profissionalController.ProprioPerfilProfissional)
-				usuarios.GET("/profissional/pacientes", usuarioController.ListarPacientesDoProfissional)
-				usuarios.PUT("/perfil", usuarioController.AtualizarPerfil)
-				usuarios.PUT("/perfil/alterar-senha", usuarioController.AlterarSenha) // CONSERTAR
+				usuarios.GET("/", usuarioCtrl.BuscarPerfil)
+				usuarios.GET("/paciente", pacienteCtrl.ProprioPerfilPaciente)
+				usuarios.GET("/profissional", profissionalCtrl.ProprioPerfilProfissional)
+				usuarios.GET("/profissional/pacientes", usuarioCtrl.ListarPacientesDoProfissional)
+				usuarios.PUT("/perfil", usuarioCtrl.AtualizarPerfil)
+				usuarios.PUT("/perfil/alterar-senha", usuarioCtrl.AlterarSenha) // CONSERTAR
 				// PARA FAZER - URGENTE
-				usuarios.DELETE("/perfil/apagar-conta", usuarioController.DeletarPerfil)
+				usuarios.DELETE("/perfil/apagar-conta", usuarioCtrl.DeletarPerfil)
 			}
 
 			registroHumor := protegido.Group("/registro-humor")
 			{
-				registroHumor.POST("/", registroHumorController.Criar)
+				registroHumor.POST("/", registroHumorCtrl.Criar)
 
 			}
 
 			relatorios := protegido.Group("/relatorios")
 			{
-				relatorios.GET("/", relatorioController.GerarRelatorio)
-				relatorios.GET("/paciente-lista", relatorioController.GerarAnaliseHistorica)
+				relatorios.GET("/", relatorioCtrl.GerarRelatorio)
+				relatorios.GET("/paciente-lista", relatorioCtrl.GerarAnaliseHistorica)
 			}
 			/* monitoramento := protegido.Group("/monitoramento")
 			{
-				monitoramento.GET("/paciente-lista", monitoramentoController.RealizarMonitoramento)
+				monitoramento.GET("/paciente-lista", monitoramentoCtrl.RealizarMonitoramento)
 			} */
 			resumo := protegido.Group("/resumo")
 			{
-				resumo.GET("/", resumoController.GerarResumo)
+				resumo.GET("/", resumoCtrl.GerarResumo)
 			}
 
 			convites := protegido.Group("/convites")
 			{
-				convites.POST("/gerar", conviteController.GerarConvite)
-				convites.POST("/vincular", conviteController.VincularPaciente)
+				convites.POST("/gerar", conviteCtrl.GerarConvite)
+				convites.POST("/vincular", conviteCtrl.VincularPaciente)
 			}
 		}
 	}

@@ -36,3 +36,7 @@ type UsuarioRepositorio interface {
 	AtualizarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error
 	DeletarUsuario(tx *gorm.DB, id uint) error
 }
+
+type InstrumentoRepositorio interface {
+	BuscarTodosAtivos(tx *gorm.DB) ([]*dominio.Instrumento, error)
+}
