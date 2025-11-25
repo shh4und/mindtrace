@@ -67,10 +67,11 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-import { useUserStore } from '../../store/user';
-import { TipoUsuario } from '../../types/usuario.js';
+import { useUserStore } from '@/store/user';
+import { TipoUsuario } from '@/types/usuario.js';
+import { parseJwt, getStoredToken } from '@/utils/jwt.js';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import NavbarPublic from '../../components/layout/NavbarPublic.vue';
+import NavbarPublic from '@/components/layout/NavbarPublic.vue';
 
 const router = useRouter();
 const toast = useToast();
@@ -86,22 +87,13 @@ const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 };
 
-// Funcao para decodificar o payload do jwt
-const parseJwt = (token) => {
-  try {
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch (e) {
-    return null;
-  }
-};
-
 const handleLogin = async () => {
   try {
     await userStore.login({ email: email.value, senha: password.value });
     toast.success('Login realizado com sucesso!');
     
     // O redirecionamento é baseado no role do token (agora string)
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     const decodedToken = parseJwt(token);
     
     if (decodedToken && decodedToken.role) {

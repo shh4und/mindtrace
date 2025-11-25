@@ -5,146 +5,217 @@
       <p class="text-gray-600 mt-1">Preencha como você se sentiu hoje e registre suas observações.</p>
     </header>
 
-    <form @submit.prevent="submitMood" class="space-y-8">
+    <form @submit.prevent="submit" class="space-y-8" novalidate>
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Registro para o dia:</h2>
         <div class="flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0">
           <input type="text" :value="currentDate"
-            class="flex-1 text-lg font-medium text-gray-700 bg-gray-100 rounded-md p-2 text-center" readonly>
+            class="flex-1 text-lg font-medium text-gray-700 bg-gray-100 rounded-md p-2 text-center" readonly aria-label="Data atual" />
           <input type="text" :value="currentDay"
-            class="flex-1 text-lg font-medium text-gray-700 bg-gray-100 rounded-md p-2 text-center" readonly>
+            class="flex-1 text-lg font-medium text-gray-700 bg-gray-100 rounded-md p-2 text-center" readonly aria-label="Dia da semana" />
         </div>
       </div>
 
-  <!-- Secao de selecao de humor com emojis -->
-      <div class="bg-rose-50 rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4 text-center">Como você se sentiu hoje?</h2>
-        <div class="flex flex-wrap gap-6 justify-center">
-          <button v-for="m in moodOptions" :key="m.value" type="button" @click="selectedMood = m.value"
+      <!-- Secao de selecao de humor com emojis -->
+      <fieldset class="bg-rose-50 rounded-lg shadow-sm border border-gray-200 p-6">
+        <legend class="text-xl font-semibold text-gray-900 mb-4 text-center w-full">Como você se sentiu hoje?</legend>
+        <div class="flex flex-wrap gap-6 justify-center" role="radiogroup" aria-label="Selecione seu humor">
+          <button 
+            v-for="m in moodOptions" 
+            :key="m.value" 
+            type="button" 
+            @click="selectedMood = m.value"
             :aria-pressed="selectedMood === m.value"
-            :class="['mood-btn flex flex-col items-center justify-center p-3 rounded-full transition', { 'selected': selectedMood === m.value }]">
-            <span class="mood-emoji mb-2">{{ m.emoji }}</span>
+            :aria-label="`${m.label} ${m.emoji}`"
+            :class="['mood-btn flex flex-col items-center justify-center p-3 rounded-full transition', { 'selected': selectedMood === m.value }]"
+          >
+            <span class="mood-emoji mb-2" aria-hidden="true">{{ m.emoji }}</span>
             <span class="text-sm">{{ m.label }}</span>
           </button>
         </div>
-      </div>
+      </fieldset>
 
-  <!-- Controle de sono com icones de lua -->
-      <div class="bg-rose-100 rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">Horas de Sono</h2>
+      <!-- Controle de sono com icones de lua -->
+      <fieldset class="bg-rose-100 rounded-lg shadow-sm border border-gray-200 p-6">
+        <legend class="text-xl font-semibold text-gray-900 mb-6 text-center w-full">Horas de Sono</legend>
         <div class="flex flex-col md:flex-row items-center md:space-x-4">
           <div class="w-full">
             <div class="mb-3">
-              <div class="icon-row">
-                <button v-for="step in sleepSteps" :key="step" type="button" class="icon-step "
-                  :class="[{ 'active': step <= sleepHours }, '']" @click="sleepHours = step">
+              <div class="icon-row" role="group" aria-label="Indicadores visuais de sono">
+                <button 
+                  v-for="step in sleepSteps" 
+                  :key="step" 
+                  type="button" 
+                  class="icon-step"
+                  :class="[{ 'active': step <= sleepHours }]" 
+                  @click="sleepHours = step"
+                  :aria-label="`${step} horas de sono`"
+                >
                   <span class="step-emoji hidden md:block" aria-hidden="true">🌜</span>
                 </button>
               </div>
             </div>
-            <input type="range" min="0" :max="sleepMax" step="1" v-model.number="sleepHours" class="w-full slider" />
-            <div class="flex justify-between text-sm mt-2 text-gray-600">
-              <span>0h</span>
-              <span>4h</span>
-              <span>8h</span>
-              <span>12h+</span>
+            <input 
+              type="range" 
+              :min="sleepConfig.min" 
+              :max="sleepConfig.max" 
+              step="1" 
+              v-model.number="sleepHours" 
+              class="w-full slider"
+              :aria-label="`Horas de sono: ${sleepLabel}`"
+              aria-valuemin="0"
+              :aria-valuemax="sleepConfig.max"
+              :aria-valuenow="sleepHours"
+              :aria-valuetext="sleepLabel"
+            />
+            <div class="flex justify-between text-sm mt-2 text-gray-600" aria-hidden="true">
+              <span v-for="label in sleepConfig.labels" :key="label">{{ label }}</span>
             </div>
           </div>
-          <div class="w-full md:w-36 text-center display-area mt-6 md:mt-0">
-            <div class="display-emoji">🌜</div>
+          <div class="w-full md:w-36 text-center display-area mt-6 md:mt-0" aria-live="polite">
+            <div class="display-emoji" aria-hidden="true">🌜</div>
             <div class="font-semibold display-value">{{ sleepLabel }}</div>
           </div>
         </div>
-      </div>
+      </fieldset>
 
-  <!-- Controle de energia com icones de bateria -->
-      <div class="bg-amber-50 rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">Nível de Energia</h2>
+      <!-- Controle de energia com icones de bateria -->
+      <fieldset class="bg-amber-50 rounded-lg shadow-sm border border-gray-200 p-6">
+        <legend class="text-xl font-semibold text-gray-900 mb-6 text-center w-full">Nível de Energia</legend>
         <div class="flex flex-col md:flex-row items-center md:space-x-4">
           <div class="w-full">
             <div class="mb-3">
-              <div class="icon-row">
-                <button v-for="step in energySteps" :key="step" type="button" class="icon-step"
-                  :class="{ 'active': step < energyLevel }" @click="energyLevel = step+1">
-                  <span class="step-emoji  hidden md:block" aria-hidden="true">🔋</span>
+              <div class="icon-row" role="group" aria-label="Indicadores visuais de energia">
+                <button 
+                  v-for="step in energySteps" 
+                  :key="step" 
+                  type="button" 
+                  class="icon-step"
+                  :class="{ 'active': step < energyLevel }" 
+                  @click="energyLevel = step + 1"
+                  :aria-label="`Nível ${step + 1} de energia`"
+                >
+                  <span class="step-emoji hidden md:block" aria-hidden="true">🔋</span>
                 </button>
               </div>
             </div>
-            <input type="range" min="1" :max="energyMax" step="1" v-model.number="energyLevel" class="w-full slider" />
-            <div class="flex justify-between text-sm mt-2 text-gray-600">
-              <span>Baixa</span>
-              <span>Moderada</span>
-              <span>Alta</span>
+            <input 
+              type="range" 
+              :min="energyConfig.min" 
+              :max="energyConfig.max" 
+              step="1" 
+              v-model.number="energyLevel" 
+              class="w-full slider"
+              :aria-label="`Nível de energia: ${energyLevel} de ${energyConfig.max}`"
+              :aria-valuemin="energyConfig.min"
+              :aria-valuemax="energyConfig.max"
+              :aria-valuenow="energyLevel"
+            />
+            <div class="flex justify-between text-sm mt-2 text-gray-600" aria-hidden="true">
+              <span v-for="label in energyConfig.labels" :key="label">{{ label }}</span>
             </div>
           </div>
-          <div class="w-full md:w-36 text-center display-area mt-6 md:mt-0">
-            <div class="display-emoji">🔋</div>
-            <div class="font-semibold display-value">{{ energyLevel }} / {{ energyMax }}</div>
+          <div class="w-full md:w-36 text-center display-area mt-6 md:mt-0" aria-live="polite">
+            <div class="display-emoji" aria-hidden="true">🔋</div>
+            <div class="font-semibold display-value">{{ energyLevel }} / {{ energyConfig.max }}</div>
           </div>
         </div>
-      </div>
+      </fieldset>
 
-  <!-- Controle de stress com icones de alerta -->
-      <div class="bg-yellow-50 rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">Nível de Stress</h2>
+      <!-- Controle de stress com icones de alerta -->
+      <fieldset class="bg-yellow-50 rounded-lg shadow-sm border border-gray-200 p-6">
+        <legend class="text-xl font-semibold text-gray-900 mb-6 text-center w-full">Nível de Stress</legend>
         <div class="flex flex-col md:flex-row items-center md:space-x-4">
           <div class="w-full">
             <div class="mb-3">
-              <div class="icon-row">
-                <button v-for="step in stressSteps" :key="step" type="button" class="icon-step"
-                  :class="{ 'active': step < stressLevel }" @click="stressLevel = step+1">
-                  <span class="step-emoji  hidden md:block" aria-hidden="true">😤</span>
+              <div class="icon-row" role="group" aria-label="Indicadores visuais de stress">
+                <button 
+                  v-for="step in stressSteps" 
+                  :key="step" 
+                  type="button" 
+                  class="icon-step"
+                  :class="{ 'active': step < stressLevel }" 
+                  @click="stressLevel = step + 1"
+                  :aria-label="`Nível ${step + 1} de stress`"
+                >
+                  <span class="step-emoji hidden md:block" aria-hidden="true">😤</span>
                 </button>
               </div>
             </div>
-            <input type="range" min="1" :max="stressMax" step="1" v-model.number="stressLevel" class="w-full slider" />
-            <div class="flex justify-between text-sm mt-2 text-gray-600">
-              <span>Calmo</span>
-              <span>Moderado</span>
-              <span>Alto</span>
+            <input 
+              type="range" 
+              :min="stressConfig.min" 
+              :max="stressConfig.max" 
+              step="1" 
+              v-model.number="stressLevel" 
+              class="w-full slider"
+              :aria-label="`Nível de stress: ${stressLevel} de ${stressConfig.max}`"
+              :aria-valuemin="stressConfig.min"
+              :aria-valuemax="stressConfig.max"
+              :aria-valuenow="stressLevel"
+            />
+            <div class="flex justify-between text-sm mt-2 text-gray-600" aria-hidden="true">
+              <span v-for="label in stressConfig.labels" :key="label">{{ label }}</span>
             </div>
           </div>
-          <div class="w-full md:w-36 text-center display-area mt-6 md:mt-0">
-            <div class="display-emoji">😤</div>
-            <div class="font-semibold display-value">{{ stressLevel }} / {{ stressMax }}</div>
+          <div class="w-full md:w-36 text-center display-area mt-6 md:mt-0" aria-live="polite">
+            <div class="display-emoji" aria-hidden="true">😤</div>
+            <div class="font-semibold display-value">{{ stressLevel }} / {{ stressConfig.max }}</div>
           </div>
         </div>
-      </div>
+      </fieldset>
 
-      <div class="bg-green-200 rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6">Atividades de Autocuidado realizadas hoje</h2>
+      <fieldset class="bg-green-200 rounded-lg shadow-sm border border-gray-200 p-6">
+        <legend class="text-xl font-semibold text-gray-900 mb-6">Atividades de Autocuidado realizadas hoje</legend>
         <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <label v-for="activity in selfCareActivities" :key="activity"
-            class="flex items-center space-x-3 text-black cursor-pointer">
+          <label 
+            v-for="activity in selfCareActivities" 
+            :key="activity"
+            class="flex items-center space-x-3 text-black cursor-pointer"
+          >
             <input type="checkbox" :value="activity" v-model="selectedActivities" class="hidden peer" />
-            <span class="w-7 h-7 border-2 border-gray-300/70 rounded-lg bg-white inline-flex items-center justify-center transition-all duration-150 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 peer-checked:-translate-y-0.5">
-              <svg v-if="selectedActivities.includes(activity)" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 6L9 17L4 12" stroke="white" stroke-width="2.5" stroke-linecap="round"
-                  stroke-linejoin="round" />
+            <span class="w-7 h-7 border-2 border-gray-300/70 rounded-lg bg-white inline-flex items-center justify-center transition-all duration-150 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 peer-checked:-translate-y-0.5" aria-hidden="true">
+              <svg v-if="selectedActivities.includes(activity)" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 6L9 17L4 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </span>
             <span>{{ activity }}</span>
           </label>
           <div class="col-span-2 md:col-span-1">
-            <input type="text" v-model="otherActivity" placeholder="Outra atividade..."
-              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-white focus:border-emerald-500 outline-none transition-colors text-gray-900 placeholder-gray-500">
+            <label for="other-activity" class="sr-only">Outra atividade</label>
+            <input 
+              type="text" 
+              id="other-activity"
+              v-model="otherActivity" 
+              placeholder="Outra atividade..."
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-white focus:border-emerald-500 outline-none transition-colors text-gray-900 placeholder-gray-500"
+            />
           </div>
         </div>
-      </div>
+      </fieldset>
 
-      <div class="bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6">Anotação Diária (Opcional)</h2>
-        <p class="text-sm text-black mb-4">Escreva sobre seus pensamentos, sentimentos ou o que marcou seu dia. Isso
-          ajudará você e seu profissional a entenderem o contexto do seu bem-estar.</p>
-        <textarea v-model="notes" rows="6" placeholder="Sobre o que gostaria de comentar?"
-          class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-white focus:border-emerald-500 outline-none transition-colors"></textarea>
-      </div>
+      <fieldset class="bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-6">
+        <legend class="text-xl font-semibold text-gray-900 mb-6">Anotação Diária (Opcional)</legend>
+        <p class="text-sm text-black mb-4">Escreva sobre seus pensamentos, sentimentos ou o que marcou seu dia. Isso ajudará você e seu profissional a entenderem o contexto do seu bem-estar.</p>
+        <label for="notes" class="sr-only">Anotação diária</label>
+        <textarea 
+          id="notes"
+          v-model="notes" 
+          rows="6" 
+          placeholder="Sobre o que gostaria de comentar?"
+          class="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-white focus:border-emerald-500 outline-none transition-colors"
+        ></textarea>
+      </fieldset>
 
       <div class="flex justify-end">
-        <button type="submit"
-          class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 outline-none">
-          Registrar Humor
+        <button 
+          type="submit"
+          :disabled="isSubmitting || !isValid"
+          :aria-busy="isSubmitting"
+          class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span v-if="isSubmitting">Registrando...</span>
+          <span v-else>Registrar Humor</span>
         </button>
       </div>
     </form>
@@ -152,89 +223,39 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useToast } from "vue-toastification";
-import api from '../../services/api';
+import { useMoodForm } from '@/composables/useMoodForm';
 
-const toast = useToast();
-
-// Selecoes principais do formulario
-const selectedMood = ref('');
-const sleepHours = ref(0);
-const energyLevel = ref(6);
-const stressLevel = ref(6);
-const selectedEmotions = ref([]);
-const otherEmotion = ref('');
-const selectedActivities = ref([]);
-const otherActivity = ref('');
-const notes = ref('');
-
-// Configuracao discreta dos sliders com numero de passos
-const sleepMax = 12;
-const energyMax = 10;
-const stressMax = 10;
-
-// Arrays utilizados para montar as linhas de icones passo a passo
-const sleepSteps = Array.from({ length: sleepMax + 1 }, (_, i) => i);
-const energySteps = Array.from({ length: energyMax }, (_, i) => i);
-const stressSteps = Array.from({ length: stressMax }, (_, i) => i);
-
-const moodOptions = [
-  { value: 'very_bad', label: 'Muito Mal', emoji: '😖' },
-  { value: 'bad', label: 'Aborrecido', emoji: '😕' },
-  { value: 'neutral', label: 'Neutro', emoji: '😐' },
-  { value: 'cheerful', label: 'Animado', emoji: '😊' },
-  { value: 'very_good', label: 'Muito Bem', emoji: '😁' },
-];
-
-// Svg detalhado utilizado para destacar o indicador de stress na area maior
-
-const today = new Date();
-const currentDate = computed(() => today.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' }));
-const currentDay = computed(() => today.toLocaleDateString('pt-BR', { weekday: 'long' }));
-
-const selfCareActivities = ['Leitura', 'Exercício', 'Medicação', 'Yoga', 'Meditação', 'Música', 'Hobbies', 'Nenhuma Atividade'];
-
-const sleepLabel = computed(() => (sleepHours.value >= sleepMax ? '12h+' : sleepHours.value + 'h'));
-
-const moodLevelMapping = {
-  'very_bad': 1,
-  'bad': 2,
-  'neutral': 3,
-  'cheerful': 4,
-  'very_good': 5
-};
-
-const submitMood = async () => {
-  if (!selectedMood.value) {
-    toast.warning('Por favor, selecione seu humor principal antes de registrar.');
-    return;
-  }
-
-  let finalActivities = [...selectedActivities.value];
-  if (otherActivity.value) finalActivities.push(otherActivity.value);
-  if (finalActivities.includes('Nenhuma Atividade')) finalActivities = ['Nenhuma Atividade'];
-
-  // Objeto padronizado para corresponder ao dto do backend
-  const submission = {
-    nivel_humor: moodLevelMapping[selectedMood.value],
-    horas_sono: sleepHours.value > sleepMax ? sleepMax : sleepHours.value,
-    nivel_energia: energyLevel.value > energyMax ? energyMax : energyLevel.value,
-    nivel_stress: stressLevel.value > stressMax ? stressMax : stressLevel.value,
-    auto_cuidado: finalActivities,
-    observacoes: notes.value,
-    data_hora_registro: new Date().toISOString(),
-  };
-
-  try {
-    await api.registrarHumor(submission);
-    toast.success('Seu humor foi registrado com sucesso!');
-    // Opcional limpar o formulario ou navegar para outra pagina
-  } catch (error) {
-    toast.error('Houve um erro ao registrar seu humor.');
-    console.error("Erro ao registrar humor:", error);
-  }
-};
+// Desestrutura todos os estados, configs e métodos do composable
+const {
+  // Estado do formulário
+  selectedMood,
+  sleepHours,
+  energyLevel,
+  stressLevel,
+  selectedActivities,
+  otherActivity,
+  notes,
+  isSubmitting,
+  
+  // Configurações
+  moodOptions,
+  selfCareActivities,
+  sleepConfig,
+  energyConfig,
+  stressConfig,
+  sleepSteps,
+  energySteps,
+  stressSteps,
+  
+  // Computed
+  sleepLabel,
+  currentDate,
+  currentDay,
+  isValid,
+  
+  // Métodos
+  submit
+} = useMoodForm();
 </script>
 
 <style scoped>

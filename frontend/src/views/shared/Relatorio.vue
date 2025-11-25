@@ -1,20 +1,32 @@
 <template>
   <div class="flex-1 p-4 md:p-8 w-full">
+    <!-- Botão voltar para profissional -->
+    <button 
+      v-if="userType === TipoUsuario.Profissional && patientId"
+      @click="goBack"
+      class="mb-6 flex items-center text-sm font-medium text-rose-600 hover:text-rose-800 transition-colors"
+      aria-label="Voltar para a lista de pacientes"
+    >
+      <font-awesome-icon :icon="faArrowLeft" class="mr-2" aria-hidden="true" />
+      Voltar para a lista de pacientes
+    </button>
+
     <header class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900">Relatórios de Bem-Estar</h1>
       <p class="text-gray-600 mt-1">Analise suas tendências de humor, sono e energia ao longo do tempo.</p>
     </header>
 
     <!-- Filtros de Período -->
-    <div class="mb-8 flex justify-center md:justify-start space-x-2">
+    <div class="mb-8 flex justify-center md:justify-start space-x-2" role="group" aria-label="Filtro de período">
       <button v-for="range in timeRanges" :key="range.days" @click="selectedRange = range.days"
+        :aria-pressed="selectedRange === range.days"
         :class="['px-4 py-2 rounded-md font-medium text-sm transition-colors', selectedRange === range.days ? 'bg-emerald-50 text-emerald-700 shadow-sm' : 'bg-white text-gray-600 hover:bg-gray-100 shadow-sm border border-gray-200 hover:text-gray-900']">
         {{ range.label }}
       </button>
     </div>
 
     <!-- Cards de Estatísticas -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" aria-label="Estatísticas resumidas">
       <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <h3 class="text-gray-500 text-sm font-medium mb-2">Média de Sono</h3>
         <p class="text-3xl font-bold text-blue-600">{{ avgSleep }} <span class="text-lg font-medium">horas/noite</span>
@@ -31,7 +43,7 @@
     </section>
 
     <!-- Gráficos -->
-    <section class="space-y-8">
+    <section class="space-y-8" aria-label="Gráficos de tendências">
       <div class="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
         <h3 class="font-semibold text-lg text-gray-900 mb-4">Horas de Sono</h3>
         <apexchart type="area" height="350" :options="sleepChartOptions" :series="sleepSeries"></apexchart>
@@ -50,13 +62,16 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import api from '../../services/api';
+import { useRouter } from 'vue-router';
+import api from '@/services/api';
 import { useToast } from 'vue-toastification';
-import { TipoUsuario } from '../../types/usuario.js';
+import { TipoUsuario } from '@/types/usuario.js';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 const props = defineProps({
   patientId: {
-    type: Number,
+    type: [Number, String],
     default: null, // ID do paciente, usado pelo profissional
   },
   userType: {
@@ -66,6 +81,7 @@ const props = defineProps({
   }
 });
 
+const router = useRouter();
 const toast = useToast();
 
 // --- ESTADO DO COMPONENTE ---
@@ -89,6 +105,11 @@ const moodOptions = [
   {label: 'Animado', emoji: '😊' },
   {label: 'Muito Bem', emoji: '😁' },
 ];
+
+// Navegação
+const goBack = () => {
+  router.push({ name: 'profissional-pacientes' });
+};
 
 // --- DADOS PROCESSADOS PARA OS GRÁFICOS ---
 const chartData = computed(() => {

@@ -1,14 +1,15 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import api from '../services/api';
-import router from '../router';
-import { TipoUsuario, isProfissional, isPaciente } from '../types/usuario.js';
+import api from '@/services/api';
+import router from '@/router';
+import { TipoUsuario, isProfissional, isPaciente } from '@/types/usuario.js';
+import { parseJwt, getStoredToken, setToken, clearToken } from '@/utils/jwt.js';
 
 export const useUserStore = defineStore('user', () => {
   // estado centralizado do usuario autenticado
   // --- STATE ---
   const user = ref(null);
-  const isAuthenticated = ref(!!localStorage.getItem('token'));
+  const isAuthenticated = ref(!!getStoredToken());
 
   // --- GETTERS (como computed properties) ---
   const isLoggedIn = computed(() => isAuthenticated.value);
@@ -75,7 +76,7 @@ export const useUserStore = defineStore('user', () => {
 
       // Armazena o token retornado no localStorage
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+        setToken(response.data.token);
         isAuthenticated.value = true;
       }
 
@@ -96,18 +97,19 @@ export const useUserStore = defineStore('user', () => {
       
       // Armazena o token retornado no localStorage
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
+        setToken(response.data.token);
         isAuthenticated.value = true;
 
         // Decodifica o token para obter o tipo de usuário
-        const token = response.data.token;
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = parseJwt(response.data.token);
         
         // Agora o role vem como string: "profissional" ou "paciente"
-        const role = payload.role;
+        const role = payload?.role;
 
         // Busca os dados completos do usuário
-        await fetchUser(role);
+        if (role) {
+          await fetchUser(role);
+        }
       }
 
       return response;
@@ -121,7 +123,7 @@ export const useUserStore = defineStore('user', () => {
    * Realiza o logout do usuario
    */
   function logout() {
-    localStorage.removeItem('token');
+    clearToken();
     user.value = null;
     isAuthenticated.value = false;
     router.push('/login');
