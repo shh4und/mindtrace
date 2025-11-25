@@ -176,3 +176,18 @@ func ConviteParaDTOOut(convite *dominio.Convite) *dtos.ConviteDTOOut {
 		CreatedAt:     convite.CreatedAt,
 	}
 }
+
+func InstrumentosParaDTOOut(instrumentos []*dominio.Instrumento) []dtos.InstrumentoDTOOut {
+	instrumentoDTOs := make([]dtos.InstrumentoDTOOut, len(instrumentos))
+
+	for i, inst := range instrumentos {
+		instrumentoDTOs[i] = dtos.InstrumentoDTOOut{
+			Codigo:    inst.Codigo,
+			Nome:      inst.Nome,
+			Descricao: inst.Descricao,
+			Versao:    inst.Versao,
+		}
+	}
+
+	return instrumentoDTOs
+}

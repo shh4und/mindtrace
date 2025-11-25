@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"mindtrace/backend/interno/aplicacao/dtos"
+	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
 
@@ -11,7 +13,7 @@ import (
 )
 
 type InstrumentoServico interface {
-	ListarInstrumentos(profID uint) ([]*dominio.Instrumento, error)
+	ListarInstrumentos(userID uint) ([]dtos.InstrumentoDTOOut, error)
 }
 
 type instrumentoServico struct {
@@ -28,10 +30,10 @@ func NovoInstrumentoServico(db *gorm.DB, instrumentoRepo repositorios.Instrument
 	}
 }
 
-func (is *instrumentoServico) ListarInstrumentos(profID uint) ([]*dominio.Instrumento, error) {
+func (is *instrumentoServico) ListarInstrumentos(userID uint) ([]dtos.InstrumentoDTOOut, error) {
 	var instrumentos []*dominio.Instrumento
 	// Checar a existencia do profissional
-	_, err := is.usuarioRepo.BuscarProfissionalPorID(is.db, profID)
+	_, err := is.usuarioRepo.BuscarProfissionalPorUsuarioID(is.db, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, dominio.ErrUsuarioNaoEncontrado
@@ -53,5 +55,5 @@ func (is *instrumentoServico) ListarInstrumentos(profID uint) ([]*dominio.Instru
 		}
 	}
 
-	return instrumentos, nil
+	return mappers.InstrumentosParaDTOOut(instrumentos), nil
 }

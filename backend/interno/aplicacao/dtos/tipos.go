@@ -163,3 +163,10 @@ type ConviteDTOOut struct {
 	Usado         bool      `json:"usado"`
 	CreatedAt     time.Time `json:"created_at"`
 }
+
+type InstrumentoDTOOut struct {
+	Codigo    string `json:"codigo"`
+	Nome      string `json:"nome"`
+	Descricao string `json:"descricao"`
+	Versao    int    `json:"versao"`
+}

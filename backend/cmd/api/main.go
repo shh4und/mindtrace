@@ -59,7 +59,7 @@ func main() {
 	var usuarioRepo repositorios.UsuarioRepositorio
 	var registroHumorRepo repositorios.RegistroHumorRepositorio
 	var conviteRepo repositorios.ConviteRepositorio
-	// var instrumentoRepo repositorios.InstrumentoRepositorio
+	var instrumentoRepo repositorios.InstrumentoRepositorio
 
 	// Seleciona implementacoes de repositorio conforme driver ativo
 	switch dbDriver {
@@ -82,7 +82,7 @@ func main() {
 	registroHumorSvc := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo, analiseSvc)
 	resumoSvc := servicos.NovoResumoServico(db, registroHumorRepo, usuarioRepo)
 	conviteSvc := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo)
-	// instrumentoSvc := servicos.NovoInstrumentoServico(db, instrumentoRepo,)
+	instrumentoSvc := servicos.NovoInstrumentoServico(db, instrumentoRepo, usuarioRepo)
 
 	// Inicializa controladores
 	profissionalCtrl := controladores.NovoProfissionalControlador(usuarioSvc)
@@ -132,8 +132,7 @@ func main() {
 				usuarios.GET("/profissional", profissionalCtrl.ProprioPerfilProfissional)
 				usuarios.GET("/profissional/pacientes", usuarioCtrl.ListarPacientesDoProfissional)
 				usuarios.PUT("/perfil", usuarioCtrl.AtualizarPerfil)
-				usuarios.PUT("/perfil/alterar-senha", usuarioCtrl.AlterarSenha) // CONSERTAR
-				// PARA FAZER - URGENTE
+				usuarios.PUT("/perfil/alterar-senha", usuarioCtrl.AlterarSenha)
 				usuarios.DELETE("/perfil/apagar-conta", usuarioCtrl.DeletarPerfil)
 			}
 
@@ -161,6 +160,11 @@ func main() {
 			{
 				convites.POST("/gerar", conviteCtrl.GerarConvite)
 				convites.POST("/vincular", conviteCtrl.VincularPaciente)
+			}
+
+			instrumentos := protegido.Group("/instrumentos")
+			{
+				instrumentos.GET("/listar-instrumentos", instrumentoCtrl.ListarInstrumentos)
 			}
 		}
 	}
