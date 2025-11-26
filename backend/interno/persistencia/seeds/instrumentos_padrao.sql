@@ -140,38 +140,38 @@ ON CONFLICT (instrumento_id, ordem_item, dominio, conteudo) DO NOTHING;
 
 -- ================= GAD-7 =================
 
-INSERT INTO perguntas (instrumento_id, ordem_item, conteudo, eh_pontuacao_invertida)
-SELECT id, 1, 'Sentir-se nervoso, ansioso ou no limite', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
-SELECT id, 2, 'Não ser capaz de parar ou controlar as preocupações', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
-SELECT id, 3, 'Preocupar-se muito com diversas coisas', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
-SELECT id, 4, 'Dificuldade para relaxar', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
-SELECT id, 5, 'Ser tão inquieto que se torna difícil permanecer sentado', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
-SELECT id, 6, 'Ficar facilmente irritado ou irritável', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
-SELECT id, 7, 'Sentir medo como se algo horrível fosse acontecer', FALSE FROM instrumentos WHERE codigo = 'gad_7'
+INSERT INTO perguntas (instrumento_id, ordem_item, dominio, conteudo, eh_pontuacao_invertida)
+SELECT id, 1, '', 'Sentir-se nervoso, ansioso ou no limite', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
+SELECT id, 2, '', 'Não ser capaz de parar ou controlar as preocupações', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
+SELECT id, 3, '', 'Preocupar-se muito com diversas coisas', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
+SELECT id, 4, '', 'Dificuldade para relaxar', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
+SELECT id, 5, '', 'Ser tão inquieto que se torna difícil permanecer sentado', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
+SELECT id, 6, '', 'Ficar facilmente irritado ou irritável', FALSE FROM instrumentos WHERE codigo = 'gad_7' UNION ALL
+SELECT id, 7, '', 'Sentir medo como se algo horrível fosse acontecer', FALSE FROM instrumentos WHERE codigo = 'gad_7'
 ON CONFLICT (instrumento_id, ordem_item, dominio, conteudo) DO NOTHING;
 
 -- ================= PHQ-9 =================
 
-INSERT INTO perguntas (instrumento_id, ordem_item, conteudo, eh_pontuacao_invertida)
-SELECT id, 1, 'Pouco interesse ou pouco prazer em fazer as coisas', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
-SELECT id, 2, 'Se sentir "para baixo", deprimido/a ou sem perspectiva', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
-SELECT id, 3, 'Dificuldade para pegar no sono ou permanecer dormindo, ou dormir mais do que de costume', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
-SELECT id, 4, 'Se sentir cansado/a ou com pouca energia', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
-SELECT id, 5, 'Falta de apetite ou comendo demais', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
-SELECT id, 6, 'Se sentir mal consigo mesmo/a ou achar que você é um fracasso ou que decepcionou sua família ou você mesmo/a', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
-SELECT id, 7, 'Dificuldade para se concentrar nas coisas, como ler o jornal ou ver televisão', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
-SELECT id, 8, 'Lentidão para se movimentar ou falar, a ponto das outras pessoas perceberem? Ou o oposto — estar tão agitado/a ou irrequieto/a', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
-SELECT id, 9, 'Pensar em se ferir de alguma maneira ou que seria melhor estar morto/a', FALSE FROM instrumentos WHERE codigo = 'phq_9'
+INSERT INTO perguntas (instrumento_id, ordem_item, dominio, conteudo, eh_pontuacao_invertida)
+SELECT id, 1, '', 'Pouco interesse ou pouco prazer em fazer as coisas', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
+SELECT id, 2, '', 'Se sentir "para baixo", deprimido/a ou sem perspectiva', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
+SELECT id, 3, '', 'Dificuldade para pegar no sono ou permanecer dormindo, ou dormir mais do que de costume', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
+SELECT id, 4, '', 'Se sentir cansado/a ou com pouca energia', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
+SELECT id, 5, '', 'Falta de apetite ou comendo demais', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
+SELECT id, 6, '', 'Se sentir mal consigo mesmo/a ou achar que você é um fracasso ou que decepcionou sua família ou você mesmo/a', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
+SELECT id, 7, '', 'Dificuldade para se concentrar nas coisas, como ler o jornal ou ver televisão', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
+SELECT id, 8, '', 'Lentidão para se movimentar ou falar, a ponto das outras pessoas perceberem? Ou o oposto — estar tão agitado/a ou irrequieto/a', FALSE FROM instrumentos WHERE codigo = 'phq_9' UNION ALL
+SELECT id, 9, '', 'Pensar em se ferir de alguma maneira ou que seria melhor estar morto/a', FALSE FROM instrumentos WHERE codigo = 'phq_9'
 ON CONFLICT (instrumento_id, ordem_item, dominio, conteudo) DO NOTHING;
 
 -- ================= WHO-5 =================
 
-INSERT INTO perguntas (instrumento_id, ordem_item, conteudo, eh_pontuacao_invertida)
-SELECT id, 1, 'Senti-me alegre e bem-disposto', FALSE FROM instrumentos WHERE codigo = 'who_5' UNION ALL
-SELECT id, 2, 'Senti-me calmo e relaxado', FALSE FROM instrumentos WHERE codigo = 'who_5' UNION ALL
-SELECT id, 3, 'Senti-me ativo e vigoroso', FALSE FROM instrumentos WHERE codigo = 'who_5' UNION ALL
-SELECT id, 4, 'Acordei a sentir-me fresco e descansado', FALSE FROM instrumentos WHERE codigo = 'who_5' UNION ALL
-SELECT id, 5, 'A minha vida diária tem sido preenchida por coisas que me interessam', FALSE FROM instrumentos WHERE codigo = 'who_5'
+INSERT INTO perguntas (instrumento_id, ordem_item, dominio, conteudo, eh_pontuacao_invertida)
+SELECT id, 1, '', 'Senti-me alegre e bem-disposto', FALSE FROM instrumentos WHERE codigo = 'who_5' UNION ALL
+SELECT id, 2, '', 'Senti-me calmo e relaxado', FALSE FROM instrumentos WHERE codigo = 'who_5' UNION ALL
+SELECT id, 3, '', 'Senti-me ativo e vigoroso', FALSE FROM instrumentos WHERE codigo = 'who_5' UNION ALL
+SELECT id, 4, '', 'Acordei a sentir-me fresco e descansado', FALSE FROM instrumentos WHERE codigo = 'who_5' UNION ALL
+SELECT id, 5, '', 'A minha vida diária tem sido preenchida por coisas que me interessam', FALSE FROM instrumentos WHERE codigo = 'who_5'
 ON CONFLICT (instrumento_id, ordem_item, dominio, conteudo) DO NOTHING;
 
 COMMIT;

@@ -76,6 +76,9 @@ func main() {
 	// Instrumentos imutaveis seedados
 	seeds.ExecutarSeeds(db)
 
+	// Dados mock para ambiente de desenvolvimento
+	seeds.ExecutarSeedsMock(db)
+
 	// Inicializa servicos
 	usuarioSvc := servicos.NovoUsuarioServico(db, usuarioRepo)
 	analiseSvc := servicos.NovoAnaliseServico(db, registroHumorRepo, usuarioRepo)
@@ -93,6 +96,7 @@ func main() {
 	relatorioCtrl := controladores.NovoRelatorioControlador(analiseSvc)
 	resumoCtrl := controladores.NovoResumoControlador(resumoSvc)
 	conviteCtrl := controladores.NovoConviteControlador(conviteSvc)
+	instrumentoCtrl := controladores.NovoInstrumentoControlador(instrumentoSvc)
 
 	// Configura roteador http com middlewares e grupos de rotas
 	roteador := gin.Default()

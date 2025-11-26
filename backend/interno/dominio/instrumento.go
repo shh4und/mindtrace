@@ -218,10 +218,10 @@ func (i *Instrumento) Validar() error {
 // Pergunta representa um item individual do instrumento
 type Pergunta struct {
 	ID                   uint   `gorm:"primaryKey"`
-	InstrumentoID        uint   `gorm:"not null;index;column:instrumento_id"`
-	OrdemItem            int    `gorm:"not null;column:ordem_item"`
-	Dominio              string `gorm:"size:100;column:dominio"`
-	Conteudo             string `gorm:"type:text;not null;column:conteudo"`
+	InstrumentoID        uint   `gorm:"not null;index;column:instrumento_id;uniqueIndex:idx_pergunta_unica,priority:1"`
+	OrdemItem            int    `gorm:"not null;column:ordem_item;uniqueIndex:idx_pergunta_unica,priority:2"`
+	Dominio              string `gorm:"size:100;column:dominio;uniqueIndex:idx_pergunta_unica,priority:3"`
+	Conteudo             string `gorm:"type:text;not null;column:conteudo;uniqueIndex:idx_pergunta_unica,priority:4"`
 	EhPontuacaoInvertida bool   `gorm:"default:false;column:eh_pontuacao_invertida"`
 }
 
@@ -276,9 +276,9 @@ func (p *Pergunta) Validar(codigoInstrumento string) error {
 // OpcaoEscala define as respostas possíveis (Likert)
 type OpcaoEscala struct {
 	ID            uint   `gorm:"primaryKey"`
-	InstrumentoID uint   `gorm:"not null;index;column:instrumento_id"`
-	Valor         int    `gorm:"not null;column:valor"`
-	Rotulo        string `gorm:"not null;column:rotulo"`
+	InstrumentoID uint   `gorm:"not null;index;column:instrumento_id;uniqueIndex:idx_opcao_escala_unica,priority:1"`
+	Valor         int    `gorm:"not null;column:valor;uniqueIndex:idx_opcao_escala_unica,priority:2"`
+	Rotulo        string `gorm:"not null;column:rotulo;uniqueIndex:idx_opcao_escala_unica,priority:3"`
 }
 
 func (OpcaoEscala) TableName() string {
