@@ -177,7 +177,7 @@ SELECT
     vals.horas_sono,
     vals.nivel_energia,
     vals.nivel_stress,
-    vals.auto_cuidado,
+    vals.auto_cuidado::jsonb,
     vals.observacoes,
     vals.data_hora_registro,
     vals.data_hora_registro
@@ -185,24 +185,24 @@ FROM pacientes pac
 JOIN usuarios u ON pac.usuario_id = u.id
 CROSS JOIN (
     VALUES
-        (4, 7, 7, 3, 'Meditação pela manhã', 'Dia produtivo no trabalho', (CURRENT_TIMESTAMP - INTERVAL '14 days')),
-        (3, 6, 6, 5, 'Caminhada leve', 'Reunião estressante', (CURRENT_TIMESTAMP - INTERVAL '13 days')),
-        (4, 8, 8, 2, 'Yoga e leitura', 'Final de semana relaxante', (CURRENT_TIMESTAMP - INTERVAL '12 days')),
-        (5, 8, 7, 2, 'Academia e banho relaxante', 'Me senti muito bem hoje', (CURRENT_TIMESTAMP - INTERVAL '11 days')),
-        (3, 5, 5, 6, 'Assistir série', 'Insônia leve', (CURRENT_TIMESTAMP - INTERVAL '10 days')),
-        (2, 4, 4, 7, 'Nenhum', 'Dia difícil, muita ansiedade', (CURRENT_TIMESTAMP - INTERVAL '9 days')),
-        (3, 6, 6, 5, 'Conversa com amigos', 'Melhorando aos poucos', (CURRENT_TIMESTAMP - INTERVAL '8 days')),
-        (4, 7, 7, 4, 'Meditação guiada', 'Sessão de terapia hoje', (CURRENT_TIMESTAMP - INTERVAL '7 days')),
-        (4, 7, 8, 3, 'Cozinhar algo especial', 'Dia tranquilo', (CURRENT_TIMESTAMP - INTERVAL '6 days')),
-        (5, 8, 8, 2, 'Passeio no parque', 'Ótimo humor!', (CURRENT_TIMESTAMP - INTERVAL '5 days')),
-        (4, 7, 7, 3, 'Leitura antes de dormir', 'Rotina estável', (CURRENT_TIMESTAMP - INTERVAL '4 days')),
-        (3, 6, 5, 5, 'Música relaxante', 'Um pouco cansada', (CURRENT_TIMESTAMP - INTERVAL '3 days')),
-        (4, 7, 7, 3, 'Alongamento', 'Bom dia de trabalho', (CURRENT_TIMESTAMP - INTERVAL '2 days')),
-        (4, 8, 8, 2, 'Skincare completo', 'Me sentindo bem', (CURRENT_TIMESTAMP - INTERVAL '1 day')),
-        (5, 8, 7, 2, 'Academia pela manhã', 'Excelente dia!', CURRENT_TIMESTAMP)
+        (4, 7, 7, 3, '["Meditação"]', 'Dia produtivo no trabalho', (CURRENT_TIMESTAMP - INTERVAL '14 days')),
+        (3, 6, 6, 5, '["Caminhada"]', 'Reunião estressante', (CURRENT_TIMESTAMP - INTERVAL '13 days')),
+        (4, 8, 8, 2, '["Yoga", "Leitura"]', 'Final de semana relaxante', (CURRENT_TIMESTAMP - INTERVAL '12 days')),
+        (5, 8, 7, 2, '["Academia", "Banho relaxante"]', 'Me senti muito bem hoje', (CURRENT_TIMESTAMP - INTERVAL '11 days')),
+        (3, 5, 5, 6, '["Assistir série"]', 'Insônia leve', (CURRENT_TIMESTAMP - INTERVAL '10 days')),
+        (2, 4, 4, 7, '[]', 'Dia difícil, muita ansiedade', (CURRENT_TIMESTAMP - INTERVAL '9 days')),
+        (3, 6, 6, 5, '["Conversa com amigos"]', 'Melhorando aos poucos', (CURRENT_TIMESTAMP - INTERVAL '8 days')),
+        (4, 7, 7, 4, '["Meditação guiada"]', 'Sessão de terapia hoje', (CURRENT_TIMESTAMP - INTERVAL '7 days')),
+        (4, 7, 8, 3, '["Cozinhar"]', 'Dia tranquilo', (CURRENT_TIMESTAMP - INTERVAL '6 days')),
+        (5, 8, 8, 2, '["Passeio no parque"]', 'Ótimo humor!', (CURRENT_TIMESTAMP - INTERVAL '5 days')),
+        (4, 7, 7, 3, '["Leitura"]', 'Rotina estável', (CURRENT_TIMESTAMP - INTERVAL '4 days')),
+        (3, 6, 5, 5, '["Música"]', 'Um pouco cansada', (CURRENT_TIMESTAMP - INTERVAL '3 days')),
+        (4, 7, 7, 3, '["Alongamento"]', 'Bom dia de trabalho', (CURRENT_TIMESTAMP - INTERVAL '2 days')),
+        (4, 8, 8, 2, '["Skincare"]', 'Me sentindo bem', (CURRENT_TIMESTAMP - INTERVAL '1 day')),
+        (5, 8, 7, 2, '["Academia"]', 'Excelente dia!', CURRENT_TIMESTAMP)
 ) AS vals(nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro)
 WHERE u.email = 'ana.costa@mindtrace.dev'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro) DO NOTHING;
 
 -- Registros de Humor - Bruno Lima (15 dias)
 INSERT INTO registros_humor (paciente_id, nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro, created_at)
@@ -212,7 +212,7 @@ SELECT
     vals.horas_sono,
     vals.nivel_energia,
     vals.nivel_stress,
-    vals.auto_cuidado,
+    vals.auto_cuidado::jsonb,
     vals.observacoes,
     vals.data_hora_registro,
     vals.data_hora_registro
@@ -220,24 +220,24 @@ FROM pacientes pac
 JOIN usuarios u ON pac.usuario_id = u.id
 CROSS JOIN (
     VALUES
-        (3, 8, 6, 4, 'Jogar videogame', 'Prova difícil na escola', (CURRENT_TIMESTAMP - INTERVAL '14 days')),
-        (4, 9, 7, 3, 'Futebol com amigos', 'Dia legal na escola', (CURRENT_TIMESTAMP - INTERVAL '13 days')),
-        (4, 10, 8, 2, 'Dormir bastante', 'Sábado tranquilo', (CURRENT_TIMESTAMP - INTERVAL '12 days')),
-        (5, 9, 8, 2, 'Passear com cachorro', 'Domingo em família', (CURRENT_TIMESTAMP - INTERVAL '11 days')),
-        (3, 7, 5, 5, 'Assistir vídeos', 'Muita lição de casa', (CURRENT_TIMESTAMP - INTERVAL '10 days')),
-        (2, 6, 4, 7, 'Nenhum', 'Briga com colega', (CURRENT_TIMESTAMP - INTERVAL '9 days')),
-        (3, 7, 7, 5, 'Conversar com a mãe', 'Conversei sobre o problema', (CURRENT_TIMESTAMP - INTERVAL '8 days')),
-        (4, 8, 8, 3, 'Desenhar', 'Resolvido o problema', (CURRENT_TIMESTAMP - INTERVAL '7 days')),
-        (4, 8, 9, 3, 'Ler mangá', 'Dia normal', (CURRENT_TIMESTAMP - INTERVAL '6 days')),
-        (5, 9, 9, 2, 'Jogar bola', 'Feriado divertido', (CURRENT_TIMESTAMP - INTERVAL '5 days')),
-        (4, 8, 8, 3, 'Ouvir música', 'Voltando à rotina', (CURRENT_TIMESTAMP - INTERVAL '4 days')),
-        (3, 7, 6, 5, 'Ver série', 'Cansado da escola', (CURRENT_TIMESTAMP - INTERVAL '3 days')),
-        (4, 8, 8, 3, 'Jogar online com amigos', 'Dia bom', (CURRENT_TIMESTAMP - INTERVAL '2 days')),
-        (4, 8, 9, 2, 'Descansar', 'Bem disposto', (CURRENT_TIMESTAMP - INTERVAL '1 day')),
-        (5, 9, 8, 2, 'Esporte na escola', 'Ótimo dia!', CURRENT_TIMESTAMP)
+        (3, 8, 6, 4, '["Videogame"]', 'Prova difícil na escola', (CURRENT_TIMESTAMP - INTERVAL '14 days')),
+        (4, 9, 7, 3, '["Futebol"]', 'Dia legal na escola', (CURRENT_TIMESTAMP - INTERVAL '13 days')),
+        (4, 10, 8, 2, '["Dormir"]', 'Sábado tranquilo', (CURRENT_TIMESTAMP - INTERVAL '12 days')),
+        (5, 9, 8, 2, '["Passear com cachorro"]', 'Domingo em família', (CURRENT_TIMESTAMP - INTERVAL '11 days')),
+        (3, 7, 5, 5, '["Assistir vídeos"]', 'Muita lição de casa', (CURRENT_TIMESTAMP - INTERVAL '10 days')),
+        (2, 6, 4, 7, '[]', 'Briga com colega', (CURRENT_TIMESTAMP - INTERVAL '9 days')),
+        (3, 7, 7, 5, '["Conversar com a mãe"]', 'Conversei sobre o problema', (CURRENT_TIMESTAMP - INTERVAL '8 days')),
+        (4, 8, 8, 3, '["Desenhar"]', 'Resolvido o problema', (CURRENT_TIMESTAMP - INTERVAL '7 days')),
+        (4, 8, 9, 3, '["Ler mangá"]', 'Dia normal', (CURRENT_TIMESTAMP - INTERVAL '6 days')),
+        (5, 9, 9, 2, '["Jogar bola"]', 'Feriado divertido', (CURRENT_TIMESTAMP - INTERVAL '5 days')),
+        (4, 8, 8, 3, '["Ouvir música"]', 'Voltando à rotina', (CURRENT_TIMESTAMP - INTERVAL '4 days')),
+        (3, 7, 6, 5, '["Ver série"]', 'Cansado da escola', (CURRENT_TIMESTAMP - INTERVAL '3 days')),
+        (4, 8, 8, 3, '["Jogar online"]', 'Dia bom', (CURRENT_TIMESTAMP - INTERVAL '2 days')),
+        (4, 8, 9, 2, '["Descansar"]', 'Bem disposto', (CURRENT_TIMESTAMP - INTERVAL '1 day')),
+        (5, 9, 8, 2, '["Esporte"]', 'Ótimo dia!', CURRENT_TIMESTAMP)
 ) AS vals(nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro)
 WHERE u.email = 'bruno.lima@mindtrace.dev'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro) DO NOTHING;
 
 
 COMMIT;

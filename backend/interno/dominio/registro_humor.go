@@ -26,7 +26,7 @@ type RegistroHumor struct {
 	HorasSono        int16     `gorm:"not null;check:horas_sono >= 0 AND horas_sono <= 12"`
 	NivelEnergia     int16     `gorm:"not null;check:nivel_energia >= 1 and nivel_energia <= 10"`
 	NivelStress      int16     `gorm:"not null;check:nivel_stress >= 1 and nivel_stress <= 10"`
-	AutoCuidado      string    `gorm:"type:text;not null"`
+	AutoCuidado      string    `gorm:"type:jsonb;default:'[]';not null"`
 	Observacoes      string    `gorm:"type:text"`
 	DataHoraRegistro time.Time `gorm:"not null;default:CURRENT_TIMESTAMP"`
 	CreatedAt        time.Time
@@ -68,9 +68,6 @@ func (rh *RegistroHumor) ValidarNivelStress() error {
 func (rh *RegistroHumor) ValidarAutoCuidado() error {
 	if rh.AutoCuidado == "" {
 		return ErrAutoCuidadoVazio
-	}
-	if len(rh.AutoCuidado) < 3 {
-		return ErrAutoCuidadoInvalido
 	}
 	return nil
 }

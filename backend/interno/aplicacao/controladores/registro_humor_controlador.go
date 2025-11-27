@@ -4,7 +4,6 @@ import (
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,17 +18,6 @@ func NovoRegistroHumorControlador(us servicos.RegistroHumorServico) *RegistroHum
 	return &RegistroHumorControlador{registroHumorServico: us}
 }
 
-// CriarRegistroHumorRequest representa o payload da requisicao para criar um registro de humor
-type CriarRegistroHumorRequest struct {
-	NivelHumor       int16     `json:"nivel_humor" binding:"required,gte=1"`
-	HorasSono        int16     `json:"horas_sono" binding:"required,gte=0"`
-	NivelStress      int16     `json:"nivel_stress" binding:"required,gte=1"`
-	NivelEnergia     int16     `json:"nivel_energia" binding:"required,gte=1"`
-	AutoCuidado      string    `json:"auto_cuidado" binding:"required"`
-	Observacoes      string    `json:"observacoes"`
-	DataHoraRegistro time.Time `json:"data_hora_registro"`
-}
-
 // Criar cria um novo registro de humor para o usuario autenticado
 // Valida a entrada e chama o servico para criar o registro
 func (rhc *RegistroHumorControlador) Criar(c *gin.Context) {
@@ -38,29 +26,13 @@ func (rhc *RegistroHumorControlador) Criar(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
 		return
 	}
-	var req CriarRegistroHumorRequest
+	var req dtos.CriarRegistroHumorDTOIn
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 		return
 	}
 
-	// autoCuidadoJSON, err := json.Marshal(req.AutoCuidado)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"erro de marshaling": err.Error()})
-	// 	return // Retorna erro de marshaling
-	// }
-
-	dto := dtos.CriarRegistroHumorDTOIn{
-		NivelHumor:       req.NivelHumor,
-		HorasSono:        req.HorasSono,
-		NivelStress:      req.NivelStress,
-		NivelEnergia:     req.NivelEnergia,
-		AutoCuidado:      req.AutoCuidado,
-		Observacoes:      req.Observacoes,
-		DataHoraRegistro: req.DataHoraRegistro,
-	}
-
-	registro_humor, err := rhc.registroHumorServico.CriarRegistroHumor(dto, userID.(uint))
+	registro_humor, err := rhc.registroHumorServico.CriarRegistroHumor(&req, userID.(uint))
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})

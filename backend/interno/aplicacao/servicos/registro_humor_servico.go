@@ -12,7 +12,7 @@ import (
 
 // RegistroHumorServico define os metodos para gerenciamento de registros de humor
 type RegistroHumorServico interface {
-	CriarRegistroHumor(dto dtos.CriarRegistroHumorDTOIn, userID uint) (*dominio.RegistroHumor, error)
+	CriarRegistroHumor(dto *dtos.CriarRegistroHumorDTOIn, userID uint) (*dominio.RegistroHumor, error)
 }
 
 // registroHumorServico implementa a interface RegistroHumorServico
@@ -29,7 +29,7 @@ func NovoRegistroHumorServico(db *gorm.DB, repo repositorios.RegistroHumorReposi
 }
 
 // CriarRegistroHumor cria um novo registro de humor para o paciente
-func (rhs *registroHumorServico) CriarRegistroHumor(dto dtos.CriarRegistroHumorDTOIn, userID uint) (*dominio.RegistroHumor, error) {
+func (rhs *registroHumorServico) CriarRegistroHumor(dto *dtos.CriarRegistroHumorDTOIn, userID uint) (*dominio.RegistroHumor, error) {
 	var registroHumorRealizado *dominio.RegistroHumor
 
 	err := rhs.db.Transaction(func(tx *gorm.DB) error {
@@ -41,8 +41,10 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto dtos.CriarRegistroHumorD
 			return err
 		}
 
-		novoRegistroHumor := mappers.CriarRegistroHumorDTOInParaEntidade(&dto, paciente.ID)
-
+		novoRegistroHumor, err := mappers.CriarRegistroHumorDTOInParaEntidade(dto, paciente.ID)
+		if err != nil {
+			return err
+		}
 		// Validar o registro de humor antes de criar
 		if err := novoRegistroHumor.Validar(); err != nil {
 			return err

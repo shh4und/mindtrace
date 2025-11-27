@@ -66,7 +66,7 @@ export function useMoodForm() {
     
     // Se "Nenhuma Atividade" foi selecionada, retorna apenas ela
     if (activities.includes('Nenhuma Atividade')) {
-      return ['Nenhuma Atividade'];
+      return [];
     }
     
     return activities;

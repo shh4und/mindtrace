@@ -17,10 +17,10 @@ type LoginDTOIn struct {
 // CriarRegistroHumorDTOOut representa os dados para criar um registro de humor
 type CriarRegistroHumorDTOIn struct {
 	NivelHumor       int16     `json:"nivel_humor" binding:"required,min=1,max=5"`
-	HorasSono        int16     `json:"horas_sono" binding:"required,min=0,max=12"`
+	HorasSono        *int16    `json:"horas_sono" binding:"required,min=0,max=12"`
 	NivelStress      int16     `json:"nivel_stress" binding:"required,min=1,max=10"`
 	NivelEnergia     int16     `json:"nivel_energia" binding:"required,min=1,max=10"`
-	AutoCuidado      string    `json:"auto_cuidado" binding:"required"`
+	AutoCuidado      []string  `json:"auto_cuidado" binding:"required"`
 	Observacoes      string    `json:"observacoes"`
 	DataHoraRegistro time.Time `json:"data_hora_registro"`
 }

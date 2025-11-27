@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"encoding/json"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/dominio"
 )
@@ -152,17 +153,22 @@ func RegistrarPacienteDTOInParaEntidade(dto *dtos.RegistrarPacienteDTOIn) (*domi
 	return usuario, paciente
 }
 
-func CriarRegistroHumorDTOInParaEntidade(dto *dtos.CriarRegistroHumorDTOIn, pacienteID uint) *dominio.RegistroHumor {
+func CriarRegistroHumorDTOInParaEntidade(dto *dtos.CriarRegistroHumorDTOIn, pacienteID uint) (*dominio.RegistroHumor, error) {
+	autoCuidadoJSONB, err := json.Marshal(dto.AutoCuidado)
+	if err != nil {
+		return nil, err
+	}
+
 	return &dominio.RegistroHumor{
 		PacienteID:       pacienteID,
 		NivelHumor:       dto.NivelHumor,
-		HorasSono:        dto.HorasSono,
+		HorasSono:        *dto.HorasSono,
 		NivelEnergia:     dto.NivelEnergia,
 		NivelStress:      dto.NivelStress,
-		AutoCuidado:      dto.AutoCuidado,
+		AutoCuidado:      string(autoCuidadoJSONB),
 		Observacoes:      dto.Observacoes,
 		DataHoraRegistro: dto.DataHoraRegistro,
-	}
+	}, nil
 }
 
 func ConviteParaDTOOut(convite *dominio.Convite) *dtos.ConviteDTOOut {
