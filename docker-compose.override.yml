@@ -16,6 +16,7 @@ services:
       - DB_DB=${POSTGRES_DB}
       - JWT_SECRET=${JWT_SECRET}
       - DB_DRIVER=${DB_DRIVER}
+      - GO_ENV=${GO_ENV}
     ports:
       - "8080:8080"
     depends_on:
