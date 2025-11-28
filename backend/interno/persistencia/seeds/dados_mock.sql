@@ -202,7 +202,7 @@ CROSS JOIN (
         (5, 8, 7, 2, '["Academia"]', 'Excelente dia!', CURRENT_TIMESTAMP)
 ) AS vals(nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro)
 WHERE u.email = 'ana.costa@mindtrace.dev'
-ON CONFLICT (nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro) DO NOTHING;
+ON CONFLICT (paciente_id, nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes) DO NOTHING;
 
 -- Registros de Humor - Bruno Lima (15 dias)
 INSERT INTO registros_humor (paciente_id, nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro, created_at)
@@ -237,7 +237,7 @@ CROSS JOIN (
         (5, 9, 8, 2, '["Esporte"]', 'Ótimo dia!', CURRENT_TIMESTAMP)
 ) AS vals(nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro)
 WHERE u.email = 'bruno.lima@mindtrace.dev'
-ON CONFLICT (nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro) DO NOTHING;
+ON CONFLICT (paciente_id, nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes) DO NOTHING;
 
 
 COMMIT;

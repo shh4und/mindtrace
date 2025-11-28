@@ -46,7 +46,9 @@ func AutMiddleware() gin.HandlerFunc {
 			// Extrai o ID do usuario do token e coloca no contexto do Gin
 			// Facilita os controladores a identificar qual usuario fez a requisicao
 			userIDFloat := claims["sub"].(float64)
+			role := claims["role"]
 			c.Set("userID", uint(userIDFloat))
+			c.Set("tipo", role.(string))
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"erro": "Token inválido"})
 			return

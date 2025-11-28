@@ -20,14 +20,14 @@ var (
 // RegistroHumor armazena as entradas de humor do paciente.
 type RegistroHumor struct {
 	ID               uint      `gorm:"primaryKey"`
-	PacienteID       uint      `gorm:"not null"`
+	PacienteID       uint      `gorm:"not null;uniqueIndex:idx_registro_humor_completo"`
 	Paciente         Paciente  `gorm:"foreignKey:PacienteID;constraint:OnDelete:CASCADE"`
-	NivelHumor       int16     `gorm:"not null;check:nivel_humor >= 1 AND nivel_humor <= 5"`
-	HorasSono        int16     `gorm:"not null;check:horas_sono >= 0 AND horas_sono <= 12"`
-	NivelEnergia     int16     `gorm:"not null;check:nivel_energia >= 1 and nivel_energia <= 10"`
-	NivelStress      int16     `gorm:"not null;check:nivel_stress >= 1 and nivel_stress <= 10"`
-	AutoCuidado      string    `gorm:"type:jsonb;default:'[]';not null"`
-	Observacoes      string    `gorm:"type:text"`
+	NivelHumor       int16     `gorm:"not null;check:nivel_humor >= 1 AND nivel_humor <= 5;uniqueIndex:idx_registro_humor_completo"`
+	HorasSono        int16     `gorm:"not null;check:horas_sono >= 0 AND horas_sono <= 12;uniqueIndex:idx_registro_humor_completo"`
+	NivelEnergia     int16     `gorm:"not null;check:nivel_energia >= 1 and nivel_energia <= 10;uniqueIndex:idx_registro_humor_completo"`
+	NivelStress      int16     `gorm:"not null;check:nivel_stress >= 1 and nivel_stress <= 10;uniqueIndex:idx_registro_humor_completo"`
+	AutoCuidado      string    `gorm:"type:jsonb;default:'[]';not null;uniqueIndex:idx_registro_humor_completo"`
+	Observacoes      string    `gorm:"type:text;uniqueIndex:idx_registro_humor_completo"`
 	DataHoraRegistro time.Time `gorm:"not null;default:CURRENT_TIMESTAMP"`
 	CreatedAt        time.Time
 }

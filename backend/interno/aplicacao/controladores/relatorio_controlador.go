@@ -25,13 +25,17 @@ func (rc *RelatorioControlador) GerarRelatorio(c *gin.Context) {
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuario nao encontrado no token"})
 	}
+	tipoUsuario, exists := c.Get("tipo")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "tipo de usuario nao encontrado no token"})
+	}
 
 	periodoStr := c.DefaultQuery("periodo", "7")
 	periodo, err := strconv.Atoi(periodoStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Parametro 'periodo' invalido"})
 	}
-	relatorio, err := rc.analiseServico.GerarAnaliseHistorica(userID.(uint), int(periodo))
+	relatorio, err := rc.analiseServico.GerarAnaliseHistorica(userID.(uint), 0, tipoUsuario.(string), int(periodo))
 
 	if relatorio == nil {
 		if err != nil {
@@ -48,9 +52,13 @@ func (rc *RelatorioControlador) GerarRelatorio(c *gin.Context) {
 // GerarAnaliseHistorica gera um relatorio para um paciente especifico pelo profissional
 // Extrai o ID do paciente e periodo da query e chama o servico para gerar o relatorio
 func (rc *RelatorioControlador) GerarAnaliseHistorica(c *gin.Context) {
-	_, exists := c.Get("userID")
+	userID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID de usuario nao encontrado no token"})
+	}
+	tipoUsuario, exists := c.Get("tipo")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "tipo de usuario nao encontrado no token"})
 	}
 
 	pacienteIDStr := c.DefaultQuery("pacienteID", "0")
@@ -67,7 +75,7 @@ func (rc *RelatorioControlador) GerarAnaliseHistorica(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Parametro 'periodo' invalido"})
 	}
-	relatorio, err := rc.analiseServico.GerarAnaliseHistorica(uint(pacienteID), int(periodo))
+	relatorio, err := rc.analiseServico.GerarAnaliseHistorica(userID.(uint), uint(pacienteID), tipoUsuario.(string), int(periodo))
 
 	if relatorio == nil {
 		if err != nil {

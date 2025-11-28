@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"mindtrace/backend/interno/aplicacao/dtos"
+	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
 	"time"
 
@@ -18,7 +19,7 @@ const (
 
 type AnaliseServico interface {
 	// GerarAnaliseHistorica: Para o frontend desenhar gráficos (substitui GerarRelatorio)
-	GerarAnaliseHistorica(pacienteID uint, dias int) (*dtos.AnalisePacienteDTOOut, error)
+	GerarAnaliseHistorica(usuarioID, pacienteID uint, tipoUsuario string, dias int) (*dtos.AnalisePacienteDTOOut, error)
 
 	// ExecutarMonitoramento: Chamado automaticamente após novos registros ou via cron job
 	ExecutarMonitoramento(pacienteID uint) error
@@ -39,13 +40,25 @@ func NovoAnaliseServico(db *gorm.DB, regRepo repositorios.RegistroHumorRepositor
 	}
 }
 
-func (s *analiseServico) GerarAnaliseHistorica(pacienteID uint, dias int) (*dtos.AnalisePacienteDTOOut, error) {
+func (s *analiseServico) GerarAnaliseHistorica(usuarioID, pacienteID uint, tipoUsuario string, dias int) (*dtos.AnalisePacienteDTOOut, error) {
 	if dias <= 0 || dias > 90 {
 		return nil, errors.New("periodo invalido")
 	}
 
 	now := time.Now()
 	dataInicio := now.AddDate(0, 0, -dias)
+
+	if dominio.StringParaTipoUsuario(tipoUsuario) == dominio.TipoUsuarioPaciente && pacienteID == 0 {
+		pacienteInfo, err := s.usuarioRepo.BuscarPacientePorUsuarioID(s.db, usuarioID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, dominio.ErrUsuarioNaoEncontrado
+			}
+			return nil, err
+		}
+
+		pacienteID = pacienteInfo.ID
+	}
 
 	registros, err := s.registroRepo.BuscarPorPacienteEPeriodo(pacienteID, dataInicio, now)
 	if err != nil {
