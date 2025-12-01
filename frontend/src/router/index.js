@@ -15,6 +15,8 @@ const PacienteHumor = () => import('@/views/dashboard-paciente/RegistroHumor.vue
 const PacienteRelatorio = () => import('@/views/shared/Relatorio.vue')
 const PacienteVincular = () => import('@/views/dashboard-paciente/VincularProfissional.vue')
 const PacienteEditarPerfil = () => import('@/views/shared/EditarPerfil.vue')
+const PacienteQuestionarios = () => import('@/views/dashboard-paciente/QuestionariosPendentes.vue')
+const PacienteResponderQuestionario = () => import('@/views/dashboard-paciente/ResponderQuestionario.vue')
 
 // Dashboard Profissional e suas views
 const ProfissionalDashboard = () => import('@/views/dashboard-profissional/ProfissionalDashboard.vue')
@@ -22,6 +24,7 @@ const ProfissionalPacientes = () => import('@/views/dashboard-profissional/Lista
 const ProfissionalConvite = () => import('@/views/dashboard-profissional/GerarConvite.vue')
 const ProfissionalEditarPerfil = () => import('@/views/shared/EditarPerfil.vue')
 const ProfissionalRelatorio = () => import('@/views/shared/Relatorio.vue')
+const ProfissionalAtribuirQuestionario = () => import('@/views/dashboard-profissional/AtribuirQuestionario.vue')
 
 // configura roteador principal com historico html5 baseado na base url do ambiente
 const router = createRouter({
@@ -78,6 +81,16 @@ const router = createRouter({
           component: PacienteVincular
         },
         {
+          path: 'questionarios',
+          name: 'paciente-questionarios',
+          component: PacienteQuestionarios
+        },
+        {
+          path: 'questionarios/:atribuicaoId/responder',
+          name: 'paciente-responder-questionario',
+          component: PacienteResponderQuestionario
+        },
+        {
           path: 'editar-perfil',
           name: 'paciente-editar-perfil',
           component: PacienteEditarPerfil,
@@ -111,6 +124,11 @@ const router = createRouter({
           path: 'convite',
           name: 'profissional-convite',
           component: ProfissionalConvite
+        },
+        {
+          path: 'atribuir-questionario/:patientId',
+          name: 'profissional-atribuir-questionario',
+          component: ProfissionalAtribuirQuestionario
         },
         {
           path: 'editar-perfil',

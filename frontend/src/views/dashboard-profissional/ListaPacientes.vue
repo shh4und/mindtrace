@@ -35,6 +35,13 @@
           <font-awesome-icon :icon="faChartLine" class="mr-2" aria-hidden="true" />
           Ver Relatório
         </button>
+        <button 
+          @click.stop="viewQuestFormAssign(patient.id)" 
+          class="flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+        >
+          <font-awesome-icon :icon="faListCheck" class="mr-2" aria-hidden="true" />
+          Atribuir Questionário
+        </button>
       </div>
     </div>
   </div>
@@ -46,7 +53,7 @@ import { useRouter } from 'vue-router';
 import api from '@/services/api';
 import { useToast } from 'vue-toastification';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faUser, faChartLine } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faChartLine, faListCheck } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 
 library.add(faUser);
@@ -87,6 +94,13 @@ const calculateAge = (birthdate) => {
 const viewPatientReport = (patientId) => {
   router.push({ 
     name: 'profissional-paciente-relatorio', 
+    params: { patientId } 
+  });
+};
+
+const viewQuestFormAssign = (patientId) => {
+  router.push({ 
+    name: 'profissional-atribuir-questionario', 
     params: { patientId } 
   });
 };

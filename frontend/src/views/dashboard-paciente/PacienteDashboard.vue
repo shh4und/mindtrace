@@ -41,7 +41,8 @@ import {
   faFaceSmileBeam,
   faChartLine,
   faLink,
-  faUserPen
+  faUserPen,
+  faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
@@ -53,6 +54,7 @@ const menuItems = [
   { name: 'resumo', view: 'resumo', label: 'Resumo', icon: faHome },
   { name: 'humor', view: 'humor', label: 'Registro de Humor', icon: faFaceSmileBeam },
   { name: 'relatorios', view: 'relatorios', label: 'Relatórios', icon: faChartLine },
+  { name: 'questionarios', view: 'questionarios', label: 'Questionários', icon: faClipboardList },
   { name: 'vincular', view: 'vincular', label: 'Vincular Profissional', icon: faLink },
   { name: 'editar', view: 'editar-perfil', label: 'Editar Perfil', icon: faUserPen }
 ];
@@ -62,6 +64,7 @@ const viewToRoute = {
   'resumo': 'paciente-resumo',
   'humor': 'paciente-humor',
   'relatorios': 'paciente-relatorios',
+  'questionarios': 'paciente-questionarios',
   'vincular': 'paciente-vincular',
   'editar-perfil': 'paciente-editar-perfil'
 };
@@ -71,6 +74,7 @@ const routeToView = {
   'paciente-resumo': 'resumo',
   'paciente-humor': 'humor',
   'paciente-relatorios': 'relatorios',
+  'paciente-questionarios': 'questionarios',
   'paciente-vincular': 'vincular',
   'paciente-editar-perfil': 'editar-perfil'
 };
