@@ -54,6 +54,12 @@ func main() {
 	)
 	if err != nil {
 		log.Fatalf("falha ao migrar o banco de dados: %v", err)
+		}
+
+		// Instrumentos imutaveis seedados
+		seeds.ExecutarSeeds(db)
+		// Dados mock para ambiente de desenvolvimento
+		seeds.ExecutarSeedsMock(db)
 	}
 
 	var usuarioRepo repositorios.UsuarioRepositorio

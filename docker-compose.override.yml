@@ -9,7 +9,9 @@ services:
     working_dir: /app
     volumes:
       - ./backend:/app
-      - /app/pkg/mod
+      - go-mod-cache:/go/pkg/mod
+    env_file:
+      - .env
     environment:
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
@@ -40,3 +42,6 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+
+volumes:
+  go-mod-cache:
