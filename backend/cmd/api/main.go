@@ -38,6 +38,9 @@ func main() {
 		log.Fatalf("DB_DRIVER invalido: %s", dbDriver)
 	}
 
+	skipDBInit := os.Getenv("SKIP_DB_INIT") == "true"
+
+	if !skipDBInit {
 	// Executa migracoes automatizadas para alinhar esquema do banco
 	err = db.AutoMigrate(
 		&dominio.Usuario{},

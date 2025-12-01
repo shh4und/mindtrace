@@ -19,6 +19,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - DB_DRIVER=${DB_DRIVER}
       - GO_ENV=${GO_ENV}
+      - SKIP_DB_INIT=${SKIP_DB_INIT}
     ports:
       - "8080:8080"
     depends_on:
