@@ -53,7 +53,7 @@
         <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ instrumento.descricao }}</p>
         
         <div class="flex items-center justify-between">
-          <span class="text-xs text-gray-400">{{ instrumento.totalPerguntas }} perguntas</span>
+          <!-- <span class="text-xs text-gray-400">{{ instrumento.totalPerguntas }} perguntas</span> -->
           <button 
             @click="atribuirQuestionario(instrumento)"
             class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center"
@@ -68,8 +68,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import api from '@/services/api';
 import { useToast } from 'vue-toastification';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { 
@@ -79,43 +80,47 @@ import {
   faPaperPlane 
 } from '@fortawesome/free-solid-svg-icons';
 
+
+const props = defineProps({
+  patientId: {
+    type: [Number, String],
+    default: null, // ID do paciente, usado pelo profissional
+  },patientNome: {
+    type: String,
+    default: null,}})
+
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
 
 // ID do paciente vindo da rota
-const patientId = computed(() => route.params.patientId);
+// const patientId = computed(() => route.params.patientId);
 
 // Mock: nome do paciente (em produção viria da API ou store)
 const pacienteNome = ref('Paciente Selecionado');
+const instrumentos = ref([]);
 
-// Mock: dados dos instrumentos padronizados
-const instrumentos = ref([
-  {
-    codigo: 'phq_9',
-    nome: 'Patient Health Questionnaire-9',
-    descricao: 'Instrumento de 9 itens para rastreamento e mensuração da gravidade de sintomas depressivos. Amplamente utilizado em atenção primária e pesquisa clínica.',
-    totalPerguntas: 9
-  },
-  {
-    codigo: 'gad_7',
-    nome: 'Generalized Anxiety Disorder-7',
-    descricao: 'Questionário breve de 7 itens para identificar provável transtorno de ansiedade generalizada e avaliar a gravidade dos sintomas.',
-    totalPerguntas: 7
-  },
-  {
-    codigo: 'whoqol_bref',
-    nome: 'WHOQOL-BREF',
-    descricao: 'Versão abreviada do instrumento de avaliação de qualidade de vida da OMS, contemplando domínios físico, psicológico, relações sociais e meio ambiente.',
-    totalPerguntas: 26
-  },
-  {
-    codigo: 'who_5',
-    nome: 'WHO-5 Well-Being Index',
-    descricao: 'Índice de bem-estar de 5 itens desenvolvido pela OMS para medir o estado subjetivo de bem-estar psicológico nas últimas duas semanas.',
-    totalPerguntas: 5
+onMounted(async () => {
+  try {
+    const response = await api.listarQuestionarios()
+  
+    if (Array.isArray(response.data) && response.data.length > 0){
+      const qtdInstrumentos = response.data.length
+      instrumentos.value = response.data
+      
+      toast.success(`${qtdInstrumentos} questionários carregados com sucesso.`)
+    }
+    else{
+      toast.warning(`Houve um problema ao carregar ou não há questionários cadastrados.`)
+    }
+  } catch (error) {
+    toast.error('Erro ao carregar os questionários.');
+    console.error(error)
   }
-]);
+  pacienteNome.value = props.patientNome
+
+})
+
 
 const getCodigoBadgeClass = (codigo) => {
   const classes = {
@@ -142,11 +147,6 @@ const atribuirQuestionario = (instrumento) => {
   // await api.atribuirQuestionario(patientId.value, instrumento.codigo);
   
   toast.success(`Questionário "${instrumento.nome}" atribuído com sucesso!`);
-  
-  // Volta para lista de pacientes após atribuição
-  setTimeout(() => {
-    router.push({ name: 'profissional-pacientes' });
-  }, 1500);
 };
 
 const voltar = () => {
@@ -158,6 +158,7 @@ const voltar = () => {
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

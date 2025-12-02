@@ -36,7 +36,7 @@
           Ver Relatório
         </button>
         <button 
-          @click.stop="viewQuestFormAssign(patient.id)" 
+          @click.stop="viewQuestFormAssign({patientId: patient.id, patientNome: patient.name})" 
           class="flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
         >
           <font-awesome-icon :icon="faListCheck" class="mr-2" aria-hidden="true" />
@@ -98,10 +98,10 @@ const viewPatientReport = (patientId) => {
   });
 };
 
-const viewQuestFormAssign = (patientId) => {
+const viewQuestFormAssign = ({patientId, patientNome}) => {
   router.push({ 
     name: 'profissional-atribuir-questionario', 
-    params: { patientId } 
+    params: { patientId, patientNome }  // params de rota, NÃO props de componente
   });
 };
 

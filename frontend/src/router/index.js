@@ -28,118 +28,127 @@ const ProfissionalAtribuirQuestionario = () => import('@/views/dashboard-profiss
 
 // configura roteador principal com historico html5 baseado na base url do ambiente
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  // define rotas declaradas delegando protecao para regras de autenticacao externas
-  routes: [
-    {
-      path: '/',
-      name: 'landpage',
-      component: Landpage
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: Login
-    },
-    {
-      path: '/cadastro',
-      name: 'cadastro',
-      component: Cadastro
-    },
-    {
-      path: '/recuperar-senha',
-      name: 'forgot-password',
-      component: ForgotPassword
-    },
-    // Dashboard Paciente com nested routes
-    {
-      path: '/dashboard-paciente',
-      name: 'dashboard-paciente',
-      component: PacienteDashboard,
-      redirect: { name: 'paciente-resumo' },
-      meta: { requiresAuth: true, role: TipoUsuario.Paciente },
-      children: [
+    history: createWebHistory(import.meta.env.BASE_URL),
+    // define rotas declaradas delegando protecao para regras de autenticacao externas
+    routes: [
         {
-          path: 'resumo',
-          name: 'paciente-resumo',
-          component: PacienteResumo
+            path: "/",
+            name: "landpage",
+            component: Landpage,
         },
         {
-          path: 'humor',
-          name: 'paciente-humor',
-          component: PacienteHumor
+            path: "/login",
+            name: "login",
+            component: Login,
         },
         {
-          path: 'relatorios',
-          name: 'paciente-relatorios',
-          component: PacienteRelatorio,
-          props: { userType: TipoUsuario.Paciente }
+            path: "/cadastro",
+            name: "cadastro",
+            component: Cadastro,
         },
         {
-          path: 'vincular',
-          name: 'paciente-vincular',
-          component: PacienteVincular
+            path: "/recuperar-senha",
+            name: "forgot-password",
+            component: ForgotPassword,
         },
+        // Dashboard Paciente com nested routes
         {
-          path: 'questionarios',
-          name: 'paciente-questionarios',
-          component: PacienteQuestionarios
+            path: "/dashboard-paciente",
+            name: "dashboard-paciente",
+            component: PacienteDashboard,
+            redirect: { name: "paciente-resumo" },
+            meta: { requiresAuth: true, role: TipoUsuario.Paciente },
+            children: [
+                {
+                    path: "resumo",
+                    name: "paciente-resumo",
+                    component: PacienteResumo,
+                },
+                {
+                    path: "humor",
+                    name: "paciente-humor",
+                    component: PacienteHumor,
+                },
+                {
+                    path: "relatorios",
+                    name: "paciente-relatorios",
+                    component: PacienteRelatorio,
+                    props: { userType: TipoUsuario.Paciente },
+                },
+                {
+                    path: "vincular",
+                    name: "paciente-vincular",
+                    component: PacienteVincular,
+                },
+                {
+                    path: "questionarios",
+                    name: "paciente-questionarios",
+                    component: PacienteQuestionarios,
+                },
+                {
+                    path: "questionarios/:atribuicaoId/responder",
+                    name: "paciente-responder-questionario",
+                    component: PacienteResponderQuestionario,
+                },
+                {
+                    path: "editar-perfil",
+                    name: "paciente-editar-perfil",
+                    component: PacienteEditarPerfil,
+                    props: { userType: TipoUsuario.Paciente },
+                },
+            ],
         },
+        // Dashboard Profissional com nested routes
         {
-          path: 'questionarios/:atribuicaoId/responder',
-          name: 'paciente-responder-questionario',
-          component: PacienteResponderQuestionario
+            path: "/dashboard-profissional",
+            name: "dashboard-profissional",
+            component: ProfissionalDashboard,
+            redirect: { name: "profissional-pacientes" },
+            meta: { requiresAuth: true, role: TipoUsuario.Profissional },
+            children: [
+                {
+                    path: "pacientes",
+                    name: "profissional-pacientes",
+                    component: ProfissionalPacientes,
+                },
+                {
+                    path: "pacientes/:patientId/relatorio",
+                    name: "profissional-paciente-relatorio",
+                    component: ProfissionalRelatorio,
+                    props: (route) => ({
+                        userType: TipoUsuario.Profissional,
+                        patientId: route.params.patientId,
+                    }),
+                },
+                {
+                    path: "convite",
+                    name: "profissional-convite",
+                    component: ProfissionalConvite,
+                },
+                {
+                    path: "atribuir-questionario/:patientId",
+                    name: "profissional-atribuir-questionario",
+                    component: ProfissionalAtribuirQuestionario,
+                },
+                {
+                    path: "editar-perfil",
+                    name: "profissional-editar-perfil",
+                    component: ProfissionalEditarPerfil,
+                    props: { userType: TipoUsuario.Profissional },
+                },
+                {
+                    path: "atribuir-questionario/:patientId/:patientNome",
+                    name: "profissional-atribuir-questionario",
+                    component: () =>
+                        import(
+                            "@/views/dashboard-profissional/AtribuirQuestionario.vue"
+                        ),
+                    props: true, // <-- Isso converte route.params em props do componente
+                },
+            ],
         },
-        {
-          path: 'editar-perfil',
-          name: 'paciente-editar-perfil',
-          component: PacienteEditarPerfil,
-          props: { userType: TipoUsuario.Paciente }
-        }
-      ]
-    },
-    // Dashboard Profissional com nested routes
-    {
-      path: '/dashboard-profissional',
-      name: 'dashboard-profissional',
-      component: ProfissionalDashboard,
-      redirect: { name: 'profissional-pacientes' },
-      meta: { requiresAuth: true, role: TipoUsuario.Profissional },
-      children: [
-        {
-          path: 'pacientes',
-          name: 'profissional-pacientes',
-          component: ProfissionalPacientes
-        },
-        {
-          path: 'pacientes/:patientId/relatorio',
-          name: 'profissional-paciente-relatorio',
-          component: ProfissionalRelatorio,
-          props: route => ({ 
-            userType: TipoUsuario.Profissional, 
-            patientId: route.params.patientId 
-          })
-        },
-        {
-          path: 'convite',
-          name: 'profissional-convite',
-          component: ProfissionalConvite
-        },
-        {
-          path: 'atribuir-questionario/:patientId',
-          name: 'profissional-atribuir-questionario',
-          component: ProfissionalAtribuirQuestionario
-        },
-        {
-          path: 'editar-perfil',
-          name: 'profissional-editar-perfil',
-          component: ProfissionalEditarPerfil,
-          props: { userType: TipoUsuario.Profissional }
-        }
-      ]
-    }
-  ]
-})
+    ],
+});
 
 // Guarda de navegação global
 router.beforeEach((to, from, next) => {
