@@ -24,6 +24,7 @@ func (ic *InstrumentoControlador) ListarInstrumentos(c *gin.Context) {
 	}
 
 	instrumentosOut, err := ic.instrumentoServico.ListarInstrumentos(userID.(uint))
+	// log.Printf("-> instrumentosOut:\n%v", instrumentosOut)
 	if err != nil {
 		if err == dominio.ErrUsuarioNaoEncontrado {
 			c.JSON(http.StatusNotFound, gin.H{"erro": err.Error()})

@@ -3,7 +3,6 @@ package servicos
 import (
 	"errors"
 	"fmt"
-	"log"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/dominio"
@@ -13,7 +12,7 @@ import (
 )
 
 type InstrumentoServico interface {
-	ListarInstrumentos(userID uint) ([]dtos.InstrumentoDTOOut, error)
+	ListarInstrumentos(userID uint) ([]*dtos.InstrumentoDTOOut, error)
 }
 
 type instrumentoServico struct {
@@ -30,7 +29,7 @@ func NovoInstrumentoServico(db *gorm.DB, instrumentoRepo repositorios.Instrument
 	}
 }
 
-func (is *instrumentoServico) ListarInstrumentos(userID uint) ([]dtos.InstrumentoDTOOut, error) {
+func (is *instrumentoServico) ListarInstrumentos(userID uint) ([]*dtos.InstrumentoDTOOut, error) {
 	var instrumentos []*dominio.Instrumento
 	// Checar a existencia do profissional
 	_, err := is.usuarioRepo.BuscarProfissionalPorUsuarioID(is.db, userID)
@@ -47,11 +46,17 @@ func (is *instrumentoServico) ListarInstrumentos(userID uint) ([]dtos.Instrument
 		return nil, err
 	}
 
+	if instrumentos == nil {
+		return nil, fmt.Errorf("slice instrumentos invalido: slice nulo")
+	}
 	for _, inst := range instrumentos {
-		if err := inst.Validar(); err != nil {
-			log.Printf("WARNING: Instrumento %s falhou na validacao: %v", inst.Codigo, err)
+		if err := inst.ValidarCodigo(); err != nil {
 
 			return nil, fmt.Errorf("instrumento %s invalido: %w", inst.Codigo, err)
+		}
+		if err := inst.ValidarNome(); err != nil {
+
+			return nil, fmt.Errorf("instrumento %s invalido: %w", inst.Nome, err)
 		}
 	}
 
