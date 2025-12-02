@@ -41,22 +41,22 @@ func main() {
 	skipDBInit := os.Getenv("SKIP_DB_INIT") == "true"
 
 	if !skipDBInit {
-	// Executa migracoes automatizadas para alinhar esquema do banco
-	err = db.AutoMigrate(
-		&dominio.Usuario{},
-		&dominio.Profissional{},
-		&dominio.Paciente{},
-		&dominio.RegistroHumor{},
-		&dominio.Notificacao{},
-		&dominio.Convite{},
-		&dominio.Instrumento{},
-		&dominio.Pergunta{},
-		&dominio.OpcaoEscala{},
-		&dominio.Atribuicao{},
-		&dominio.Resposta{},
-	)
-	if err != nil {
-		log.Fatalf("falha ao migrar o banco de dados: %v", err)
+		// Executa migracoes automatizadas para alinhar esquema do banco
+		err = db.AutoMigrate(
+			&dominio.Usuario{},
+			&dominio.Profissional{},
+			&dominio.Paciente{},
+			&dominio.RegistroHumor{},
+			&dominio.Notificacao{},
+			&dominio.Convite{},
+			&dominio.Instrumento{},
+			&dominio.Pergunta{},
+			&dominio.OpcaoEscala{},
+			&dominio.Atribuicao{},
+			&dominio.Resposta{},
+		)
+		if err != nil {
+			log.Fatalf("falha ao migrar o banco de dados: %v", err)
 		}
 
 		// Instrumentos imutaveis seedados
@@ -76,17 +76,12 @@ func main() {
 		usuarioRepo = postgres_repo.NovoGormUsuarioRepositorio(db)
 		registroHumorRepo = postgres_repo.NovoGormRegistroHumorRepositorio(db)
 		conviteRepo = postgres_repo.NovoGormConviteRepositorio(db)
+		instrumentoRepo = postgres_repo.NovoGormInstrumentoRepositorio(db)
 	case "sqlite":
 		usuarioRepo = sqlite_repo.NovoGormUsuarioRepositorio(db)
 		registroHumorRepo = sqlite_repo.NovoGormRegistroHumorRepositorio(db)
 		conviteRepo = sqlite_repo.NovoGormConviteRepositorio(db)
 	}
-
-	// Instrumentos imutaveis seedados
-	seeds.ExecutarSeeds(db)
-
-	// Dados mock para ambiente de desenvolvimento
-	seeds.ExecutarSeedsMock(db)
 
 	// Inicializa servicos
 	usuarioSvc := servicos.NovoUsuarioServico(db, usuarioRepo)
@@ -182,6 +177,6 @@ func main() {
 		}
 	}
 
-	log.Println("servidor iniciado na porta 8080")
-	roteador.Run(":8080")
+	log.Println("servidor iniciado na porta 9090")
+	roteador.Run(":9090")
 }
