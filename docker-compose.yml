@@ -17,7 +17,7 @@ services:
     image: shh4und/mindtrace-backend:latest  # Substitua pelo seu username no Docker Hub
     container_name: mindtrace-backend
     ports:
-      - "8080:8080"
+      - "9090:9090"
     environment:
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
