@@ -188,6 +188,7 @@ func InstrumentosParaDTOOut(instrumentos []*dominio.Instrumento) []*dtos.Instrum
 
 	for i, inst := range instrumentos {
 		instrumentoDTOs[i] = &dtos.InstrumentoDTOOut{
+			ID:        inst.ID,
 			Codigo:    inst.Codigo,
 			Nome:      inst.Nome,
 			Descricao: inst.Descricao,

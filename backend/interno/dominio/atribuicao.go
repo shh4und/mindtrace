@@ -21,15 +21,16 @@ var (
 
 // Atribuicao representa o envio de um questionário para um paciente
 type Atribuicao struct {
-	ID            uint        `gorm:"primaryKey"`
-	PacienteID    uint        `gorm:"not null;index;column:paciente_id"`
-	Paciente      Paciente    `gorm:"foreignKey:PacienteID"`
-	InstrumentoID uint        `gorm:"not null;index;column:instrumento_id"`
-	Instrumento   Instrumento `gorm:"foreignKey:InstrumentoID"`
-
-	Status         string     `gorm:"default:'PENDENTE';index;column:status"`
-	DataAtribuicao time.Time  `gorm:"autoCreateTime;column:data_atribuicao"`
-	DataResposta   *time.Time `gorm:"column:data_resposta"`
+	ID             uint         `gorm:"primaryKey"`
+	PacienteID     uint         `gorm:"not null;index;column:paciente_id"`
+	Paciente       Paciente     `gorm:"foreignKey:PacienteID"`
+	InstrumentoID  uint         `gorm:"not null;index;column:instrumento_id"`
+	Instrumento    Instrumento  `gorm:"foreignKey:InstrumentoID"`
+	ProfissionalID uint         `gorm:"not null;index;column:profissional_id"`
+	Profissional   Profissional `gorm:"foreignKey:ProfissionalID"`
+	Status         string       `gorm:"default:'PENDENTE';index;column:status"`
+	DataAtribuicao time.Time    `gorm:"autoCreateTime;column:data_atribuicao"`
+	DataResposta   *time.Time   `gorm:"column:data_resposta"`
 
 	// Relacionamento inverso: Uma atribuição pode ter uma resposta
 	Resposta *Resposta `gorm:"foreignKey:AtribuicaoID"`

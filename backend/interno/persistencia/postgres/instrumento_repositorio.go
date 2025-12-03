@@ -20,3 +20,15 @@ func (r *gormInstrumentoRepositorio) BuscarTodosAtivos(tx *gorm.DB) ([]*dominio.
 	err := tx.Where("esta_ativo = TRUE").Find(&instrumentos).Error
 	return instrumentos, err
 }
+
+func (r *gormInstrumentoRepositorio) BuscarInstrumentoPorID(tx *gorm.DB, instrumentoID uint) (*dominio.Instrumento, error) {
+	var instrumento dominio.Instrumento
+	if err := tx.First(&instrumento, instrumentoID).Error; err != nil {
+		return nil, err
+	}
+	return &instrumento, nil
+}
+
+func (r *gormInstrumentoRepositorio) CriarAtribuicao(tx *gorm.DB, atribuicao *dominio.Atribuicao) error {
+	return tx.Create(atribuicao).Error
+}

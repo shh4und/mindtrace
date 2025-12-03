@@ -86,7 +86,7 @@ const api = {
   },
 
   // --- Resumo ---
-  buscarResumo(){
+  buscarResumo() {
     return apiClient.get('/resumo/')
   },
 
@@ -98,8 +98,12 @@ const api = {
     return apiClient.post('/convites/vincular', { token });
   },
 
-  listarQuestionarios(){
+  listarQuestionarios() {
     return apiClient.get('/instrumentos/listar-instrumentos')
+  },
+
+  atribuirQuestionario(pacienteId, instrumentoId, instrumentoCodigo) {
+    return apiClient.post(`/instrumentos/atribuir-instrumento?pacienteID=${pacienteId}&instrumentoID${instrumentoId}&instrumentoCodigo=${instrumentoCodigo}`)
   }
 };
 

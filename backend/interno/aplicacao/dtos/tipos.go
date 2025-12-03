@@ -165,6 +165,7 @@ type ConviteDTOOut struct {
 }
 
 type InstrumentoDTOOut struct {
+	ID        uint   `json:"id"`
 	Codigo    string `json:"codigo"`
 	Nome      string `json:"nome"`
 	Descricao string `json:"descricao"`

@@ -142,10 +142,10 @@ const getIconBgClass = (codigo) => {
   return classes[codigo] || 'bg-gray-500';
 };
 
-const atribuirQuestionario = (instrumento) => {
+const atribuirQuestionario = async (instrumento) => {
   // TODO: Integrar com API quando backend estiver pronto
-  // await api.atribuirQuestionario(patientId.value, instrumento.codigo);
-  
+  const response = await api.atribuirQuestionario(patientId.value, instrumento.id, instrumento.codigo);
+  console.log(response)
   toast.success(`Questionário "${instrumento.nome}" atribuído com sucesso!`);
 };
 

@@ -13,8 +13,8 @@ import (
 
 type InstrumentoServico interface {
 	ListarInstrumentos(userID uint) ([]*dtos.InstrumentoDTOOut, error)
+	CriarAtribuicao(userID, pacienteID, instrumentoID uint, instrumentoCodigo string) error
 }
-
 type instrumentoServico struct {
 	db              *gorm.DB
 	instrumentoRepo repositorios.InstrumentoRepositorio
@@ -61,4 +61,47 @@ func (is *instrumentoServico) ListarInstrumentos(userID uint) ([]*dtos.Instrumen
 	}
 
 	return mappers.InstrumentosParaDTOOut(instrumentos), nil
+}
+
+func (is *instrumentoServico) CriarAtribuicao(userID, pacienteID, instrumentoID uint, instrumentoCodigo string) error {
+	var atribuicao *dominio.Atribuicao
+
+	err := is.db.Transaction(func(tx *gorm.DB) error {
+
+		profissional, err := is.usuarioRepo.BuscarProfissionalPorUsuarioID(tx, userID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return dominio.ErrUsuarioNaoEncontrado
+			}
+			return err
+		}
+
+		paciente, err := is.usuarioRepo.BuscarPacientePorID(tx, pacienteID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return dominio.ErrUsuarioNaoEncontrado
+			}
+			return err
+		}
+
+		instrumento, err := is.instrumentoRepo.BuscarInstrumentoPorID(tx, instrumentoID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("instrumento nao encontrado: %v", err)
+			}
+			return err
+		}
+
+		atribuicao.Profissional = *profissional
+		atribuicao.Paciente = *paciente
+		atribuicao.Instrumento = *instrumento
+
+		if err = is.instrumentoRepo.CriarAtribuicao(tx, atribuicao); err != nil {
+			return err
+		}
+		return nil
+
+	})
+
+	return err
 }

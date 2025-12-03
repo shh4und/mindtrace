@@ -39,4 +39,6 @@ type UsuarioRepositorio interface {
 
 type InstrumentoRepositorio interface {
 	BuscarTodosAtivos(tx *gorm.DB) ([]*dominio.Instrumento, error)
+	BuscarInstrumentoPorID(tx *gorm.DB, instrumentoID uint) (*dominio.Instrumento, error)
+	CriarAtribuicao(tx *gorm.DB, atribuicao *dominio.Atribuicao) error
 }
