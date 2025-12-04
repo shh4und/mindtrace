@@ -173,7 +173,7 @@ func main() {
 			instrumentos := protegido.Group("/instrumentos")
 			{
 				instrumentos.GET("/listar-instrumentos", instrumentoCtrl.ListarInstrumentos)
-				instrumentos.GET("/atribuir-instrumento", instrumentoCtrl.AtribuirInstrumento)
+				instrumentos.POST("/atribuir-instrumento", instrumentoCtrl.AtribuirInstrumento)
 			}
 		}
 	}

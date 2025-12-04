@@ -46,7 +46,7 @@ func (r *gormUsuarioRepositorio) BuscarUsuarioPorID(id uint) (*dominio.Usuario, 
 
 func (r *gormUsuarioRepositorio) BuscarProfissionalPorID(tx *gorm.DB, id uint) (*dominio.Profissional, error) {
 	var profissional dominio.Profissional
-	if err := tx.First(&profissional, id).Error; err != nil {
+	if err := tx.Preload("Usuario").First(&profissional, id).Error; err != nil {
 		return nil, err
 	}
 	return &profissional, nil
@@ -54,7 +54,7 @@ func (r *gormUsuarioRepositorio) BuscarProfissionalPorID(tx *gorm.DB, id uint) (
 
 func (r *gormUsuarioRepositorio) BuscarPacientePorID(tx *gorm.DB, id uint) (*dominio.Paciente, error) {
 	var paciente dominio.Paciente
-	if err := tx.First(&paciente, id).Error; err != nil {
+	if err := tx.Preload("Usuario").First(&paciente, id).Error; err != nil {
 		return nil, err
 	}
 	return &paciente, nil

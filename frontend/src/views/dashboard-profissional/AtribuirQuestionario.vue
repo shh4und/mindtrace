@@ -81,23 +81,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 
-const props = defineProps({
-  patientId: {
-    type: [Number, String],
-    default: null, // ID do paciente, usado pelo profissional
-  },patientNome: {
-    type: String,
-    default: null,}})
-
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
 
 // ID do paciente vindo da rota
-// const patientId = computed(() => route.params.patientId);
+const patientId = computed(() => route.params.patientId);
+const pacienteNome = computed(() => route.params.patientNome);
 
-// Mock: nome do paciente (em produção viria da API ou store)
-const pacienteNome = ref('Paciente Selecionado');
 const instrumentos = ref([]);
 
 onMounted(async () => {
@@ -117,8 +108,6 @@ onMounted(async () => {
     toast.error('Erro ao carregar os questionários.');
     console.error(error)
   }
-  pacienteNome.value = props.patientNome
-
 })
 
 
@@ -145,7 +134,6 @@ const getIconBgClass = (codigo) => {
 const atribuirQuestionario = async (instrumento) => {
   // TODO: Integrar com API quando backend estiver pronto
   const response = await api.atribuirQuestionario(patientId.value, instrumento.id, instrumento.codigo);
-  console.log(response)
   toast.success(`Questionário "${instrumento.nome}" atribuído com sucesso!`);
 };
 

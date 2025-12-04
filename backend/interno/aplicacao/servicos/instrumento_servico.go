@@ -64,8 +64,6 @@ func (is *instrumentoServico) ListarInstrumentos(userID uint) ([]*dtos.Instrumen
 }
 
 func (is *instrumentoServico) CriarAtribuicao(userID, pacienteID, instrumentoID uint, instrumentoCodigo string) error {
-	var atribuicao *dominio.Atribuicao
-
 	err := is.db.Transaction(func(tx *gorm.DB) error {
 
 		profissional, err := is.usuarioRepo.BuscarProfissionalPorUsuarioID(tx, userID)
@@ -92,9 +90,14 @@ func (is *instrumentoServico) CriarAtribuicao(userID, pacienteID, instrumentoID 
 			return err
 		}
 
-		atribuicao.Profissional = *profissional
-		atribuicao.Paciente = *paciente
-		atribuicao.Instrumento = *instrumento
+		atribuicao := &dominio.Atribuicao{
+			ProfissionalID: profissional.ID,
+			Profissional:   *profissional,
+			PacienteID:     paciente.ID,
+			Paciente:       *paciente,
+			InstrumentoID:  instrumento.ID,
+			Instrumento:    *instrumento,
+		}
 
 		if err = is.instrumentoRepo.CriarAtribuicao(tx, atribuicao); err != nil {
 			return err

@@ -103,7 +103,7 @@ const api = {
   },
 
   atribuirQuestionario(pacienteId, instrumentoId, instrumentoCodigo) {
-    return apiClient.post(`/instrumentos/atribuir-instrumento?pacienteID=${pacienteId}&instrumentoID${instrumentoId}&instrumentoCodigo=${instrumentoCodigo}`)
+    return apiClient.post(`/instrumentos/atribuir-instrumento?pacienteID=${pacienteId}&instrumentoID=${instrumentoId}&instrumentoCodigo=${instrumentoCodigo}`)
   }
 };
 
