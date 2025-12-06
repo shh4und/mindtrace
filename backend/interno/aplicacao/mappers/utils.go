@@ -198,3 +198,78 @@ func InstrumentosParaDTOOut(instrumentos []*dominio.Instrumento) []*dtos.Instrum
 
 	return instrumentoDTOs
 }
+
+// AtribuicaoParaDTOOutPaciente converte Atribuicao para DTO (visão do paciente)
+func AtribuicaoParaDTOOutPaciente(atrib *dominio.Atribuicao) *dtos.AtribuicaoDTOOut {
+	if atrib == nil {
+		return nil
+	}
+
+	// Contar perguntas do instrumento
+	totalPerguntas := len(atrib.Instrumento.Perguntas)
+
+	return &dtos.AtribuicaoDTOOut{
+		ID:             atrib.ID,
+		Status:         string(atrib.Status),
+		DataAtribuicao: atrib.CreatedAt,
+		DataResposta:   atrib.DataResposta,
+		Instrumento: dtos.InstrumentoResumidoDTOOut{
+			Codigo:         atrib.Instrumento.Codigo,
+			Nome:           atrib.Instrumento.Nome,
+			Descricao:      atrib.Instrumento.Descricao,
+			TotalPerguntas: totalPerguntas,
+		},
+		Profissional: &dtos.ProfissionalResumidoDTOOut{
+			ID:            atrib.Profissional.ID,
+			Nome:          atrib.Profissional.Usuario.Nome,
+			Email:         atrib.Profissional.Usuario.Email,
+			Especialidade: atrib.Profissional.Especialidade,
+		},
+	}
+}
+
+// AtribuicaoParaDTOOutProfissional converte Atribuicao para DTO (visão do profissional)
+func AtribuicaoParaDTOOutProfissional(atrib *dominio.Atribuicao) *dtos.AtribuicaoDTOOut {
+	if atrib == nil {
+		return nil
+	}
+
+	// Contar perguntas do instrumento
+	totalPerguntas := len(atrib.Instrumento.Perguntas)
+
+	return &dtos.AtribuicaoDTOOut{
+		ID:             atrib.ID,
+		Status:         string(atrib.Status),
+		DataAtribuicao: atrib.CreatedAt,
+		DataResposta:   atrib.DataResposta,
+		Instrumento: dtos.InstrumentoResumidoDTOOut{
+			Codigo:         atrib.Instrumento.Codigo,
+			Nome:           atrib.Instrumento.Nome,
+			Descricao:      atrib.Instrumento.Descricao,
+			TotalPerguntas: totalPerguntas,
+		},
+		Paciente: &dtos.PacienteResumidoDTOOut{
+			ID:    atrib.Paciente.ID,
+			Nome:  atrib.Paciente.Usuario.Nome,
+			Email: atrib.Paciente.Usuario.Email,
+		},
+	}
+}
+
+// AtribuicoesParaDTOOutPaciente converte slice de Atribuicoes para DTOs (visão paciente)
+func AtribuicoesParaDTOOutPaciente(atribuicoes []*dominio.Atribuicao) []*dtos.AtribuicaoDTOOut {
+	dtos := make([]*dtos.AtribuicaoDTOOut, 0)
+	for _, atrib := range atribuicoes {
+		dtos = append(dtos, AtribuicaoParaDTOOutPaciente(atrib))
+	}
+	return dtos
+}
+
+// AtribuicoesParaDTOOutProfissional converte slice de Atribuicoes para DTOs (visão profissional)
+func AtribuicoesParaDTOOutProfissional(atribuicoes []*dominio.Atribuicao) []*dtos.AtribuicaoDTOOut {
+	dtos := make([]*dtos.AtribuicaoDTOOut, 0)
+	for _, atrib := range atribuicoes {
+		dtos = append(dtos, AtribuicaoParaDTOOutProfissional(atrib))
+	}
+	return dtos
+}

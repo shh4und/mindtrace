@@ -14,6 +14,8 @@ import (
 type InstrumentoServico interface {
 	ListarInstrumentos(userID uint) ([]*dtos.InstrumentoDTOOut, error)
 	CriarAtribuicao(userID, pacienteID, instrumentoID uint, instrumentoCodigo string) error
+	ListarAtribuicoesProfissional(profId uint) ([]*dtos.AtribuicaoDTOOut, error)
+	ListarAtribuicoesPaciente(pacId uint) ([]*dtos.AtribuicaoDTOOut, error)
 }
 type instrumentoServico struct {
 	db              *gorm.DB
@@ -102,9 +104,61 @@ func (is *instrumentoServico) CriarAtribuicao(userID, pacienteID, instrumentoID 
 		if err = is.instrumentoRepo.CriarAtribuicao(tx, atribuicao); err != nil {
 			return err
 		}
+
+		if err = atribuicao.Validar(); err != nil {
+			return err
+		}
 		return nil
 
 	})
 
 	return err
+}
+
+func (is *instrumentoServico) ListarAtribuicoesPaciente(usuarioId uint) ([]*dtos.AtribuicaoDTOOut, error) {
+	var atribuicoes []*dominio.Atribuicao
+
+	paciente, err := is.usuarioRepo.BuscarPacientePorUsuarioID(is.db, usuarioId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, dominio.ErrUsuarioNaoEncontrado
+		}
+		return nil, err
+	}
+
+	atribuicoes, err = is.instrumentoRepo.BuscarAtribuicoesPaciente(is.db, paciente.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, atribc := range atribuicoes {
+		if err = atribc.Validar(); err != nil {
+			return nil, err
+		}
+	}
+
+	return mappers.AtribuicoesParaDTOOutPaciente(atribuicoes), nil
+}
+
+func (is *instrumentoServico) ListarAtribuicoesProfissional(usuarioId uint) ([]*dtos.AtribuicaoDTOOut, error) {
+	var atribuicoes []*dominio.Atribuicao
+	profissional, err := is.usuarioRepo.BuscarProfissionalPorUsuarioID(is.db, usuarioId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, dominio.ErrUsuarioNaoEncontrado
+		}
+		return nil, err
+	}
+	atribuicoes, err = is.instrumentoRepo.BuscarAtribuicoesProfissional(is.db, profissional.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, atribc := range atribuicoes {
+		if err = atribc.Validar(); err != nil {
+			return nil, err
+		}
+	}
+
+	return mappers.AtribuicoesParaDTOOutProfissional(atribuicoes), nil
 }

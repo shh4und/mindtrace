@@ -23,7 +23,7 @@ func (r *gormInstrumentoRepositorio) BuscarTodosAtivos(tx *gorm.DB) ([]*dominio.
 
 func (r *gormInstrumentoRepositorio) BuscarInstrumentoPorID(tx *gorm.DB, instrumentoID uint) (*dominio.Instrumento, error) {
 	var instrumento dominio.Instrumento
-	if err := tx.First(&instrumento, instrumentoID).Error; err != nil {
+	if err := tx.Preload("Perguntas").First(&instrumento, instrumentoID).Error; err != nil {
 		return nil, err
 	}
 	return &instrumento, nil
@@ -31,4 +31,32 @@ func (r *gormInstrumentoRepositorio) BuscarInstrumentoPorID(tx *gorm.DB, instrum
 
 func (r *gormInstrumentoRepositorio) CriarAtribuicao(tx *gorm.DB, atribuicao *dominio.Atribuicao) error {
 	return tx.Create(atribuicao).Error
+}
+
+func (r *gormInstrumentoRepositorio) BuscarAtribuicoesPaciente(tx *gorm.DB, pacId uint) ([]*dominio.Atribuicao, error) {
+	var atribuicoes []*dominio.Atribuicao
+
+	if err := tx.
+		Preload("Instrumento.Perguntas").
+		Preload("Profissional.Usuario").
+		Preload("Paciente.Usuario").
+		Where("paciente_id = ?", pacId).
+		Find(&atribuicoes).Error; err != nil {
+		return nil, err
+	}
+	return atribuicoes, nil
+}
+
+func (r *gormInstrumentoRepositorio) BuscarAtribuicoesProfissional(tx *gorm.DB, profId uint) ([]*dominio.Atribuicao, error) {
+	var atribuicoes []*dominio.Atribuicao
+
+	if err := tx.
+		Preload("Instrumento.Perguntas").
+		Preload("Profissional.Usuario").
+		Preload("Paciente.Usuario").
+		Where("profissional_id = ?", profId).
+		Find(&atribuicoes).Error; err != nil {
+		return nil, err
+	}
+	return atribuicoes, nil
 }
