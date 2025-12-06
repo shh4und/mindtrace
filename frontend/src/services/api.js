@@ -104,6 +104,14 @@ const api = {
 
   atribuirQuestionario(pacienteId, instrumentoId, instrumentoCodigo) {
     return apiClient.post(`/instrumentos/atribuir-instrumento?pacienteID=${pacienteId}&instrumentoID=${instrumentoId}&instrumentoCodigo=${instrumentoCodigo}`)
+  },
+
+  listarAtribuicoesPaciente(){
+    return apiClient.get('/instrumentos/listar-atribuicoes-paciente')
+  },
+
+  listarAtribuicoesProfissional(){
+    return apiClient.get('/instrumentos/listar-atribuicoes-profissional')
   }
 };
 
