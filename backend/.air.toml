@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main"
+  entrypoint = "./tmp/main"
   cmd = "CGO_ENABLED=0 go build -o ./tmp/main ./cmd/api/main.go"
   delay = 500
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "node_modules", "pkg", "pkg/mod", "frontend", ".git", "postgres-data"]

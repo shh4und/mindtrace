@@ -24,7 +24,7 @@ services:
       - "9090:9090"
     depends_on:
       - db
-
+    tty: true
   frontend:
     image: mindtrace-frontend-dev       # tag local para DEV
     build:
