@@ -1,8 +1,32 @@
 <template>
-  <div class="max-w-3xl mx-auto">
-    <!-- Header com progresso -->
-    <div class="mb-8">
-      <div class="flex items-center mb-4">
+  <!-- Loading state -->
+  <div v-if="carregando" class="max-w-3xl mx-auto pb-8 pt-8">
+    <div class="flex flex-col items-center justify-center min-h-[60vh]">
+      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mb-4"></div>
+      <p class="text-gray-600">Carregando questionário...</p>
+    </div>
+  </div>
+
+  <!-- Error state -->
+  <div v-else-if="erro" class="max-w-3xl mx-auto pb-8 pt-8">
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+      <font-awesome-icon :icon="faExclamationTriangle" class="w-12 h-12 text-red-500 mb-4" />
+      <h2 class="text-xl font-semibold text-red-800 mb-2">Erro ao carregar questionário</h2>
+      <p class="text-red-600 mb-4">{{ erro }}</p>
+      <button 
+        @click="router.push({ name: 'paciente-questionarios' })"
+        class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+      >
+        Voltar para questionários
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div v-else class="max-w-3xl mx-auto pb-8">
+    <!-- Header fixo -->
+    <div class="sticky top-0 bg-white z-10 pb-4 mb-6 border-b border-gray-200">
+      <div class="flex items-center mb-4 pt-4">
         <button 
           @click="confirmarSaida" 
           class="mr-4 p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -15,7 +39,7 @@
             class="inline-block px-2 py-1 text-xs font-mono font-medium rounded-md mb-1"
             :class="getCodigoBadgeClass(instrumento.codigo)"
           >
-            {{ instrumento.codigo.toUpperCase().replace('_', '-') }}
+            {{ instrumento.codigo?.toUpperCase().replace('_', '-') || 'N/A' }}
           </span>
           <h1 class="text-2xl font-bold text-gray-900">{{ instrumento.nome }}</h1>
         </div>
@@ -29,7 +53,7 @@
         ></div>
       </div>
       <p class="text-sm text-gray-500 mt-2 text-center">
-        Pergunta {{ perguntaAtualIndex + 1 }} de {{ instrumento.perguntas.length }}
+        {{ Object.keys(respostas).length }} de {{ instrumento.perguntas?.length || 0 }} perguntas respondidas
       </p>
     </div>
 
@@ -41,100 +65,84 @@
       </p>
     </div>
 
-    <!-- Pergunta atual -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-      <div class="mb-6">
-        <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">
-          Pergunta {{ perguntaAtualIndex + 1 }}
-        </span>
-        <p class="text-lg font-medium text-gray-900 mt-2">
-          {{ perguntaAtual.conteudo }}
-        </p>
-      </div>
+    <!-- Todas as perguntas em scroll -->
+    <div class="space-y-6">
+      <div 
+        v-for="(pergunta, index) in instrumento.perguntas" 
+        :key="pergunta.pergunta_id"
+        :id="`pergunta-${pergunta.pergunta_id}`"
+        class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all"
+        :class="respostas[pergunta.pergunta_id] !== undefined ? 'border-emerald-200 bg-emerald-50/30' : ''"
+      >
+        <div class="mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">
+              Pergunta {{ index + 1 }}
+            </span>
+            <span 
+              v-if="respostas[pergunta.pergunta_id] !== undefined"
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700"
+            >
+              <font-awesome-icon :icon="faCheckCircle" class="w-3 h-3 mr-1" />
+              Respondida
+            </span>
+          </div>
+          <p class="text-lg font-medium text-gray-900">
+            {{ pergunta.conteudo }}
+          </p>
+        </div>
 
-      <!-- Opções de resposta (Likert) -->
-      <div class="space-y-3">
-        <label 
-          v-for="opcao in instrumento.opcoesEscala" 
-          :key="opcao.valor"
-          class="flex items-center p-4 border rounded-lg cursor-pointer transition-all"
-          :class="respostas[perguntaAtual.id] === opcao.valor 
-            ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500' 
-            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'"
-        >
-          <input 
-            type="radio" 
-            :name="`pergunta-${perguntaAtual.id}`"
-            :value="opcao.valor"
-            v-model="respostas[perguntaAtual.id]"
-            class="sr-only"
-          />
-          <span 
-            class="w-8 h-8 rounded-full border-2 flex items-center justify-center mr-4 transition-all"
-            :class="respostas[perguntaAtual.id] === opcao.valor 
-              ? 'border-indigo-500 bg-indigo-500 text-white' 
-              : 'border-gray-300 text-gray-500'"
+        <!-- Opções de resposta (Likert) -->
+        <div class="space-y-2">
+          <div 
+            v-for="opcao in instrumento.opcoes_escala" 
+            :key="`${pergunta.pergunta_id}-${opcao.valor}`"
+            class="flex items-center p-3 border rounded-lg cursor-pointer transition-all"
+            :class="respostas[pergunta.pergunta_id] === opcao.valor 
+              ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500' 
+              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'"
+            @click="selecionarResposta(pergunta.pergunta_id, opcao.valor)"
           >
-            {{ opcao.valor }}
-          </span>
-          <span class="flex-1 text-gray-700">{{ opcao.rotulo }}</span>
-          <font-awesome-icon 
-            v-if="respostas[perguntaAtual.id] === opcao.valor"
-            :icon="faCheckCircle" 
-            class="w-5 h-5 text-indigo-500" 
-          />
-        </label>
+            <span 
+              class="w-8 h-8 rounded-full border-2 flex items-center justify-center mr-3 transition-all shrink-0 text-sm font-semibold"
+              :class="respostas[pergunta.pergunta_id] === opcao.valor 
+                ? 'border-indigo-500 bg-indigo-500 text-white' 
+                : 'border-gray-300 text-gray-500'"
+            >
+              {{ opcao.valor }}
+            </span>
+            <span class="flex-1 text-sm text-gray-700">{{ opcao.rotulo }}</span>
+            <font-awesome-icon 
+              v-if="respostas[pergunta.pergunta_id] === opcao.valor"
+              :icon="faCheckCircle" 
+              class="w-5 h-5 text-indigo-500 shrink-0" 
+            />
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Navegação -->
-    <div class="flex items-center justify-between">
+    <!-- Botão fixo de envio -->
+    <div class="sticky bottom-0 bg-white border-t border-gray-200 pt-4 mt-8">
       <button 
-        @click="perguntaAnterior"
-        :disabled="perguntaAtualIndex === 0"
-        class="px-4 py-2 text-gray-600 font-medium rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-      >
-        <font-awesome-icon :icon="faChevronLeft" class="w-4 h-4 mr-2" />
-        Anterior
-      </button>
-
-      <button 
-        v-if="perguntaAtualIndex < instrumento.perguntas.length - 1"
-        @click="proximaPergunta"
-        :disabled="respostas[perguntaAtual.id] === undefined"
-        class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-      >
-        Próxima
-        <font-awesome-icon :icon="faChevronRight" class="w-4 h-4 ml-2" />
-      </button>
-
-      <button 
-        v-else
         @click="enviarRespostas"
         :disabled="!todasRespondidas"
-        class="px-6 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+        class="w-full px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400 flex items-center justify-center"
       >
-        <font-awesome-icon :icon="faPaperPlane" class="w-4 h-4 mr-2" />
-        Enviar Respostas
+        <font-awesome-icon :icon="faPaperPlane" class="w-5 h-5 mr-2" />
+        <span v-if="todasRespondidas">Enviar Respostas</span>
+        <span v-else>Responda todas as perguntas para enviar</span>
       </button>
-    </div>
-
-    <!-- Indicadores de perguntas -->
-    <div class="flex justify-center gap-2 mt-8">
-      <button
-        v-for="(pergunta, index) in instrumento.perguntas"
-        :key="pergunta.id"
-        @click="irParaPergunta(index)"
-        class="w-3 h-3 rounded-full transition-all"
-        :class="getIndicadorClass(index)"
-        :aria-label="`Ir para pergunta ${index + 1}`"
-      ></button>
+      <p class="text-xs text-gray-500 text-center mt-2">
+        {{ Object.keys(respostas).length }}/{{ instrumento.perguntas?.length || 0 }} perguntas respondidas
+      </p>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { api } from '@/services/api'
 import { useRouter, useRoute } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -142,9 +150,8 @@ import {
   faArrowLeft, 
   faInfoCircle, 
   faCheckCircle, 
-  faChevronLeft, 
-  faChevronRight, 
-  faPaperPlane 
+  faPaperPlane,
+  faExclamationTriangle 
 } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
@@ -152,34 +159,18 @@ const route = useRoute();
 const toast = useToast();
 
 const atribuicaoId = computed(() => route.params.atribuicaoId);
-const perguntaAtualIndex = ref(0);
 const respostas = ref({});
+const carregando = ref(true);
+const erro = ref(null);
 
-// Mock: dados do instrumento PHQ-9
+// Dados do instrumento
 const instrumento = ref({
-  codigo: 'phq_9',
-  nome: 'Patient Health Questionnaire-9',
-  instrucao: 'Nas últimas 2 semanas, com que frequência você foi incomodado(a) por qualquer um dos problemas abaixo?',
-  opcoesEscala: [
-    { valor: 0, rotulo: 'Nenhuma vez' },
-    { valor: 1, rotulo: 'Vários dias' },
-    { valor: 2, rotulo: 'Mais da metade dos dias' },
-    { valor: 3, rotulo: 'Quase todos os dias' }
-  ],
-  perguntas: [
-    { id: 1, ordemItem: 1, conteudo: 'Pouco interesse ou pouco prazer em fazer as coisas' },
-    { id: 2, ordemItem: 2, conteudo: 'Se sentir "para baixo", deprimido(a) ou sem perspectiva' },
-    { id: 3, ordemItem: 3, conteudo: 'Dificuldade para pegar no sono ou permanecer dormindo, ou dormir mais do que de costume' },
-    { id: 4, ordemItem: 4, conteudo: 'Se sentir cansado(a) ou com pouca energia' },
-    { id: 5, ordemItem: 5, conteudo: 'Falta de apetite ou comendo demais' },
-    { id: 6, ordemItem: 6, conteudo: 'Se sentir mal consigo mesmo(a) — ou achar que você é um fracasso ou que decepcionou sua família ou você mesmo(a)' },
-    { id: 7, ordemItem: 7, conteudo: 'Dificuldade para se concentrar nas coisas, como ler o jornal ou ver televisão' },
-    { id: 8, ordemItem: 8, conteudo: 'Lentidão para se movimentar ou falar, a ponto das outras pessoas perceberem? Ou o oposto — Loss inquieto(a) ou agitado(a) a ponto de você ficar andando de um lado para o outro muito mais do que de costume' },
-    { id: 9, ordemItem: 9, conteudo: 'Pensar em se ferir de alguma maneira ou que seria melhor estar morto(a)' }
-  ]
+  codigo: '',
+  nome: '',
+  instrucao: '',
+  perguntas: [],
+  opcoes_escala: []
 });
-
-const perguntaAtual = computed(() => instrumento.value.perguntas[perguntaAtualIndex.value]);
 
 const progresso = computed(() => {
   const respondidas = Object.keys(respostas.value).length;
@@ -187,7 +178,7 @@ const progresso = computed(() => {
 });
 
 const todasRespondidas = computed(() => {
-  return instrumento.value.perguntas.every(p => respostas.value[p.id] !== undefined);
+  return instrumento.value.perguntas.every(p => respostas.value[p.pergunta_id] !== undefined);
 });
 
 const getCodigoBadgeClass = (codigo) => {
@@ -200,31 +191,13 @@ const getCodigoBadgeClass = (codigo) => {
   return classes[codigo] || 'bg-gray-100 text-gray-700';
 };
 
-const getIndicadorClass = (index) => {
-  const pergunta = instrumento.value.perguntas[index];
-  if (index === perguntaAtualIndex.value) {
-    return 'bg-indigo-600 scale-125';
-  }
-  if (respostas.value[pergunta.id] !== undefined) {
-    return 'bg-emerald-500';
-  }
-  return 'bg-gray-300';
-};
-
-const proximaPergunta = () => {
-  if (perguntaAtualIndex.value < instrumento.value.perguntas.length - 1) {
-    perguntaAtualIndex.value++;
-  }
-};
-
-const perguntaAnterior = () => {
-  if (perguntaAtualIndex.value > 0) {
-    perguntaAtualIndex.value--;
-  }
-};
-
-const irParaPergunta = (index) => {
-  perguntaAtualIndex.value = index;
+const selecionarResposta = (perguntaId, valor) => {
+  console.log('Selecionando:', { perguntaId, valor, respostasAntes: {...respostas.value} });
+  respostas.value = {
+    ...respostas.value,
+    [perguntaId]: valor
+  };
+  console.log('Respostas depois:', respostas.value);
 };
 
 const enviarRespostas = () => {
@@ -256,9 +229,26 @@ const confirmarSaida = () => {
   }
 };
 
-onMounted(() => {
-  // TODO: Buscar dados do instrumento baseado na atribuição
-  // const response = await api.buscarAtribuicao(atribuicaoId.value);
-  // instrumento.value = response.data.instrumento;
+onMounted(async () => {
+  try {
+    carregando.value = true;
+    const response = await api.buscarAtribuicao(atribuicaoId.value);
+    console.log('Dados recebidos:', response.data);
+    
+    if (!response.data || !response.data.instrumento) {
+      throw new Error('Dados do questionário inválidos');
+    }
+    
+    instrumento.value = response.data.instrumento;
+    console.log('Perguntas:', instrumento.value.perguntas);
+    console.log('Primeira pergunta:', instrumento.value.perguntas[0]);
+    toast.success("Questionário carregado com sucesso!");
+  } catch (error) {
+    console.error('Erro ao carregar questionário:', error);
+    erro.value = error.response?.data?.erro || 'Não foi possível carregar o questionário';
+    toast.error(erro.value);
+  } finally {
+    carregando.value = false;
+  }
 });
 </script>

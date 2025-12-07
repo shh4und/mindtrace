@@ -39,7 +39,8 @@ import Sidebar from '@/components/layout/Sidebar.vue';
 import { 
   faUsers,
   faEnvelope,
-  faUserPen
+  faUserPen,
+  faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
@@ -49,6 +50,7 @@ const userStore = useUserStore();
 // Itens do menu para profissional
 const menuItems = [
   { name: 'pacientes', view: 'pacientes', label: 'Meus Pacientes', icon: faUsers },
+  { name: 'questionarios', view: 'questionarios-atribuidos', label: 'Questionários', icon: faClipboardList },
   { name: 'convite', view: 'convite', label: 'Gerar Convite', icon: faEnvelope },
   { name: 'editar', view: 'editar-perfil', label: 'Editar Perfil', icon: faUserPen }
 ];
@@ -56,6 +58,7 @@ const menuItems = [
 // Mapeamento de view para nome de rota
 const viewToRoute = {
   'pacientes': 'profissional-pacientes',
+  'questionarios-atribuidos': 'profissional-questionarios-atribuidos',
   'convite': 'profissional-convite',
   'editar-perfil': 'profissional-editar-perfil'
 };
@@ -64,6 +67,8 @@ const viewToRoute = {
 const routeToView = {
   'profissional-pacientes': 'pacientes',
   'profissional-paciente-relatorio': 'pacientes', // Relatório faz parte da seção pacientes
+  'profissional-atribuir-questionario': 'pacientes', // Atribuir faz parte da seção pacientes
+  'profissional-questionarios-atribuidos': 'questionarios-atribuidos',
   'profissional-convite': 'convite',
   'profissional-editar-perfil': 'editar-perfil'
 };

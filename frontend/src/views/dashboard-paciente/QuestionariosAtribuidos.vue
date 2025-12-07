@@ -40,6 +40,10 @@
             <p class="text-sm text-gray-500 mb-3">{{ pendencia.instrumento.descricao }}</p>
 
             <div class="flex items-center text-xs text-gray-400 gap-4">
+              <span class="flex items-center" >
+                <font-awesome-icon :icon="faUserDoctor" class="w-3 h-3 mr-1" />
+                 <strong> {{ pendencia.profissional.nome }}</strong>
+              </span>
               <span class="flex items-center">
                 <font-awesome-icon :icon="faCalendar" class="w-3 h-3 mr-1" />
                 Atribuído em {{ formatDate(pendencia.data_atribuicao) }}
@@ -86,7 +90,8 @@ import {
   faListOl,
   faPen,
   faCheck,
-  faClock
+  faClock,
+  faUserDoctor
 } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();

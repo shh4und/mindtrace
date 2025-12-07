@@ -15,7 +15,7 @@ const PacienteHumor = () => import('@/views/dashboard-paciente/RegistroHumor.vue
 const PacienteRelatorio = () => import('@/views/shared/Relatorio.vue')
 const PacienteVincular = () => import('@/views/dashboard-paciente/VincularProfissional.vue')
 const PacienteEditarPerfil = () => import('@/views/shared/EditarPerfil.vue')
-const PacienteQuestionarios = () => import('@/views/dashboard-paciente/QuestionariosPendentes.vue')
+const PacienteQuestionariosAtribuidos = () => import('@/views/dashboard-paciente/QuestionariosAtribuidos.vue')
 const PacienteResponderQuestionario = () => import('@/views/dashboard-paciente/ResponderQuestionario.vue')
 
 // Dashboard Profissional e suas views
@@ -25,6 +25,7 @@ const ProfissionalConvite = () => import('@/views/dashboard-profissional/GerarCo
 const ProfissionalEditarPerfil = () => import('@/views/shared/EditarPerfil.vue')
 const ProfissionalRelatorio = () => import('@/views/shared/Relatorio.vue')
 const ProfissionalAtribuirQuestionario = () => import('@/views/dashboard-profissional/AtribuirQuestionario.vue')
+const ProfissionalQuestionariosAtribuidos = () => import('@/views/dashboard-profissional/QuestionariosAtribuidos.vue')
 
 // configura roteador principal com historico html5 baseado na base url do ambiente
 const router = createRouter({
@@ -83,7 +84,7 @@ const router = createRouter({
                 {
                     path: "questionarios",
                     name: "paciente-questionarios",
-                    component: PacienteQuestionarios,
+                    component: PacienteQuestionariosAtribuidos,
                 },
                 {
                     path: "questionarios/:atribuicaoId/responder",
@@ -126,24 +127,21 @@ const router = createRouter({
                     component: ProfissionalConvite,
                 },
                 {
-                    path: "atribuir-questionario/:patientId",
+                    path: "questionarios-atribuidos",
+                    name: "profissional-questionarios-atribuidos",
+                    component: ProfissionalQuestionariosAtribuidos,
+                },
+                {
+                    path: "atribuir-questionario/:patientId/:patientNome",
                     name: "profissional-atribuir-questionario",
                     component: ProfissionalAtribuirQuestionario,
+                    props: true,
                 },
                 {
                     path: "editar-perfil",
                     name: "profissional-editar-perfil",
                     component: ProfissionalEditarPerfil,
                     props: { userType: TipoUsuario.Profissional },
-                },
-                {
-                    path: "atribuir-questionario/:patientId/:patientNome",
-                    name: "profissional-atribuir-questionario",
-                    component: () =>
-                        import(
-                            "@/views/dashboard-profissional/AtribuirQuestionario.vue"
-                        ),
-                    props: true, // <-- Isso converte route.params em props do componente
                 },
             ],
         },

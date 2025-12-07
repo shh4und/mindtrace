@@ -112,6 +112,10 @@ const api = {
 
   listarAtribuicoesProfissional(){
     return apiClient.get('/instrumentos/listar-atribuicoes-profissional')
+  },
+
+  buscarAtribuicao(atribuicaoId){
+    return apiClient.get(`/instrumentos/atribuicao?atribuicaoID=${atribuicaoId}`)
   }
 };
 
