@@ -22,15 +22,29 @@ func (r *gormInstrumentoRepositorio) BuscarTodosAtivos(tx *gorm.DB) ([]*dominio.
 }
 
 func (r *gormInstrumentoRepositorio) BuscarInstrumentoPorID(tx *gorm.DB, instrumentoID uint) (*dominio.Instrumento, error) {
-	var instrumento dominio.Instrumento
-	if err := tx.Preload("Perguntas").First(&instrumento, instrumentoID).Error; err != nil {
+	var instrumento *dominio.Instrumento
+	if err := tx.Preload("Perguntas").Preload("OpcoesEscala").First(&instrumento, instrumentoID).Error; err != nil {
 		return nil, err
 	}
-	return &instrumento, nil
+	return instrumento, nil
 }
 
 func (r *gormInstrumentoRepositorio) CriarAtribuicao(tx *gorm.DB, atribuicao *dominio.Atribuicao) error {
 	return tx.Create(atribuicao).Error
+}
+
+func (r *gormInstrumentoRepositorio) BuscarAtribuicaoPorID(tx *gorm.DB, atribuicaoID uint) (*dominio.Atribuicao, error) {
+	var atribuicao *dominio.Atribuicao
+
+	if err := tx.
+		Preload("Instrumento.Perguntas").
+		Preload("Instrumento.OpcoesEscala").
+		Preload("Profissional.Usuario").
+		Preload("Paciente.Usuario").
+		Find(&atribuicao, atribuicaoID).Error; err != nil {
+		return nil, err
+	}
+	return atribuicao, nil
 }
 
 func (r *gormInstrumentoRepositorio) BuscarAtribuicoesPaciente(tx *gorm.DB, pacId uint) ([]*dominio.Atribuicao, error) {

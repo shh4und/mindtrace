@@ -172,23 +172,38 @@ type InstrumentoDTOOut struct {
 	Versao    int    `json:"versao"`
 }
 
+type PerguntaDTOOut struct {
+	ID                   uint   `json:"pergunta_id"`
+	OrdemItem            int    `json:"ordem_item"`
+	Conteudo             string `json:"conteudo"`
+	EhPontuacaoInvertida bool   `json:"eh_pontuacao_invertida"`
+}
+
+type OpcoesEscala struct {
+	Valor  int    `json:"valor"`
+	Rotulo string `json:"rotulo"`
+}
+
+type InstrumentoCompletoDTOOut struct {
+	ID             uint              `json:"id"`
+	Codigo         string            `json:"codigo"`
+	Nome           string            `json:"nome"`
+	Descricao      string            `json:"descricao"`
+	Versao         int               `json:"versao"`
+	Perguntas      []*PerguntaDTOOut `json:"perguntas,omitempty"`
+	OpcoesEscala   []*OpcoesEscala   `json:"opcoes_escala,omitempty"`
+	TotalPerguntas int               `json:"total_perguntas"`
+}
+
 // AtribuicaoDTOOut representa uma atribuição de instrumento para saída
 type AtribuicaoDTOOut struct {
 	ID             uint                        `json:"id"`
 	Status         string                      `json:"status"`
 	DataAtribuicao time.Time                   `json:"data_atribuicao"`
 	DataResposta   *time.Time                  `json:"data_resposta,omitempty"`
-	Instrumento    InstrumentoResumidoDTOOut   `json:"instrumento"`
+	Instrumento    InstrumentoCompletoDTOOut   `json:"instrumento"`
 	Paciente       *PacienteResumidoDTOOut     `json:"paciente,omitempty"`     // Apenas para profissional
 	Profissional   *ProfissionalResumidoDTOOut `json:"profissional,omitempty"` // Apenas para paciente
-}
-
-// InstrumentoResumidoDTOOut representa dados resumidos de um instrumento
-type InstrumentoResumidoDTOOut struct {
-	Codigo         string `json:"codigo"`
-	Nome           string `json:"nome"`
-	Descricao      string `json:"descricao"`
-	TotalPerguntas int    `json:"total_perguntas"`
 }
 
 // PacienteResumidoDTOOut representa dados resumidos de um paciente

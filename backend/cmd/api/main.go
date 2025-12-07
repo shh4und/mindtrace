@@ -176,6 +176,7 @@ func main() {
 				instrumentos.POST("/atribuir-instrumento", instrumentoCtrl.AtribuirInstrumento)
 				instrumentos.GET("/listar-atribuicoes-paciente", instrumentoCtrl.ListarAtribuicoesPaciente)
 				instrumentos.GET("/listar-atribuicoes-profissional", instrumentoCtrl.ListarAtribuicoesProfissional)
+				instrumentos.GET("/atribuicao", instrumentoCtrl.ApresentarPerguntasAtribuicao)
 			}
 		}
 	}

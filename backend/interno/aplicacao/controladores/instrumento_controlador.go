@@ -118,3 +118,34 @@ func (ic *InstrumentoControlador) ListarAtribuicoesProfissional(c *gin.Context) 
 
 	c.JSON(http.StatusOK, atribuicoesOut)
 }
+
+func (ic *InstrumentoControlador) ApresentarPerguntasAtribuicao(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
+		return
+	}
+
+	atribuicaoIDStr := c.DefaultQuery("atribuicaoID", "0")
+	if atribuicaoIDStr == "0" {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "ID de atribuição inválido"})
+		return
+	}
+	atribuicaoID, err := strconv.Atoi(atribuicaoIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "Parametro 'atribuicaoID' invalido"})
+		return
+	}
+
+	atribuicaoOut, err := ic.instrumentoServico.ListarPerguntasAtribuicao(userID.(uint), uint(atribuicaoID))
+	if err != nil {
+		if err == dominio.ErrUsuarioNaoEncontrado {
+			c.JSON(http.StatusNotFound, gin.H{"erro": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, atribuicaoOut)
+}

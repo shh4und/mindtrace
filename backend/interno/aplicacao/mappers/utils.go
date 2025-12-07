@@ -213,7 +213,7 @@ func AtribuicaoParaDTOOutPaciente(atrib *dominio.Atribuicao) *dtos.AtribuicaoDTO
 		Status:         string(atrib.Status),
 		DataAtribuicao: atrib.CreatedAt,
 		DataResposta:   atrib.DataResposta,
-		Instrumento: dtos.InstrumentoResumidoDTOOut{
+		Instrumento: dtos.InstrumentoCompletoDTOOut{
 			Codigo:         atrib.Instrumento.Codigo,
 			Nome:           atrib.Instrumento.Nome,
 			Descricao:      atrib.Instrumento.Descricao,
@@ -234,6 +234,21 @@ func AtribuicaoParaDTOOutProfissional(atrib *dominio.Atribuicao) *dtos.Atribuica
 		return nil
 	}
 
+	dtoPerguntas := make([]*dtos.PerguntaDTOOut, 0)
+	for _, pergunta := range atrib.Instrumento.Perguntas {
+		dtoPerguntas = append(dtoPerguntas, &dtos.PerguntaDTOOut{
+			ID:                   pergunta.ID,
+			OrdemItem:            pergunta.OrdemItem,
+			Conteudo:             pergunta.Conteudo,
+			EhPontuacaoInvertida: pergunta.EhPontuacaoInvertida})
+	}
+
+	dtoOpcoesEscala := make([]*dtos.OpcoesEscala, 0)
+	for _, opcaoEscala := range atrib.Instrumento.OpcoesEscala {
+		dtoOpcoesEscala = append(dtoOpcoesEscala, &dtos.OpcoesEscala{
+			Valor:  opcaoEscala.Valor,
+			Rotulo: opcaoEscala.Rotulo})
+	}
 	// Contar perguntas do instrumento
 	totalPerguntas := len(atrib.Instrumento.Perguntas)
 
@@ -242,10 +257,12 @@ func AtribuicaoParaDTOOutProfissional(atrib *dominio.Atribuicao) *dtos.Atribuica
 		Status:         string(atrib.Status),
 		DataAtribuicao: atrib.CreatedAt,
 		DataResposta:   atrib.DataResposta,
-		Instrumento: dtos.InstrumentoResumidoDTOOut{
+		Instrumento: dtos.InstrumentoCompletoDTOOut{
 			Codigo:         atrib.Instrumento.Codigo,
 			Nome:           atrib.Instrumento.Nome,
 			Descricao:      atrib.Instrumento.Descricao,
+			Perguntas:      dtoPerguntas,
+			OpcoesEscala:   dtoOpcoesEscala,
 			TotalPerguntas: totalPerguntas,
 		},
 		Paciente: &dtos.PacienteResumidoDTOOut{
@@ -272,4 +289,43 @@ func AtribuicoesParaDTOOutProfissional(atribuicoes []*dominio.Atribuicao) []*dto
 		dtos = append(dtos, AtribuicaoParaDTOOutProfissional(atrib))
 	}
 	return dtos
+}
+
+func AtribuicaoComPerguntasDTOOut(atrib *dominio.Atribuicao) *dtos.AtribuicaoDTOOut {
+	if atrib == nil {
+		return nil
+	}
+
+	dtoPerguntas := make([]*dtos.PerguntaDTOOut, 0)
+	for _, pergunta := range atrib.Instrumento.Perguntas {
+		dtoPerguntas = append(dtoPerguntas, &dtos.PerguntaDTOOut{
+			ID:                   pergunta.ID,
+			OrdemItem:            pergunta.OrdemItem,
+			Conteudo:             pergunta.Conteudo,
+			EhPontuacaoInvertida: pergunta.EhPontuacaoInvertida})
+	}
+
+	dtoOpcoesEscala := make([]*dtos.OpcoesEscala, 0)
+	for _, opcaoEscala := range atrib.Instrumento.OpcoesEscala {
+		dtoOpcoesEscala = append(dtoOpcoesEscala, &dtos.OpcoesEscala{
+			Valor:  opcaoEscala.Valor,
+			Rotulo: opcaoEscala.Rotulo})
+	}
+	// Contar perguntas do instrumento
+	totalPerguntas := len(atrib.Instrumento.Perguntas)
+
+	return &dtos.AtribuicaoDTOOut{
+		ID:             atrib.ID,
+		Status:         string(atrib.Status),
+		DataAtribuicao: atrib.CreatedAt,
+		DataResposta:   atrib.DataResposta,
+		Instrumento: dtos.InstrumentoCompletoDTOOut{
+			Codigo:         atrib.Instrumento.Codigo,
+			Nome:           atrib.Instrumento.Nome,
+			Descricao:      atrib.Instrumento.Descricao,
+			Perguntas:      dtoPerguntas,
+			OpcoesEscala:   dtoOpcoesEscala,
+			TotalPerguntas: totalPerguntas,
+		},
+	}
 }
