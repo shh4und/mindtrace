@@ -1,6 +1,10 @@
 package dtos
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/datatypes"
+)
 
 type RegistrarUsuarioDTOIn struct {
 	Email string `json:"email" binding:"required,email"`
@@ -77,6 +81,12 @@ type AlterarSenhaDTOIn struct {
 
 type VincularPacienteDTOIn struct {
 	Token string `json:"token" binding:"required,min=10"`
+}
+
+type RegistroRespostaDTOIn struct {
+	AtribuicaoID       uint           `json:"atribuicao_id"`
+	PontuacaoTotal     float64        `json:"pontuacao_total"`
+	PerguntasRespostas datatypes.JSON `json:"respostas"`
 }
 
 // PontoDeDadosDTOOut representa um ponto de dados para graficos

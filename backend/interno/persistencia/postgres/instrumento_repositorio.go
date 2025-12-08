@@ -74,3 +74,31 @@ func (r *gormInstrumentoRepositorio) BuscarAtribuicoesProfissional(tx *gorm.DB, 
 	}
 	return atribuicoes, nil
 }
+
+func (r *gormInstrumentoRepositorio) CriarReposta(tx *gorm.DB, resposta *dominio.Resposta) error {
+	return tx.Create(resposta).Error
+}
+func (r *gormInstrumentoRepositorio) BuscarRespostaPorAtribuicaoID(tx *gorm.DB, atribuicaoID uint) (*dominio.Resposta, error) {
+	var resposta *dominio.Resposta
+
+	if err := tx.Where("atribuicao_id = ?", atribuicaoID).First(&resposta).Error; err != nil {
+		return nil, err
+	}
+
+	return resposta, nil
+}
+
+// func (r *gormInstrumentoRepositorio) BuscarRespostaCompletaPorAtribuicaoID(tx *gorm.DB, atribuicaoID uint) (*dominio.Resposta, error) {
+// 	var resposta *dominio.Resposta
+
+// 	if err := tx.
+// 		Preload("Atribuicao.Instrumento.Perguntas").
+// 		Preload("Atribuicao.Paciente.Usuario").
+// 		Preload("Atribuicao.Profissional.Usuario").
+// 		Where("atribuicao_id = ?", atribuicaoID).
+// 		First(&resposta).Error; err != nil {
+// 		return nil, err
+// 	}
+
+// 	return resposta, nil
+// }

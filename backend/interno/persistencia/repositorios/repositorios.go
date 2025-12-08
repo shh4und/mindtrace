@@ -44,4 +44,7 @@ type InstrumentoRepositorio interface {
 	BuscarAtribuicoesPaciente(tx *gorm.DB, pacId uint) ([]*dominio.Atribuicao, error)
 	BuscarAtribuicoesProfissional(tx *gorm.DB, pacId uint) ([]*dominio.Atribuicao, error)
 	BuscarAtribuicaoPorID(tx *gorm.DB, atribuicaoID uint) (*dominio.Atribuicao, error)
+
+	CriarReposta(tx *gorm.DB, resposta *dominio.Resposta) error
+	BuscarRespostaPorAtribuicaoID(tx *gorm.DB, atribuicaoID uint) (*dominio.Resposta, error)
 }

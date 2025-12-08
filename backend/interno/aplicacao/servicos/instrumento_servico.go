@@ -17,6 +17,7 @@ type InstrumentoServico interface {
 	ListarAtribuicoesProfissional(profId uint) ([]*dtos.AtribuicaoDTOOut, error)
 	ListarAtribuicoesPaciente(pacId uint) ([]*dtos.AtribuicaoDTOOut, error)
 	ListarPerguntasAtribuicao(usuarioId, atribuicaoId uint) (*dtos.AtribuicaoDTOOut, error)
+	CriarRespostasAtribuicao(dto *dtos.RegistroRespostaDTOIn) error
 }
 type instrumentoServico struct {
 	db              *gorm.DB
@@ -185,4 +186,27 @@ func (is *instrumentoServico) ListarPerguntasAtribuicao(usuarioId, atribuicaoId 
 	}
 
 	return mappers.AtribuicaoComPerguntasDTOOut(atribuicao), nil
+}
+
+func (is *instrumentoServico) CriarRespostasAtribuicao(dto *dtos.RegistroRespostaDTOIn) error {
+
+	err := is.db.Transaction(func(tx *gorm.DB) error {
+
+		atribuicao, err := is.instrumentoRepo.BuscarAtribuicaoPorID(tx, uint(dto.AtribuicaoID))
+		if err != nil {
+			return err
+		}
+		classificacao := ""
+		novoRegistroResposta, err := mappers.CriarRegistroRespostasDTOInParaEntidade(dto, atribuicao.ID, classificacao)
+		if err != nil {
+			return err
+		}
+		if err = is.instrumentoRepo.CriarReposta(tx, novoRegistroResposta); err != nil {
+			return err
+		}
+
+		return err
+
+	})
+	return err
 }

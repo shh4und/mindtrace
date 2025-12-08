@@ -171,6 +171,24 @@ func CriarRegistroHumorDTOInParaEntidade(dto *dtos.CriarRegistroHumorDTOIn, paci
 	}, nil
 }
 
+func CriarRegistroRespostasDTOInParaEntidade(dto *dtos.RegistroRespostaDTOIn, atribuicaoID uint, classificacao string) (*dominio.Resposta, error) {
+
+	dadosBrutos, err := json.Marshal(dto.PerguntasRespostas)
+	if err != nil {
+		return nil, err
+	}
+
+	resposta := &dominio.Resposta{
+		AtribuicaoID:   atribuicaoID,
+		PontuacaoTotal: dto.PontuacaoTotal,
+		Classificacao:  classificacao,
+		DadosBrutos:    dadosBrutos,
+	}
+
+	return resposta, nil
+
+}
+
 func ConviteParaDTOOut(convite *dominio.Convite) *dtos.ConviteDTOOut {
 	if convite == nil {
 		return nil

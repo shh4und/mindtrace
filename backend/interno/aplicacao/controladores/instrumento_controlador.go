@@ -1,6 +1,7 @@
 package controladores
 
 import (
+	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/servicos"
 	"mindtrace/backend/interno/dominio"
 	"net/http"
@@ -148,4 +149,26 @@ func (ic *InstrumentoControlador) ApresentarPerguntasAtribuicao(c *gin.Context) 
 	}
 
 	c.JSON(http.StatusOK, atribuicaoOut)
+}
+
+func (ic *InstrumentoControlador) RegistrarRespostas(c *gin.Context) {
+	_, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
+		return
+	}
+
+	var req dtos.RegistroRespostaDTOIn
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		return
+	}
+
+	err := ic.instrumentoServico.CriarRespostasAtribuicao(&req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"msg": "resposta registrada com sucesso."})
 }

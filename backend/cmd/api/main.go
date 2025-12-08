@@ -155,10 +155,7 @@ func main() {
 				relatorios.GET("/", relatorioCtrl.GerarRelatorio)
 				relatorios.GET("/paciente-lista", relatorioCtrl.GerarAnaliseHistorica)
 			}
-			/* monitoramento := protegido.Group("/monitoramento")
-			{
-				monitoramento.GET("/paciente-lista", monitoramentoCtrl.RealizarMonitoramento)
-			} */
+
 			resumo := protegido.Group("/resumo")
 			{
 				resumo.GET("/", resumoCtrl.GerarResumo)
@@ -177,6 +174,8 @@ func main() {
 				instrumentos.GET("/listar-atribuicoes-paciente", instrumentoCtrl.ListarAtribuicoesPaciente)
 				instrumentos.GET("/listar-atribuicoes-profissional", instrumentoCtrl.ListarAtribuicoesProfissional)
 				instrumentos.GET("/atribuicao", instrumentoCtrl.ApresentarPerguntasAtribuicao)
+				instrumentos.POST("/registrar-respostas", instrumentoCtrl.RegistrarRespostas)
+
 			}
 		}
 	}
