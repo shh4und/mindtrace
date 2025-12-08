@@ -116,6 +116,10 @@ const api = {
 
   buscarAtribuicao(atribuicaoId){
     return apiClient.get(`/instrumentos/atribuicao?atribuicaoID=${atribuicaoId}`)
+  },
+
+  enviarResposta(payload){
+    return apiClient.post('/instrumentos/registrar-respostas', payload)
   }
 };
 

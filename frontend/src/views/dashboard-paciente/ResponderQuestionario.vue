@@ -57,13 +57,6 @@
       </p>
     </div>
 
-    <!-- Instrução -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-      <p class="text-sm text-blue-800">
-        <font-awesome-icon :icon="faInfoCircle" class="mr-2" />
-        {{ instrumento.instrucao }}
-      </p>
-    </div>
 
     <!-- Todas as perguntas em scroll -->
     <div class="space-y-6">
@@ -167,7 +160,6 @@ const erro = ref(null);
 const instrumento = ref({
   codigo: '',
   nome: '',
-  instrucao: '',
   perguntas: [],
   opcoes_escala: []
 });
@@ -192,25 +184,25 @@ const getCodigoBadgeClass = (codigo) => {
 };
 
 const selecionarResposta = (perguntaId, valor) => {
-  console.log('Selecionando:', { perguntaId, valor, respostasAntes: {...respostas.value} });
   respostas.value = {
     ...respostas.value,
     [perguntaId]: valor
   };
-  console.log('Respostas depois:', respostas.value);
 };
 
-const enviarRespostas = () => {
+const enviarRespostas = async () => {
   // TODO: Integrar com API quando backend estiver pronto
-  // const payload = {
-  //   atribuicaoId: atribuicaoId.value,
-  //   respostas: Object.entries(respostas.value).map(([perguntaId, valor]) => ({
-  //     perguntaId: parseInt(perguntaId),
-  //     valor
-  //   }))
-  // };
-  // await api.enviarResposta(payload);
+  const payload = {
+    atribuicao_id: parseInt(atribuicaoId.value),
+    respostas: Object.entries(respostas.value).map(([perguntaId, valor]) => ({
+      pergunta_id: parseInt(perguntaId),
+      valor
+    }))
+  };
 
+  await api.enviarResposta(payload);
+  
+  console.log(payload)
   toast.success('Questionário enviado com sucesso! Obrigado por responder.');
   
   setTimeout(() => {
@@ -233,16 +225,13 @@ onMounted(async () => {
   try {
     carregando.value = true;
     const response = await api.buscarAtribuicao(atribuicaoId.value);
-    console.log('Dados recebidos:', response.data);
     
     if (!response.data || !response.data.instrumento) {
       throw new Error('Dados do questionário inválidos');
     }
     
     instrumento.value = response.data.instrumento;
-    console.log('Perguntas:', instrumento.value.perguntas);
-    console.log('Primeira pergunta:', instrumento.value.perguntas[0]);
-    toast.success("Questionário carregado com sucesso!");
+    // toast.success("Questionário carregado com sucesso!");
   } catch (error) {
     console.error('Erro ao carregar questionário:', error);
     erro.value = error.response?.data?.erro || 'Não foi possível carregar o questionário';

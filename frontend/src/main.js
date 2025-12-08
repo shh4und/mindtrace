@@ -33,7 +33,7 @@ app.use(VueApexCharts)
 // configuracoes padrao para notificacoes toast
 const options = {
     position: 'top-right',
-    timeout: 5000,
+    timeout: 2000,
     closeOnClick: true,
     pauseOnFocusLoss: true,
     pauseOnHover: true,
