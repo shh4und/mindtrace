@@ -12,8 +12,10 @@ MindTrace é uma aplicação web full-stack completa projetada para rastreamento
 
 - **Gestão de Usuários**: Registro e autenticação para pacientes e profissionais de saúde
 - **Rastreamento de Humor**: Pacientes podem registrar entradas diárias de humor com timestamps e notas
+- **Questionários Padronizados**: Sistema completo de escalas psicométricas (PHQ-9, GAD-7, WHOQOL-BREF, WHO-5)
+- **Atribuição de Instrumentos**: Profissionais podem atribuir questionários a pacientes
+- **Analytics Avançados**: Análise histórica com classificação de status (REGULAR, ATENÇÃO, PREOCUPANTE)
 - **Relatórios e Análises**: Profissionais podem gerar relatórios de tendências de humor para seus pacientes
-- **Alertas Automatizados**: Notificações inteligentes para profissionais baseadas em padrões de dados dos pacientes
 - **Sistema de Convites**: Profissionais podem enviar convites de vinculação de conta para pacientes
 - **Dashboards Duplos**: Interfaces separadas baseadas em função para pacientes e profissionais
 - **Visualização de Dados**: Gráficos e tabelas interativas para análise de tendências de humor
@@ -24,6 +26,7 @@ MindTrace é uma aplicação web full-stack completa projetada para rastreamento
 - **Linguagem**: Go (Golang) 1.25.1
 - **Framework Web**: Gin v1.10.1
 - **ORM**: GORM v1.30.1
+- **Tipos de Dados**: GORM Datatypes (JSONB)
 - **Banco de Dados**: PostgreSQL 17 (produção) / SQLite (desenvolvimento)
 - **Autenticação**: JWT (golang-jwt/jwt/v5)
 - **Testes**: Testify v1.10.0 - **281 testes unitários**
@@ -36,7 +39,7 @@ MindTrace é uma aplicação web full-stack completa projetada para rastreamento
 - **Gerenciamento de Estado**: Pinia v3.0.3
 - **Cliente HTTP**: Axios v1.11.0
 - **Estilização**: TailwindCSS v4.1.11
-- **Gráficos**: ApexCharts v5.3.4 com vue3-apexcharts
+- **Gráficos**: ApexCharts v5.3.4 com vue3-apexcharts v1.8.0
 - **Ícones**: FontAwesome v7.0.0
 
 ### Infraestrutura & DevOps
@@ -191,36 +194,128 @@ docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --remove-or
 ```
 mindtrace/
 ├── backend/                          # Aplicação backend em Go
-│   ├── cmd/api/                      # Ponto de entrada da aplicação
+│   ├── cmd/api/                      # Entry point
+│   │   └── main.go
 │   ├── interno/                      # Pacotes internos
-│   │   ├── aplicacao/                # Camada de aplicação
-│   │   │   ├── controladores/        # Controladores HTTP
-│   │   │   ├── middlewares/          # Middlewares HTTP
-│   │   │   ├── servicos/             # Serviços de negócio
-│   │   │   │   └── tests/            # ✅ Testes de serviços (74 testes)
-│   │   │   └── mappers/              # Mapeamento DTO ↔ Entidade
-│   │   │       └── tests/            # ✅ Testes de mappers (23 testes)
-│   │   ├── dominio/                  # Camada de domínio
-│   │   │   ├── usuario.go            # Entidades de usuário
-│   │   │   ├── convite.go            # Entidade de convite
-│   │   │   ├── registro_humor.go     # Entidade de registro de humor
-│   │   │   ├── relatorio.go          # DTO de relatório
+│   │   ├── dominio/                  # Camada de domínio (Entities)
+│   │   │   ├── usuario.go            # Usuário, Profissional, Paciente
+│   │   │   ├── registro_humor.go     # Registro de humor
+│   │   │   ├── convite.go            # Sistema de convites
+│   │   │   ├── relatorio.go          # DTOs de relatório
+│   │   │   ├── notificacao.go        # Sistema de notificações
+│   │   │   ├── instrumento.go        # ✨ Questionários padronizados
+│   │   │   ├── atribuicao.go         # ✨ Atribuições de questionários
+│   │   │   ├── resposta.go           # ✨ Respostas (JSONB)
 │   │   │   └── tests/                # ✅ Testes de domínio (142 testes)
+│   │   ├── aplicacao/                # Camada de aplicação
+│   │   │   ├── controladores/        # HTTP Controllers
+│   │   │   │   ├── aut_controlador.go
+│   │   │   │   ├── usuario_controlador.go
+│   │   │   │   ├── paciente_controlador.go
+│   │   │   │   ├── profissional_controlador.go
+│   │   │   │   ├── registro_humor_controlador.go
+│   │   │   │   ├── convite_controlador.go
+│   │   │   │   ├── relatorio_controlador.go
+│   │   │   │   ├── resumo_controlador.go
+│   │   │   │   └── instrumento_controlador.go  # ✨ API de questionários
+│   │   │   ├── servicos/             # Business Logic
+│   │   │   │   ├── usuario_servico.go
+│   │   │   │   ├── registro_humor_servico.go
+│   │   │   │   ├── convite_servico.go
+│   │   │   │   ├── resumo_servico.go
+│   │   │   │   ├── alerta_servico.go          # ✨ Sistema de alertas
+│   │   │   │   ├── analise_servico.go         # ✨ Analytics avançados
+│   │   │   │   ├── notificacao_servico.go
+│   │   │   │   ├── instrumento_servico.go     # ✨ Lógica de questionários
+│   │   │   │   └── tests/            # ✅ Testes de serviços (74 testes)
+│   │   │   ├── dtos/                 # Data Transfer Objects
+│   │   │   │   └── tipos.go
+│   │   │   ├── helpers/              # Helper functions
+│   │   │   │   └── pdf.go            # Geração de PDF
+│   │   │   ├── mappers/              # DTO ↔ Entity conversão
+│   │   │   │   ├── utils.go
+│   │   │   │   └── tests/            # ✅ Testes de mappers (23 testes)
+│   │   │   └── middlewares/          # HTTP Middlewares
+│   │   │       ├── aut_middleware.go
+│   │   │       └── cors_middleware.go
 │   │   └── persistencia/             # Camada de persistência
-│   │       ├── postgres/             # Implementações PostgreSQL
-│   │       ├── repositorios/         # Interfaces de repositório
-│   │       └── sqlite/               # Implementações SQLite
-│   ├── Dockerfile                    # Container de produção
-│   ├── Dockerfile.dev                # Container de desenvolvimento
-│   ├── go.mod                        # Módulos Go
-│   └── go.sum                        # Dependências
+│   │       ├── repositorios/         # Repository interfaces
+│   │       │   └── repositorios.go
+│   │       ├── postgres/             # PostgreSQL implementation
+│   │       │   ├── db.go
+│   │       │   ├── usuario_repositorio.go
+│   │       │   ├── registro_humor_repositorio.go
+│   │       │   ├── convite_repositorio.go
+│   │       │   ├── relatorio_repositorio.go
+│   │       │   ├── notificacao_repositorio.go
+│   │       │   └── instrumento_repositorio.go  # ✨ Repos questionários
+│   │       ├── sqlite/               # SQLite implementation
+│   │       │   ├── db.go
+│   │       │   ├── usuario_repositorio.go
+│   │       │   ├── registro_humor_repositorio.go
+│   │       │   ├── convite_repositorio.go
+│   │       │   ├── relatorio_repositorio.go
+│   │       │   ├── notificacao_repositorio.go
+│   │       │   └── instrumento_repositorio.go  # ✨ Repos questionários
+│   │       └── seeds/                # Database seeding
+│   │           └── instrumento_seed.go
+│   ├── Dockerfile                    # Production container
+│   ├── Dockerfile.dev                # Development container
+│   ├── go.mod                        # Go modules
+│   └── go.sum                        # Dependencies
 ├── frontend/                         # Aplicação frontend Vue.js
 │   ├── src/
-│   │   ├── components/               # Componentes Vue reutilizáveis
-│   │   ├── views/                    # Componentes de página
-│   │   ├── router/                   # Configuração Vue Router
-│   │   ├── store/                    # Gerenciamento de estado Pinia
-│   │   └── services/                 # Serviços de API
+│   │   ├── views/                    # Views (Páginas)
+│   │   │   ├── auth/                 # Autenticação
+│   │   │   │   ├── Login.vue
+│   │   │   │   ├── Cadastro.vue
+│   │   │   │   └── ForgotPassword.vue
+│   │   │   ├── dashboard-paciente/   # Dashboard Paciente
+│   │   │   │   ├── PacienteDashboard.vue
+│   │   │   │   ├── RegistroHumor.vue
+│   │   │   │   ├── Resumo.vue
+│   │   │   │   ├── VincularProfissional.vue
+│   │   │   │   ├── QuestionariosAtribuidos.vue    # ✨ Lista de questionários
+│   │   │   │   └── ResponderQuestionario.vue      # ✨ Interface de resposta
+│   │   │   ├── dashboard-profissional/ # Dashboard Profissional
+│   │   │   │   ├── ProfissionalDashboard.vue
+│   │   │   │   ├── GerarConvite.vue
+│   │   │   │   ├── ListaPacientes.vue
+│   │   │   │   ├── AtribuirQuestionario.vue       # ✨ Atribuir questionários
+│   │   │   │   └── QuestionariosAtribuidos.vue    # ✨ Gerenciar atribuições
+│   │   │   ├── shared/               # Views compartilhadas
+│   │   │   │   ├── EditarPerfil.vue
+│   │   │   │   └── Relatorio.vue
+│   │   │   └── Landpage.vue          # Página inicial
+│   │   ├── components/               # Componentes reutilizáveis
+│   │   │   ├── layout/               # Layout components
+│   │   │   │   ├── NavbarPublic.vue
+│   │   │   │   ├── Sidebar.vue
+│   │   │   │   ├── SidebarPaciente.vue
+│   │   │   │   ├── SidebarProfissional.vue
+│   │   │   │   └── TopNavbar.vue
+│   │   │   └── ui/                   # UI components
+│   │   │       ├── BaseButton.vue
+│   │   │       ├── BaseCard.vue
+│   │   │       ├── BaseInput.vue
+│   │   │       └── index.js
+│   │   ├── composables/              # Composition API
+│   │   │   ├── index.js
+│   │   │   ├── useAuth.js            # Lógica de autenticação
+│   │   │   └── useMoodForm.js        # Lógica de formulário
+│   │   ├── services/                 # API Clients
+│   │   │   └── api.js                # Cliente HTTP (Axios)
+│   │   ├── router/                   # Vue Router
+│   │   │   └── index.js
+│   │   ├── store/                    # Pinia State Management
+│   │   │   └── user.js               # User store
+│   │   ├── utils/                    # Utilities
+│   │   │   └── jwt.js                # JWT helper
+│   │   ├── types/                    # Type definitions
+│   │   ├── constants/                # Constants
+│   │   ├── assets/                   # Static assets
+│   │   ├── App.vue                   # Root component
+│   │   └── main.js                   # Entry point
 │   ├── Dockerfile                    # Container de produção
 │   ├── Dockerfile.dev                # Container de desenvolvimento
 │   ├── package.json                  # Dependências Node
@@ -228,12 +323,17 @@ mindtrace/
 ├── docs/                             # Documentação
 │   ├── ARQUITETURA_MINDTRACE.md      # 📘 Documento principal de arquitetura
 │   └── TESTES_UNITARIOS_RELATORIO.md # Documentação de testes
+├── seeders/                          # Scripts de seed do banco
+│   ├── seed.sh                       # Script principal de seed
+│   ├── seed.ps1                      # Script PowerShell
+│   ├── monitoramento.sh              # Seed de monitoramento
+│   ├── registro_humor.sh             # Seed de registros de humor
+│   └── vincular.sh                   # Seed de vínculos
 ├── docker-compose.yml                # Docker Compose base
 ├── docker-compose.override.yml       # Overrides de desenvolvimento
 ├── docker-compose.prod.yml           # Configuração de produção
 ├── docker-compose.sqlite.yml         # Configuração SQLite
-├── schema_dump.sql                   # Schema do banco de dados
-├── seed.sh                           # Script de seed do banco
+├── dump-mindtrace-public.sql         # Dump do banco de dados
 └── README.md                         # Este arquivo
 ```
 
