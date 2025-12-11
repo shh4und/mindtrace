@@ -1,5 +1,5 @@
 # Dockerfile.dev for backend (Go with air for live reload)
-FROM golang:alpine
+FROM golang:1.25.1-alpine
 
 ENV GOPATH=/go
 ENV GOBIN=/go/bin
