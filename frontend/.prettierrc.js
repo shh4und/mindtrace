@@ -1,0 +1,14 @@
+export default {
+  semi: true,
+  singleQuote: true,
+  tabWidth: 2,
+  useTabs: false,
+  trailingComma: "es5",
+  bracketSpacing: true,
+  arrowParens: "always",
+  printWidth: 100,
+  endOfLine: "lf",
+  // Vue specific
+  vueIndentScriptAndStyle: false,
+  htmlWhitespaceSensitivity: "css",
+};
