@@ -1,95 +1,119 @@
 <template>
-  <div>
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">Meus Questionários</h1>
-    <p class="text-gray-500 mb-8">Responda os questionários atribuídos pelo seu profissional</p>
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Meus Questionários</h1>
+      <p class="text-gray-500">
+        Responda os questionários atribuídos pelo seu profissional
+      </p>
+    </div>
 
-    <div>
-      Pendentes
-      <!-- Loading state -->
-      <div v-if="isLoading" class="text-center py-12">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-        <p class="text-gray-500">Carregando questionários...</p>
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-6 border-b border-gray-200">
+      <button
+        v-for="tab in tabs"
+        :key="tab.id"
+        @click="activeTab = tab.id"
+        class="px-4 py-3 font-medium text-sm transition-all relative"
+        :class="[
+          activeTab === tab.id
+            ? 'text-indigo-600'
+            : 'text-gray-500 hover:text-gray-700',
+        ]"
+      >
+        {{ tab.label }}
+        <span
+          class="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-medium"
+          :class="[
+            activeTab === tab.id
+              ? 'bg-indigo-100 text-indigo-600'
+              : 'bg-gray-200 text-gray-600',
+          ]"
+        >
+          {{ tab.count }}
+        </span>
+        <span
+          v-if="activeTab === tab.id"
+          class="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600"
+        ></span>
+      </button>
+    </div>
+
+    <!-- Conteúdo das abas -->
+    <div v-if="isLoading" class="text-center py-12">
+      <div
+        class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto mb-4"
+      ></div>
+      <p class="text-gray-500">Carregando questionários...</p>
+    </div>
+
+    <!-- Aba Pendentes -->
+    <div v-else-if="activeTab === 'pendentes'">
+      <div v-if="pendencias.length === 0" class="text-center py-12">
+        <div
+          class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <font-awesome-icon
+            :icon="faClipboardCheck"
+            class="w-8 h-8 text-gray-400"
+          />
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          Nenhum questionário pendente
+        </h3>
+        <p class="text-gray-500">
+          Você não possui questionários para responder no momento.
+        </p>
       </div>
 
-      <!-- Empty state -->
-      <div v-else-if="pendencias.length === 0" class="text-center py-12">
-        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <font-awesome-icon :icon="faClipboardCheck" class="w-8 h-8 text-gray-400" />
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhum questionário pendente</h3>
-        <p class="text-gray-500">Você não possui questionários para responder no momento.</p>
-      </div>
-
-      <!-- Lista de questionários -->
-      <div v-else class="space-y-4">
-        <div v-for="pendencia in pendencias" :key="pendencia.id"
-          class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <div class="flex items-center gap-3 mb-2">
-                <span class="inline-block px-2 py-1 text-xs font-mono font-medium rounded-md"
-                  :class="getCodigoBadgeClass(pendencia.instrumento.codigo)">
-                  {{ pendencia.instrumento.codigo.toUpperCase().replace('_', '-') }}
-                </span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  :class="getStatusClass(pendencia.status)">
-                  <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="getStatusDotClass(pendencia.status)"></span>
-                  {{ getStatusLabel(pendencia.status) }}
-                </span>
-              </div>
-
-              <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ pendencia.instrumento.nome }}</h3>
-              <p class="text-sm text-gray-500 mb-3">{{ pendencia.instrumento.descricao }}</p>
-
-              <div class="flex items-center text-xs text-gray-400 gap-4">
-                <span class="flex items-center">
-                  <font-awesome-icon :icon="faUserDoctor" class="w-3 h-3 mr-1" />
-                  <strong> {{ pendencia.profissional.nome }}</strong>
-                </span>
-                <span class="flex items-center">
-                  <font-awesome-icon :icon="faCalendar" class="w-3 h-3 mr-1" />
-                  Atribuído em {{ formatDate(pendencia.data_atribuicao) }}
-                </span>
-                <span class="flex items-center">
-                  <font-awesome-icon :icon="faListOl" class="w-3 h-3 mr-1" />
-                  {{ pendencia.instrumento.total_perguntas }} perguntas
-                </span>
-              </div>
-            </div>
-
-            <div class="ml-4">
-              <button v-if="pendencia.status === 'PENDENTE'" @click="responderQuestionario(pendencia.id)"
-                class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center">
-                <font-awesome-icon :icon="faPen" class="w-4 h-4 mr-2" />
-                Responder
-              </button>
-              <span v-else-if="pendencia.status === 'RESPONDIDO'"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg">
-                <font-awesome-icon :icon="faCheck" class="w-4 h-4 mr-2" />
-                Concluído
-              </span>
-              <span v-else-if="pendencia.status === 'EXPIRADO'"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg">
-                <font-awesome-icon :icon="faClock" class="w-4 h-4 mr-2" />
-                Expirado
-              </span>
-            </div>
-          </div>
-        </div>
+      <div v-else class="space-y-4 animate-fadeIn">
+        <QuestionarioCard
+          v-for="pendencia in sortedPendencias"
+          :key="pendencia.id"
+          :pendencia="pendencia"
+          @responder="responderQuestionario"
+        />
       </div>
     </div>
-    <div>
-      Respondidos
+
+    <!-- Aba Respondidos -->
+    <div v-else-if="activeTab === 'respondidos'">
+      <div v-if="respondidos.length === 0" class="text-center py-12">
+        <div
+          class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <font-awesome-icon
+            :icon="faClipboardCheck"
+            class="w-8 h-8 text-gray-400"
+          />
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          Nenhum questionário respondido
+        </h3>
+        <p class="text-gray-500">
+          Você ainda não respondeu nenhum questionário.
+        </p>
+      </div>
+
+      <div v-else class="space-y-4 animate-fadeIn">
+        <QuestionarioCard
+          v-for="respondido in sortedRespondidos"
+          :key="respondido.id"
+          :pendencia="respondido"
+          :readonly="true"
+          @responder="responderQuestionario"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { api } from '@/services/api'
-import { useRouter } from 'vue-router';
-import { useToast } from 'vue-toastification';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { ref, computed, onMounted } from "vue";
+import { api } from "@/services/api";
+import { useRouter } from "vue-router";
+import { useToast } from "vue-toastification";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import QuestionarioCard from "@/components/layout/QuestionarioCard.vue";
 import {
   faClipboardCheck,
   faCalendar,
@@ -97,83 +121,97 @@ import {
   faPen,
   faCheck,
   faClock,
-  faUserDoctor
-} from '@fortawesome/free-solid-svg-icons';
+  faUserDoctor,
+} from "@fortawesome/free-solid-svg-icons";
 
 const router = useRouter();
 const isLoading = ref(true);
 const toast = useToast();
+const activeTab = ref("pendentes");
 
-// Mock: lista de pendências
-const pendencias = ref([]);
+// Dados
+const allQuestions = ref([]);
 
+// Computed
+const pendencias = computed(() =>
+  allQuestions.value.filter((q) => q.status === "PENDENTE")
+);
 
-const getCodigoBadgeClass = (codigo) => {
-  const classes = {
-    'phq_9': 'bg-blue-100 text-blue-700',
-    'gad_7': 'bg-amber-100 text-amber-700',
-    'whoqol_bref': 'bg-emerald-100 text-emerald-700',
-    'who_5': 'bg-purple-100 text-purple-700'
-  };
-  return classes[codigo] || 'bg-gray-100 text-gray-700';
-};
+const respondidos = computed(() =>
+  allQuestions.value.filter((q) => q.status === "RESPONDIDO")
+);
+// Ordenar por data de atribuição (mais recentes primeiro)
+const sortedPendencias = computed(() =>
+  [...pendencias.value].sort(
+    (a, b) => new Date(b.data_atribuicao) - new Date(a.data_atribuicao)
+  )
+);
 
-const getStatusClass = (status) => {
-  const classes = {
-    'PENDENTE': 'bg-yellow-50 text-yellow-800',
-    'RESPONDIDO': 'bg-emerald-50 text-emerald-800',
-    'EXPIRADO': 'bg-gray-100 text-gray-600'
-  };
-  return classes[status] || 'bg-gray-100 text-gray-600';
-};
+const sortedRespondidos = computed(() =>
+  [...respondidos.value].sort(
+    (a, b) => new Date(b.data_atribuicao) - new Date(a.data_atribuicao)
+  )
+);
 
-const getStatusDotClass = (status) => {
-  const classes = {
-    'PENDENTE': 'bg-yellow-500',
-    'RESPONDIDO': 'bg-emerald-500',
-    'EXPIRADO': 'bg-gray-400'
-  };
-  return classes[status] || 'bg-gray-400';
-};
+// Abas
+const tabs = computed(() => [
+  {
+    id: "pendentes",
+    label: "Pendentes",
+    count: pendencias.value.length,
+  },
+  {
+    id: "respondidos",
+    label: "Respondidos",
+    count: respondidos.value.length,
+  },
+]);
 
-const getStatusLabel = (status) => {
-  const labels = {
-    'PENDENTE': 'Pendente',
-    'RESPONDIDO': 'Respondido',
-    'EXPIRADO': 'Expirado'
-  };
-  return labels[status] || status;
+// Métodos
+const responderQuestionario = (atribuicaoId) => {
+  router.push({
+    name: "paciente-responder-questionario",
+    params: { atribuicaoId },
+  });
 };
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   });
 };
 
-const responderQuestionario = (atribuicaoId) => {
-  router.push({
-    name: 'paciente-responder-questionario',
-    params: { atribuicaoId }
-  });
-};
-
+// Lifecycle
 onMounted(async () => {
-
   try {
     const response = await api.listarAtribuicoesPaciente();
-    pendencias.value = (response.data.filter((quest) => quest.status == 'PENDENTE'));
-    respondidos.value = (response.data.filter((quest) => quest.status == 'RESPONDIDO'));
-    toast.success('Seus questionários atribuídos.');
-
+    allQuestions.value = response.data || [];
+    isLoading.value = false;
+    toast.success("Seus questionários carregados com sucesso.");
   } catch (error) {
-    toast.error('Erro ao carregar seus questionários atribuídos.');
-    console.error(error)
+    toast.error("Erro ao carregar seus questionários.");
+    console.error(error);
     isLoading.value = false;
   }
-
 });
 </script>
+
+<style scoped>
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+</style>
