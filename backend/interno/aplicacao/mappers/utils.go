@@ -347,3 +347,62 @@ func AtribuicaoComPerguntasDTOOut(atrib *dominio.Atribuicao) *dtos.AtribuicaoDTO
 		},
 	}
 }
+
+func RespostaDetalhadaDTOOut(resp *dominio.Resposta, dadosBrutos []map[string]any) *dtos.RespostaDetalhadaDTOOut {
+	if resp == nil {
+		return nil
+	}
+
+	dtoPerguntas := make([]*dtos.PerguntaDTOOut, 0)
+	for _, pergunta := range resp.Atribuicao.Instrumento.Perguntas {
+		dtoPerguntas = append(dtoPerguntas, &dtos.PerguntaDTOOut{
+			ID:                   pergunta.ID,
+			OrdemItem:            pergunta.OrdemItem,
+			Conteudo:             pergunta.Conteudo,
+			EhPontuacaoInvertida: pergunta.EhPontuacaoInvertida})
+	}
+
+	dtoOpcoesEscala := make([]*dtos.OpcoesEscala, 0)
+	for _, opcaoEscala := range resp.Atribuicao.Instrumento.OpcoesEscala {
+		dtoOpcoesEscala = append(dtoOpcoesEscala, &dtos.OpcoesEscala{
+			Valor:  opcaoEscala.Valor,
+			Rotulo: opcaoEscala.Rotulo})
+	}
+
+	// Contar perguntas do instrumento
+	totalPerguntas := len(resp.Atribuicao.Instrumento.Perguntas)
+
+	return &dtos.RespostaDetalhadaDTOOut{
+		ID:                 resp.ID,
+		Status:             string(resp.Atribuicao.Status),
+		DataAtribuicao:     resp.Atribuicao.DataAtribuicao,
+		DataResposta:       resp.Atribuicao.DataResposta,
+		AtribuicaoID:       resp.AtribuicaoID,
+		InstrumentoID:      resp.Atribuicao.InstrumentoID,
+		PerguntasRespostas: dadosBrutos,
+		PontuacaoTotal:     resp.PontuacaoTotal,
+		Classificacao:      resp.Classificacao,
+		Paciente: dtos.PacienteResumidoDTOOut{
+			ID:    resp.Atribuicao.PacienteID,
+			Nome:  resp.Atribuicao.Paciente.Usuario.Nome,
+			Email: resp.Atribuicao.Paciente.Usuario.Email,
+		},
+		Profissional: dtos.ProfissionalResumidoDTOOut{
+			ID:            resp.Atribuicao.ProfissionalID,
+			Nome:          resp.Atribuicao.Profissional.Usuario.Nome,
+			Email:         resp.Atribuicao.Profissional.Usuario.Email,
+			Especialidade: resp.Atribuicao.Profissional.Especialidade,
+		},
+		Instrumento: dtos.InstrumentoCompletoDTOOut{
+			Codigo:         resp.Atribuicao.Instrumento.Codigo,
+			Nome:           resp.Atribuicao.Instrumento.Nome,
+			Descricao:      resp.Atribuicao.Instrumento.Descricao,
+			Perguntas:      dtoPerguntas,
+			OpcoesEscala:   dtoOpcoesEscala,
+			TotalPerguntas: totalPerguntas,
+		},
+		Perguntas:      dtoPerguntas,
+		OpcoesEscala:   dtoOpcoesEscala,
+		TotalPerguntas: totalPerguntas,
+	}
+}

@@ -9,9 +9,9 @@ import (
 
 // Resposta armazena o resultado processado e o dado bruto (JSON)
 type Resposta struct {
-	ID           uint `gorm:"primaryKey"`
-	AtribuicaoID uint `gorm:"uniqueIndex;not null;column:atribuicao_id"`
-
+	ID           uint       `gorm:"primaryKey"`
+	AtribuicaoID uint       `gorm:"uniqueIndex;not null;column:atribuicao_id"`
+	Atribuicao   Atribuicao `gorm:"foreignKey:AtribuicaoID"`
 	// Metadados Relacionais (Para Relatórios)
 	PontuacaoTotal float64 `gorm:"type:decimal(10,2);column:pontuacao_total"`
 	Classificacao  string  `gorm:"size:255;column:classificacao"` // Ex: "Depressão Moderada"

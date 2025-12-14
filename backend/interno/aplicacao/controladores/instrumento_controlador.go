@@ -172,3 +172,32 @@ func (ic *InstrumentoControlador) RegistrarRespostas(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"msg": "resposta registrada com sucesso."})
 }
+
+func (ic *InstrumentoControlador) VisualizarRespostas(c *gin.Context) {
+	_, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
+		return
+	}
+
+	atribuicaoIDStr := c.DefaultQuery("atribuicaoID", "0")
+	if atribuicaoIDStr == "0" {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "ID de atribuição inválido"})
+		return
+	}
+	atribuicaoID, err := strconv.Atoi(atribuicaoIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "Parametro 'atribuicaoID' invalido"})
+		return
+	}
+
+	respostaOut, err := ic.instrumentoServico.VisualizarRespostaAtribuicao(uint(atribuicaoID))
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, respostaOut)
+}

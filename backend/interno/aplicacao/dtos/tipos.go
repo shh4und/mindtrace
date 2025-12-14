@@ -216,6 +216,24 @@ type AtribuicaoDTOOut struct {
 	Profissional   *ProfissionalResumidoDTOOut `json:"profissional,omitempty"` // Apenas para paciente
 }
 
+type RespostaDetalhadaDTOOut struct {
+	ID                 uint                       `json:"id"`
+	Status             string                     `json:"status"`
+	DataResposta       *time.Time                 `json:"data_resposta,omitempty"`
+	DataAtribuicao     time.Time                  `json:"data_atribuicao"`
+	AtribuicaoID       uint                       `json:"atribuicao_id"`
+	InstrumentoID      uint                       `json:"instrumento_id"`
+	PerguntasRespostas []map[string]any           `json:"perguntas_respostas"`
+	PontuacaoTotal     float64                    `json:"pontuacao_total"`
+	Classificacao      string                     `json:"classificacao"`
+	Paciente           PacienteResumidoDTOOut     `json:"paciente"`
+	Profissional       ProfissionalResumidoDTOOut `json:"profissional"`
+	Instrumento        InstrumentoCompletoDTOOut  `json:"instrumento"`
+	Perguntas          []*PerguntaDTOOut          `json:"perguntas,omitempty"`
+	OpcoesEscala       []*OpcoesEscala            `json:"opcoes_escala,omitempty"`
+	TotalPerguntas     int                        `json:"total_perguntas"`
+}
+
 // PacienteResumidoDTOOut representa dados resumidos de um paciente
 type PacienteResumidoDTOOut struct {
 	ID    uint   `json:"id"`

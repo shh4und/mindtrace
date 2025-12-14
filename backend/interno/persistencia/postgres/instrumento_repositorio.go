@@ -75,7 +75,15 @@ func (r *gormInstrumentoRepositorio) BuscarAtribuicoesProfissional(tx *gorm.DB, 
 	return atribuicoes, nil
 }
 
-func (r *gormInstrumentoRepositorio) CriarReposta(tx *gorm.DB, resposta *dominio.Resposta) error {
+func (r *gormInstrumentoRepositorio) CriarReposta(tx *gorm.DB, resposta *dominio.Resposta, atribuicaoId uint) error {
+
+	if err := tx.Model(&dominio.Atribuicao{}).Where("id = ? AND data_resposta is NULL", resposta.AtribuicaoID).Updates(map[string]interface{}{
+		"status":        "RESPONDIDO",
+		"data_resposta": resposta.DataResposta,
+	}).Error; err != nil {
+		return err
+	}
+
 	return tx.Create(resposta).Error
 }
 func (r *gormInstrumentoRepositorio) BuscarRespostaPorAtribuicaoID(tx *gorm.DB, atribuicaoID uint) (*dominio.Resposta, error) {
@@ -88,17 +96,19 @@ func (r *gormInstrumentoRepositorio) BuscarRespostaPorAtribuicaoID(tx *gorm.DB, 
 	return resposta, nil
 }
 
-// func (r *gormInstrumentoRepositorio) BuscarRespostaCompletaPorAtribuicaoID(tx *gorm.DB, atribuicaoID uint) (*dominio.Resposta, error) {
-// 	var resposta *dominio.Resposta
+func (r *gormInstrumentoRepositorio) BuscarRespostaCompletaPorAtribuicaoID(tx *gorm.DB, atribuicaoID uint) (*dominio.Resposta, error) {
+	var resposta *dominio.Resposta
 
-// 	if err := tx.
-// 		Preload("Atribuicao.Instrumento.Perguntas").
-// 		Preload("Atribuicao.Paciente.Usuario").
-// 		Preload("Atribuicao.Profissional.Usuario").
-// 		Where("atribuicao_id = ?", atribuicaoID).
-// 		First(&resposta).Error; err != nil {
-// 		return nil, err
-// 	}
+	if err := tx.
+		Preload("Atribuicao").
+		Preload("Atribuicao.Instrumento.Perguntas").
+		Preload("Atribuicao.Instrumento.OpcoesEscala").
+		Preload("Atribuicao.Paciente.Usuario").
+		Preload("Atribuicao.Profissional.Usuario").
+		Where("atribuicao_id = ?", atribuicaoID).
+		First(&resposta).Error; err != nil {
+		return nil, err
+	}
 
-// 	return resposta, nil
-// }
+	return resposta, nil
+}

@@ -1,6 +1,7 @@
 package servicos
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"mindtrace/backend/interno/aplicacao/dtos"
@@ -18,6 +19,7 @@ type InstrumentoServico interface {
 	ListarAtribuicoesPaciente(pacId uint) ([]*dtos.AtribuicaoDTOOut, error)
 	ListarPerguntasAtribuicao(usuarioId, atribuicaoId uint) (*dtos.AtribuicaoDTOOut, error)
 	CriarRespostasAtribuicao(dto *dtos.RegistroRespostaDTOIn) error
+	VisualizarRespostaAtribuicao(atribuicaoId uint) (*dtos.RespostaDetalhadaDTOOut, error)
 }
 type instrumentoServico struct {
 	db              *gorm.DB
@@ -201,7 +203,7 @@ func (is *instrumentoServico) CriarRespostasAtribuicao(dto *dtos.RegistroRespost
 		if err != nil {
 			return err
 		}
-		if err = is.instrumentoRepo.CriarReposta(tx, novoRegistroResposta); err != nil {
+		if err = is.instrumentoRepo.CriarReposta(tx, novoRegistroResposta, atribuicao.ID); err != nil {
 			return err
 		}
 
@@ -209,4 +211,25 @@ func (is *instrumentoServico) CriarRespostasAtribuicao(dto *dtos.RegistroRespost
 
 	})
 	return err
+}
+
+func (is *instrumentoServico) VisualizarRespostaAtribuicao(atribuicaoId uint) (*dtos.RespostaDetalhadaDTOOut, error) {
+
+	var resposta *dominio.Resposta
+	var dadosBrutos []map[string]any
+	err := is.db.Transaction(func(tx *gorm.DB) error {
+		var err error
+		resposta, err = is.instrumentoRepo.BuscarRespostaCompletaPorAtribuicaoID(tx, uint(atribuicaoId))
+		if err != nil {
+			return err
+		}
+
+		if err := json.Unmarshal(resposta.DadosBrutos, &dadosBrutos); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return mappers.RespostaDetalhadaDTOOut(resposta, dadosBrutos), err
 }
