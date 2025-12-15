@@ -258,6 +258,7 @@ func AtribuicaoParaDTOOutProfissional(atrib *dominio.Atribuicao) *dtos.Atribuica
 			ID:                   pergunta.ID,
 			OrdemItem:            pergunta.OrdemItem,
 			Conteudo:             pergunta.Conteudo,
+			Dominio:              pergunta.Dominio,
 			EhPontuacaoInvertida: pergunta.EhPontuacaoInvertida})
 	}
 
@@ -320,6 +321,7 @@ func AtribuicaoComPerguntasDTOOut(atrib *dominio.Atribuicao) *dtos.AtribuicaoDTO
 			ID:                   pergunta.ID,
 			OrdemItem:            pergunta.OrdemItem,
 			Conteudo:             pergunta.Conteudo,
+			Dominio:              pergunta.Dominio,
 			EhPontuacaoInvertida: pergunta.EhPontuacaoInvertida})
 	}
 
@@ -359,6 +361,7 @@ func RespostaDetalhadaDTOOut(resp *dominio.Resposta, dadosBrutos []map[string]an
 			ID:                   pergunta.ID,
 			OrdemItem:            pergunta.OrdemItem,
 			Conteudo:             pergunta.Conteudo,
+			Dominio:              pergunta.Dominio,
 			EhPontuacaoInvertida: pergunta.EhPontuacaoInvertida})
 	}
 

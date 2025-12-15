@@ -116,7 +116,7 @@
                 ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500'
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
             "
-            @click="selecionarResposta(pergunta.pergunta_id, opcao.valor)"
+            @click="selecionarResposta(pergunta.pergunta_id, opcao.valor, pergunta.dominio)"
           >
             <span
               class="w-8 h-8 rounded-full border-2 flex items-center justify-center mr-3 transition-all shrink-0 text-sm font-semibold"
@@ -212,10 +212,10 @@ const getCodigoBadgeClass = (codigo) => {
   return classes[codigo] || "bg-gray-100 text-gray-700";
 };
 
-const selecionarResposta = (perguntaId, valor) => {
+const selecionarResposta = (perguntaId, valor, perguntaDominio) => {
   respostas.value = {
     ...respostas.value,
-    [perguntaId]: valor,
+    [perguntaId]: [valor,perguntaDominio]
   };
 };
 
@@ -223,9 +223,10 @@ const enviarRespostas = async () => {
   // TODO: Integrar com API quando backend estiver pronto
   const payload = {
     atribuicao_id: parseInt(atribuicaoId.value),
-    respostas: Object.entries(respostas.value).map(([perguntaId, valor]) => ({
+    respostas: Object.entries(respostas.value).map(([perguntaId, dadosResposta]) => ({
       pergunta_id: parseInt(perguntaId),
-      valor,
+      valor: dadosResposta[0],
+      dominio: dadosResposta[1]
     })),
   };
 

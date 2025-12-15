@@ -186,6 +186,7 @@ type PerguntaDTOOut struct {
 	ID                   uint   `json:"pergunta_id"`
 	OrdemItem            int    `json:"ordem_item"`
 	Conteudo             string `json:"conteudo"`
+	Dominio              string `json:"dominio,omitempty"`
 	EhPontuacaoInvertida bool   `json:"eh_pontuacao_invertida"`
 }
 
