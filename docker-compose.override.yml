@@ -1,10 +1,10 @@
 services:
   backend:
-    image: mindtrace-backend-dev        # tag local para DEV
+    image: mindtrace-backend-dev
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    pull_policy: never                  # não puxa do registry
+    pull_policy: never
     container_name: mindtrace-backend-dev
     working_dir: /app
     volumes:
@@ -16,6 +16,8 @@ services:
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_DB=${POSTGRES_DB}
+      - DB_HOST=db
+      - DB_PORT=5432
       - JWT_SECRET=${JWT_SECRET}
       - DB_DRIVER=${DB_DRIVER}
       - GO_ENV=${GO_ENV}
@@ -23,10 +25,11 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     tty: true
   frontend:
-    image: mindtrace-frontend-dev       # tag local para DEV
+    image: mindtrace-frontend-dev # tag local para DEV
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
@@ -43,6 +46,7 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+    tty: true
 
 volumes:
   go-mod-cache:
