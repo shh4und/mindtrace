@@ -1,69 +1,90 @@
 <template>
   <div class="min-h-screen bg-gray-50 font-sans antialiased flex flex-col">
-  <!-- Navbar superior -->
+    <!-- Navbar superior -->
     <TopNavbar 
       :user-type="TipoUsuario.Profissional" 
-      @edit-profile="handleNavigation('editar-perfil')"
+      @edit-profile="navigateTo('profissional-editar-perfil')"
       @logout="handleLogout"
     />
 
-  <!-- Conteudo principal com sidebar -->
+    <!-- Conteudo principal com sidebar -->
     <div class="flex flex-1 overflow-hidden">
-  <!-- Barra lateral -->
-      <SidebarProfissional 
+      <!-- Barra lateral unificada -->
+      <Sidebar 
+        :menu-items="menuItems"
         :active-view="activeView"
+        variant="profissional"
         @navigate="handleNavigation" 
       />
 
-  <!-- Area de conteudo principal -->
-      <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-  <!-- Lista de pacientes ou relatorio de um paciente especifico -->
-        <div v-if="activeView === 'pacientes'">
-          <ListaPacientes v-if="!selectedPatientId" @view-patient="showPatientReport" />
-          <div v-else>
-            <button @click="showPatientList" class="mb-6 flex items-center text-sm font-medium text-rose-600 hover:text-rose-800 transition-colors">
-              <i class="fa-solid fa-arrow-left mr-2"></i>
-              Voltar para a lista de pacientes
-            </button>
-            <Relatorio @view-relatorios="showPatientReport" :user-type="TipoUsuario.Profissional" :patient-id="selectedPatientId" />
-          </div>
-        </div>
-
-  <!-- Outras views disponiveis -->
-        <GerarConvite v-if="activeView === 'convite'" />
-        <EditarPerfil v-if="activeView === 'editar-perfil'" :user-type="TipoUsuario.Profissional" />
+      <!-- Area de conteudo principal com router-view -->
+      <main id="main-content" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <router-view v-slot="{ Component, route: childRoute }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" :key="childRoute.fullPath" />
+          </transition>
+        </router-view>
       </main>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useUserStore } from '../../store/user';
-import { TipoUsuario } from '../../types/usuario.js';
-import TopNavbar from '../../components/layout/TopNavbar.vue';
-import SidebarProfissional from '../../components/layout/SidebarProfissional.vue';
-import ListaPacientes from './ListaPacientes.vue';
-import Relatorio from '../shared/Relatorio.vue';
-import GerarConvite from './GerarConvite.vue';
-import EditarPerfil from '../shared/EditarPerfil.vue';
+import { computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useUserStore } from '@/store/user';
+import { TipoUsuario } from '@/types/usuario.js';
+import TopNavbar from '@/components/layout/TopNavbar.vue';
+import Sidebar from '@/components/layout/Sidebar.vue';
+import { 
+  faUsers,
+  faEnvelope,
+  faUserPen,
+  faClipboardList
+} from '@fortawesome/free-solid-svg-icons';
 
+const router = useRouter();
+const route = useRoute();
 const userStore = useUserStore();
-const activeView = ref('pacientes'); // Visao inicial
-const selectedPatientId = ref(null);
+
+// Itens do menu para profissional
+const menuItems = [
+  { name: 'pacientes', view: 'pacientes', label: 'Meus Pacientes', icon: faUsers },
+  { name: 'questionarios', view: 'questionarios-atribuidos', label: 'Questionários', icon: faClipboardList },
+  { name: 'convite', view: 'convite', label: 'Gerar Convite', icon: faEnvelope },
+  { name: 'editar', view: 'editar-perfil', label: 'Editar Perfil', icon: faUserPen }
+];
+
+// Mapeamento de view para nome de rota
+const viewToRoute = {
+  'pacientes': 'profissional-pacientes',
+  'questionarios-atribuidos': 'profissional-questionarios-atribuidos',
+  'convite': 'profissional-convite',
+  'editar-perfil': 'profissional-editar-perfil'
+};
+
+// Mapeamento reverso para determinar view ativa baseado na rota atual
+const routeToView = {
+  'profissional-pacientes': 'pacientes',
+  'profissional-paciente-relatorio': 'pacientes', // Relatório faz parte da seção pacientes
+  'profissional-atribuir-questionario': 'pacientes', // Atribuir faz parte da seção pacientes
+  'profissional-questionarios-atribuidos': 'questionarios-atribuidos',
+  'profissional-convite': 'convite',
+  'profissional-editar-perfil': 'editar-perfil'
+};
+
+// View ativa baseada na rota atual
+const activeView = computed(() => routeToView[route.name] || 'pacientes');
 
 const handleNavigation = (view) => {
-  activeView.value = view;
-  selectedPatientId.value = null; // Reseta a selecao de paciente ao navegar
+  const routeName = viewToRoute[view];
+  if (routeName) {
+    router.push({ name: routeName });
+  }
 };
 
-const showPatientReport = (patientId) => {
-  selectedPatientId.value = patientId;
-  // A view ja e pacientes entao apenas a condicao do vif velse muda
-};
-
-const showPatientList = () => {
-  selectedPatientId.value = null;
+const navigateTo = (routeName) => {
+  router.push({ name: routeName });
 };
 
 const handleLogout = () => {
@@ -78,3 +99,14 @@ onMounted(async () => {
 });
 </script>
 
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

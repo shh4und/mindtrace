@@ -36,3 +36,16 @@ type UsuarioRepositorio interface {
 	AtualizarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error
 	DeletarUsuario(tx *gorm.DB, id uint) error
 }
+
+type InstrumentoRepositorio interface {
+	BuscarTodosAtivos(tx *gorm.DB) ([]*dominio.Instrumento, error)
+	BuscarInstrumentoPorID(tx *gorm.DB, instrumentoID uint) (*dominio.Instrumento, error)
+	CriarAtribuicao(tx *gorm.DB, atribuicao *dominio.Atribuicao) error
+	BuscarAtribuicoesPaciente(tx *gorm.DB, pacId uint) ([]*dominio.Atribuicao, error)
+	BuscarAtribuicoesProfissional(tx *gorm.DB, pacId uint) ([]*dominio.Atribuicao, error)
+	BuscarAtribuicaoPorID(tx *gorm.DB, atribuicaoID uint) (*dominio.Atribuicao, error)
+
+	CriarReposta(tx *gorm.DB, resposta *dominio.Resposta, atribuicaoId uint) error
+	BuscarRespostaPorAtribuicaoID(tx *gorm.DB, atribuicaoID uint) (*dominio.Resposta, error)
+	BuscarRespostaCompletaPorAtribuicaoID(tx *gorm.DB, atribuicaoID uint) (*dominio.Resposta, error)
+}

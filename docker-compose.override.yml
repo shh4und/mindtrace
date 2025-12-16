@@ -1,28 +1,35 @@
 services:
   backend:
-    image: mindtrace-backend-dev        # tag local para DEV
+    image: mindtrace-backend-dev
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    pull_policy: never                  # não puxa do registry
+    pull_policy: never
     container_name: mindtrace-backend-dev
     working_dir: /app
     volumes:
       - ./backend:/app
-      - /app/pkg/mod
+      - go-mod-cache:/go/pkg/mod
+    env_file:
+      - .env
     environment:
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_DB=${POSTGRES_DB}
+      - DB_HOST=db
+      - DB_PORT=5432
       - JWT_SECRET=${JWT_SECRET}
       - DB_DRIVER=${DB_DRIVER}
+      - GO_ENV=${GO_ENV}
+      - SKIP_DB_INIT=${SKIP_DB_INIT}
     ports:
-      - "8080:8080"
+      - "9090:9090"
     depends_on:
-      - db
-
+      db:
+        condition: service_healthy
+    tty: true
   frontend:
-    image: mindtrace-frontend-dev       # tag local para DEV
+    image: mindtrace-frontend-dev # tag local para DEV
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
@@ -39,16 +46,7 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+    tty: true
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin-server-dev
-    volumes:
-      - ./pgadmin-data:/var/lib/pgadmin
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-      - "8001:80"
-    depends_on:
-      - db
+volumes:
+  go-mod-cache:

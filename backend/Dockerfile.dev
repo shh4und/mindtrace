@@ -1,20 +1,22 @@
 # Dockerfile.dev for backend (Go with air for live reload)
-FROM golang:alpine
+FROM golang:1.25.1-alpine
+
+ENV GOPATH=/go
+ENV GOBIN=/go/bin
+ENV PATH=$GOBIN:/usr/local/go/bin:$PATH
 
 WORKDIR /app
 
-# Install git for dependencies // GCC for go-sqlite3
-RUN apk add --no-cache git gcc musl-dev 
+# git + build dependencies
+RUN apk add --no-cache git build-base
 
-# Copy go.mod and go.sum first for better caching
+# Copy go.mod and go.sum for caching
 COPY go.mod go.sum ./
 RUN go mod download
 
 # Install air for live reload
 RUN go install github.com/air-verse/air@latest
 
-# Copy the rest of the code
 COPY . .
 
-# Run air for development with hot reload
 CMD ["air"]

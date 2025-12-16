@@ -1,7 +1,7 @@
 # mindtrace-projeto/frontend/Dockerfile
 
 # --- Estágio 1: Build ---
-FROM node:22.17.1-alpine AS builder
+FROM node:24.12.0-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install

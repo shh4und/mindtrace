@@ -4,10 +4,10 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main"
-  cmd = "CGO_ENABLED=1 GOOS=linux go build -o ./tmp/main ./cmd/api/main.go"
-  delay = 1000
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  entrypoint = "./tmp/main"
+  cmd = "CGO_ENABLED=0 go build -o ./tmp/main ./cmd/api/main.go"
+  delay = 500
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "node_modules", "pkg", "pkg/mod", "frontend", ".git", "postgres-data"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
@@ -19,7 +19,7 @@ tmp_dir = "tmp"
   kill_delay = "0s"
   log = "build-errors.log"
   poll = true
-  poll_interval = 500
+  poll_interval = 200   
   rerun = false
   rerun_delay = 500
   send_interrupt = false
@@ -37,7 +37,7 @@ tmp_dir = "tmp"
   time = false
 
 [misc]
-  clean_on_exit = false
+  clean_on_exit = true
 
 [screen]
   clear_on_rebuild = false

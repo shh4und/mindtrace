@@ -1,6 +1,7 @@
 package mappers
 
 import (
+	"encoding/json"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/dominio"
 )
@@ -152,17 +153,40 @@ func RegistrarPacienteDTOInParaEntidade(dto *dtos.RegistrarPacienteDTOIn) (*domi
 	return usuario, paciente
 }
 
-func CriarRegistroHumorDTOInParaEntidade(dto *dtos.CriarRegistroHumorDTOIn, pacienteID uint) *dominio.RegistroHumor {
+func CriarRegistroHumorDTOInParaEntidade(dto *dtos.CriarRegistroHumorDTOIn, pacienteID uint) (*dominio.RegistroHumor, error) {
+	autoCuidadoJSONB, err := json.Marshal(dto.AutoCuidado)
+	if err != nil {
+		return nil, err
+	}
+
 	return &dominio.RegistroHumor{
 		PacienteID:       pacienteID,
 		NivelHumor:       dto.NivelHumor,
-		HorasSono:        dto.HorasSono,
+		HorasSono:        *dto.HorasSono,
 		NivelEnergia:     dto.NivelEnergia,
 		NivelStress:      dto.NivelStress,
-		AutoCuidado:      dto.AutoCuidado,
+		AutoCuidado:      string(autoCuidadoJSONB),
 		Observacoes:      dto.Observacoes,
 		DataHoraRegistro: dto.DataHoraRegistro,
+	}, nil
+}
+
+func CriarRegistroRespostasDTOInParaEntidade(dto *dtos.RegistroRespostaDTOIn, atribuicaoID uint, classificacao string) (*dominio.Resposta, error) {
+
+	dadosBrutos, err := json.Marshal(dto.PerguntasRespostas)
+	if err != nil {
+		return nil, err
 	}
+
+	resposta := &dominio.Resposta{
+		AtribuicaoID:   atribuicaoID,
+		PontuacaoTotal: dto.PontuacaoTotal,
+		Classificacao:  classificacao,
+		DadosBrutos:    dadosBrutos,
+	}
+
+	return resposta, nil
+
 }
 
 func ConviteParaDTOOut(convite *dominio.Convite) *dtos.ConviteDTOOut {
@@ -174,5 +198,215 @@ func ConviteParaDTOOut(convite *dominio.Convite) *dtos.ConviteDTOOut {
 		DataExpiracao: convite.DataExpiracao,
 		Usado:         convite.Usado,
 		CreatedAt:     convite.CreatedAt,
+	}
+}
+
+func InstrumentosParaDTOOut(instrumentos []*dominio.Instrumento) []*dtos.InstrumentoDTOOut {
+	instrumentoDTOs := make([]*dtos.InstrumentoDTOOut, len(instrumentos))
+
+	for i, inst := range instrumentos {
+		instrumentoDTOs[i] = &dtos.InstrumentoDTOOut{
+			ID:        inst.ID,
+			Codigo:    inst.Codigo,
+			Nome:      inst.Nome,
+			Descricao: inst.Descricao,
+			Versao:    inst.Versao,
+		}
+	}
+
+	return instrumentoDTOs
+}
+
+// AtribuicaoParaDTOOutPaciente converte Atribuicao para DTO (visão do paciente)
+func AtribuicaoParaDTOOutPaciente(atrib *dominio.Atribuicao) *dtos.AtribuicaoDTOOut {
+	if atrib == nil {
+		return nil
+	}
+
+	// Contar perguntas do instrumento
+	totalPerguntas := len(atrib.Instrumento.Perguntas)
+
+	return &dtos.AtribuicaoDTOOut{
+		ID:             atrib.ID,
+		Status:         string(atrib.Status),
+		DataAtribuicao: atrib.CreatedAt,
+		DataResposta:   atrib.DataResposta,
+		Instrumento: dtos.InstrumentoCompletoDTOOut{
+			Codigo:         atrib.Instrumento.Codigo,
+			Nome:           atrib.Instrumento.Nome,
+			Descricao:      atrib.Instrumento.Descricao,
+			TotalPerguntas: totalPerguntas,
+		},
+		Profissional: &dtos.ProfissionalResumidoDTOOut{
+			ID:            atrib.Profissional.ID,
+			Nome:          atrib.Profissional.Usuario.Nome,
+			Email:         atrib.Profissional.Usuario.Email,
+			Especialidade: atrib.Profissional.Especialidade,
+		},
+	}
+}
+
+// AtribuicaoParaDTOOutProfissional converte Atribuicao para DTO (visão do profissional)
+func AtribuicaoParaDTOOutProfissional(atrib *dominio.Atribuicao) *dtos.AtribuicaoDTOOut {
+	if atrib == nil {
+		return nil
+	}
+
+	dtoPerguntas := make([]*dtos.PerguntaDTOOut, 0)
+	for _, pergunta := range atrib.Instrumento.Perguntas {
+		dtoPerguntas = append(dtoPerguntas, &dtos.PerguntaDTOOut{
+			ID:                   pergunta.ID,
+			OrdemItem:            pergunta.OrdemItem,
+			Conteudo:             pergunta.Conteudo,
+			Dominio:              pergunta.Dominio,
+			EhPontuacaoInvertida: pergunta.EhPontuacaoInvertida})
+	}
+
+	dtoOpcoesEscala := make([]*dtos.OpcoesEscala, 0)
+	for _, opcaoEscala := range atrib.Instrumento.OpcoesEscala {
+		dtoOpcoesEscala = append(dtoOpcoesEscala, &dtos.OpcoesEscala{
+			Valor:  opcaoEscala.Valor,
+			Rotulo: opcaoEscala.Rotulo})
+	}
+	// Contar perguntas do instrumento
+	totalPerguntas := len(atrib.Instrumento.Perguntas)
+
+	return &dtos.AtribuicaoDTOOut{
+		ID:             atrib.ID,
+		Status:         string(atrib.Status),
+		DataAtribuicao: atrib.CreatedAt,
+		DataResposta:   atrib.DataResposta,
+		Instrumento: dtos.InstrumentoCompletoDTOOut{
+			Codigo:         atrib.Instrumento.Codigo,
+			Nome:           atrib.Instrumento.Nome,
+			Descricao:      atrib.Instrumento.Descricao,
+			Perguntas:      dtoPerguntas,
+			OpcoesEscala:   dtoOpcoesEscala,
+			TotalPerguntas: totalPerguntas,
+		},
+		Paciente: &dtos.PacienteResumidoDTOOut{
+			ID:    atrib.Paciente.ID,
+			Nome:  atrib.Paciente.Usuario.Nome,
+			Email: atrib.Paciente.Usuario.Email,
+		},
+	}
+}
+
+// AtribuicoesParaDTOOutPaciente converte slice de Atribuicoes para DTOs (visão paciente)
+func AtribuicoesParaDTOOutPaciente(atribuicoes []*dominio.Atribuicao) []*dtos.AtribuicaoDTOOut {
+	dtos := make([]*dtos.AtribuicaoDTOOut, 0)
+	for _, atrib := range atribuicoes {
+		dtos = append(dtos, AtribuicaoParaDTOOutPaciente(atrib))
+	}
+	return dtos
+}
+
+// AtribuicoesParaDTOOutProfissional converte slice de Atribuicoes para DTOs (visão profissional)
+func AtribuicoesParaDTOOutProfissional(atribuicoes []*dominio.Atribuicao) []*dtos.AtribuicaoDTOOut {
+	dtos := make([]*dtos.AtribuicaoDTOOut, 0)
+	for _, atrib := range atribuicoes {
+		dtos = append(dtos, AtribuicaoParaDTOOutProfissional(atrib))
+	}
+	return dtos
+}
+
+func AtribuicaoComPerguntasDTOOut(atrib *dominio.Atribuicao) *dtos.AtribuicaoDTOOut {
+	if atrib == nil {
+		return nil
+	}
+
+	dtoPerguntas := make([]*dtos.PerguntaDTOOut, 0)
+	for _, pergunta := range atrib.Instrumento.Perguntas {
+		dtoPerguntas = append(dtoPerguntas, &dtos.PerguntaDTOOut{
+			ID:                   pergunta.ID,
+			OrdemItem:            pergunta.OrdemItem,
+			Conteudo:             pergunta.Conteudo,
+			Dominio:              pergunta.Dominio,
+			EhPontuacaoInvertida: pergunta.EhPontuacaoInvertida})
+	}
+
+	dtoOpcoesEscala := make([]*dtos.OpcoesEscala, 0)
+	for _, opcaoEscala := range atrib.Instrumento.OpcoesEscala {
+		dtoOpcoesEscala = append(dtoOpcoesEscala, &dtos.OpcoesEscala{
+			Valor:  opcaoEscala.Valor,
+			Rotulo: opcaoEscala.Rotulo})
+	}
+	// Contar perguntas do instrumento
+	totalPerguntas := len(atrib.Instrumento.Perguntas)
+
+	return &dtos.AtribuicaoDTOOut{
+		ID:             atrib.ID,
+		Status:         string(atrib.Status),
+		DataAtribuicao: atrib.CreatedAt,
+		DataResposta:   atrib.DataResposta,
+		Instrumento: dtos.InstrumentoCompletoDTOOut{
+			Codigo:         atrib.Instrumento.Codigo,
+			Nome:           atrib.Instrumento.Nome,
+			Descricao:      atrib.Instrumento.Descricao,
+			Perguntas:      dtoPerguntas,
+			OpcoesEscala:   dtoOpcoesEscala,
+			TotalPerguntas: totalPerguntas,
+		},
+	}
+}
+
+func RespostaDetalhadaDTOOut(resp *dominio.Resposta, dadosBrutos []map[string]any, dadosProcessados *dominio.ResultadoClinico) *dtos.RespostaDetalhadaDTOOut {
+	if resp == nil {
+		return nil
+	}
+
+	dtoPerguntas := make([]*dtos.PerguntaDTOOut, 0)
+	for _, pergunta := range resp.Atribuicao.Instrumento.Perguntas {
+		dtoPerguntas = append(dtoPerguntas, &dtos.PerguntaDTOOut{
+			ID:                   pergunta.ID,
+			OrdemItem:            pergunta.OrdemItem,
+			Conteudo:             pergunta.Conteudo,
+			Dominio:              pergunta.Dominio,
+			EhPontuacaoInvertida: pergunta.EhPontuacaoInvertida})
+	}
+
+	dtoOpcoesEscala := make([]*dtos.OpcoesEscala, 0)
+	for _, opcaoEscala := range resp.Atribuicao.Instrumento.OpcoesEscala {
+		dtoOpcoesEscala = append(dtoOpcoesEscala, &dtos.OpcoesEscala{
+			Valor:  opcaoEscala.Valor,
+			Rotulo: opcaoEscala.Rotulo})
+	}
+
+	// Contar perguntas do instrumento
+	totalPerguntas := len(resp.Atribuicao.Instrumento.Perguntas)
+
+	return &dtos.RespostaDetalhadaDTOOut{
+		ID:                 resp.ID,
+		Status:             string(resp.Atribuicao.Status),
+		DataAtribuicao:     resp.Atribuicao.DataAtribuicao,
+		DataResposta:       resp.Atribuicao.DataResposta,
+		AtribuicaoID:       resp.AtribuicaoID,
+		InstrumentoID:      resp.Atribuicao.InstrumentoID,
+		PerguntasRespostas: dadosBrutos,
+		PontuacaoTotal:     dadosProcessados.ScoreTotal,
+		Classificacao:      dadosProcessados.Classificacao,
+		Paciente: dtos.PacienteResumidoDTOOut{
+			ID:    resp.Atribuicao.PacienteID,
+			Nome:  resp.Atribuicao.Paciente.Usuario.Nome,
+			Email: resp.Atribuicao.Paciente.Usuario.Email,
+		},
+		Profissional: dtos.ProfissionalResumidoDTOOut{
+			ID:            resp.Atribuicao.ProfissionalID,
+			Nome:          resp.Atribuicao.Profissional.Usuario.Nome,
+			Email:         resp.Atribuicao.Profissional.Usuario.Email,
+			Especialidade: resp.Atribuicao.Profissional.Especialidade,
+		},
+		Instrumento: dtos.InstrumentoCompletoDTOOut{
+			Codigo:         resp.Atribuicao.Instrumento.Codigo,
+			Nome:           resp.Atribuicao.Instrumento.Nome,
+			Descricao:      resp.Atribuicao.Instrumento.Descricao,
+			Perguntas:      dtoPerguntas,
+			OpcoesEscala:   dtoOpcoesEscala,
+			TotalPerguntas: totalPerguntas,
+		},
+		Perguntas:      dtoPerguntas,
+		OpcoesEscala:   dtoOpcoesEscala,
+		TotalPerguntas: totalPerguntas,
+		Detalhes:       dadosProcessados.Detalhes,
 	}
 }

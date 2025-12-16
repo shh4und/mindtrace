@@ -1,7 +1,7 @@
-# Arquitetura de Software - MindTrace MVP v1.0
+# Arquitetura de Software - MindTrace MVP v1.2
 
 **Projeto:** P2410 - Aplicativo para Monitoramento de Saúde Mental  
-**Data:** 26 de Outubro de 2025  
+**Data:** 9 de Dezembro de 2025  
 **Autor:** Alexander Nunes Souza  
 **Orientadora:** Profa. Dra. Adicinéia A. de Oliveira
 
@@ -46,11 +46,12 @@ O sistema MindTrace adota uma arquitetura híbrida que combina:
 ### 1.2 Stack Tecnológico
 
 #### Backend
-- **Linguagem:** Go 1.23+
+- **Linguagem:** Go 1.25+
 - **Framework Web:** Gin
 - **ORM:** GORM
+- **Tipos de Dados:** GORM Datatypes (JSONB)
 - **Autenticação:** JWT (golang-jwt/jwt)
-- **Banco de Dados:** PostgreSQL 17
+- **Banco de Dados:** PostgreSQL 17 / SQLite (dev/testes)
 - **Criptografia:** bcrypt (senhas)
 
 #### Frontend
@@ -59,6 +60,8 @@ O sistema MindTrace adota uma arquitetura híbrida que combina:
 - **CSS Framework:** Tailwind CSS
 - **HTTP Client:** Axios
 - **Roteamento:** Vue Router
+- **Visualização de Dados:** ApexCharts + vue3-apexcharts
+- **Gerenciamento de Estado:** Pinia
 
 #### Infraestrutura
 - **Containerização:** Docker & Docker Compose
@@ -159,6 +162,25 @@ interno/
 - ✅ Vantagens: Auditável, recuperável, compatível com LGPD
 - ⚠️ Desvantagens: Aumenta tamanho do BD, necessita limpeza periódica
 
+### D6: Armazenamento Híbrido para Questionários (Relacional + JSONB)
+
+**Decisão:** Utilizar estrutura híbrida: relacional para instrumentos imutáveis, JSONB para respostas flexíveis.
+
+**Justificativa:**
+- **Imutabilidade:** Instrumentos padronizados (PHQ-9, GAD-7, WHOQOL-BREF) não devem ser editados
+- **Flexibilidade:** Respostas de pacientes armazenadas em JSONB permitem estruturas variadas
+- **Performance:** Queries relacionais para instrumentos, acesso rápido a respostas completas via JSON
+- **Integridade:** Constraints garantem consistência (unique composite indexes)
+
+**Implementação:**
+- Entidades `Instrumento`, `Pergunta`, `OpcaoEscala` → Tabelas relacionais (imutáveis)
+- Entidade `Resposta` → Campo `DadosBrutos` (JSONB) + campos calculados (pontuação, classificação)
+- Strategy Pattern: Algoritmos de pontuação (`phq_9`, `gad_7`, `whoqol_bref`, `who_5`)
+
+**Trade-offs:**
+- ✅ Vantagens: Flexibilidade, performance, validação de esquema
+- ⚠️ Desvantagens: Complexidade aumentada, validação JSONB menos rigorosa
+
 ---
 
 ## 3. Visões Arquiteturais
@@ -203,6 +225,8 @@ interno/
 │  │                 Domain Entities                      │   │
 │  │  - Usuario, Profissional, Paciente                  │   │
 │  │  - RegistroHumor, Convite, Notificacao              │   │
+│  │  - Instrumento, Pergunta, OpcaoEscala (NEW)        │   │
+│  │  - Atribuicao, Resposta (NEW)                      │   │
 │  │  - Validações de negócio                            │   │
 │  │  - Regras de domínio                                │   │
 │  └──────────────────────────────────────────────────────┘   │
@@ -227,9 +251,12 @@ interno/
 ┌─────────────────────────────────────────────────────────────┐
 │                   DATABASE LAYER                             │
 │              PostgreSQL 17 (Relational DB)                   │
-│  - 7 tabelas (usuarios, pacientes, profissionais, etc)      │
+│  - 12 tabelas (usuarios, pacientes, profissionais, etc)     │
+│  - NEW: instrumentos, perguntas, opcoes_escala,             │
+│         atribuicoes, respostas (questionários)              │
 │  - Constraints (PK, FK, Unique, Check)                       │
-│  - Índices (deleted_at, foreign keys)                        │
+│  - Índices (deleted_at, foreign keys, composite)             │
+│  - JSONB: respostas.dados_brutos (armazenamento híbrido)    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -333,6 +360,9 @@ mindtrace/
 │   │   │   ├── convite.go
 │   │   │   ├── relatorio.go           # DTO de saída (não persiste)
 │   │   │   ├── notificacao.go
+│   │   │   ├── instrumento.go         # ✨ NEW - Questionários padronizados
+│   │   │   ├── atribuicao.go          # ✨ NEW - Atribuições
+│   │   │   ├── resposta.go            # ✨ NEW - Respostas (JSONB)
 │   │   │   └── tests/                 # ✅ TESTES DE DOMÍNIO
 │   │   │       ├── usuario_test.go         (62 testes)
 │   │   │       ├── registro_humor_test.go  (45 testes)
@@ -346,15 +376,17 @@ mindtrace/
 │   │   │   │   ├── registro_humor_controlador.go
 │   │   │   │   ├── convite_controlador.go
 │   │   │   │   ├── relatorio_controlador.go
-│   │   │   │   └── resumo_controlador.go
+│   │   │   │   ├── resumo_controlador.go
+│   │   │   │   └── instrumento_controlador.go  # ✨ Questionários API
 │   │   │   ├── servicos/
 │   │   │   │   ├── usuario_servico.go
 │   │   │   │   ├── registro_humor_servico.go
 │   │   │   │   ├── convite_servico.go
-│   │   │   │   ├── relatorio_servico.go
 │   │   │   │   ├── resumo_servico.go
-│   │   │   │   ├── alerta_servico.go
+│   │   │   │   ├── alerta_servico.go           # ✨ Sistema de alertas
+│   │   │   │   ├── analise_servico.go          # ✨ Analytics avançados
 │   │   │   │   ├── notificacao_servico.go
+│   │   │   │   ├── instrumento_servico.go      # ✨ Lógica de questionários
 │   │   │   │   └── tests/             # ✅ TESTES DE SERVIÇOS
 │   │   │   │       ├── usuario_servico_test.go         (28 testes)
 │   │   │   │       ├── relatorio_servico_test.go       (17 testes)
@@ -362,6 +394,8 @@ mindtrace/
 │   │   │   │       └── convite_servico_test.go         (13 testes)
 │   │   │   ├── dtos/
 │   │   │   │   └── tipos.go
+│   │   │   ├── helpers/
+│   │   │   │   └── pdf.go             # Geração de PDF
 │   │   │   ├── mappers/
 │   │   │   │   ├── utils.go
 │   │   │   │   └── tests/             # ✅ TESTES DE MAPPERS
@@ -378,14 +412,18 @@ mindtrace/
 │   │       │   ├── registro_humor_repositorio.go
 │   │       │   ├── convite_repositorio.go
 │   │       │   ├── relatorio_repositorio.go
-│   │       │   └── notificacao_repositorio.go
-│   │       └── sqlite/                # Implementação SQLite
-│   │           ├── db.go
-│   │           ├── usuario_repositorio.go
-│   │           ├── registro_humor_repositorio.go
-│   │           ├── convite_repositorio.go
-│   │           ├── relatorio_repositorio.go
-│   │           └── notificacao_repositorio.go
+│   │       │   ├── notificacao_repositorio.go
+│   │       │   └── instrumento_repositorio.go  # ✨ Repositório de questionários
+│   │       ├── sqlite/                # Implementação SQLite
+│   │       │   ├── db.go
+│   │       │   ├── usuario_repositorio.go
+│   │       │   ├── registro_humor_repositorio.go
+│   │       │   ├── convite_repositorio.go
+│   │       │   ├── relatorio_repositorio.go
+│   │       │   ├── notificacao_repositorio.go
+│   │       │   └── instrumento_repositorio.go  # ✨ Repositório de questionários
+│   │       └── seeds/                 # Scripts de seed
+│   │           └── instrumento_seed.go
 │   ├── go.mod
 │   ├── go.sum
 │   └── Dockerfile
@@ -394,16 +432,53 @@ mindtrace/
 │   ├── src/
 │   │   ├── views/                     # VIEWS (Pages)
 │   │   │   ├── auth/
+│   │   │   │   ├── Login.vue
+│   │   │   │   ├── Cadastro.vue
+│   │   │   │   └── ForgotPassword.vue
 │   │   │   ├── dashboard-paciente/
-│   │   │   └── dashboard-profissional/
+│   │   │   │   ├── PacienteDashboard.vue
+│   │   │   │   ├── RegistroHumor.vue
+│   │   │   │   ├── Resumo.vue
+│   │   │   │   ├── VincularProfissional.vue
+│   │   │   │   ├── QuestionariosAtribuidos.vue    # ✨ Lista de questionários
+│   │   │   │   └── ResponderQuestionario.vue      # ✨ Interface de resposta
+│   │   │   ├── dashboard-profissional/
+│   │   │   │   ├── ProfissionalDashboard.vue
+│   │   │   │   ├── GerarConvite.vue
+│   │   │   │   ├── ListaPacientes.vue
+│   │   │   │   ├── AtribuirQuestionario.vue       # ✨ Atribuir questionários
+│   │   │   │   └── QuestionariosAtribuidos.vue    # ✨ Gerenciar atribuições
+│   │   │   ├── shared/
+│   │   │   │   ├── EditarPerfil.vue
+│   │   │   │   └── Relatorio.vue
+│   │   │   └── Landpage.vue
 │   │   ├── components/                # COMPONENTS
-│   │   │   └── shared/
+│   │   │   ├── layout/
+│   │   │   │   ├── NavbarPublic.vue
+│   │   │   │   ├── Sidebar.vue
+│   │   │   │   ├── SidebarPaciente.vue
+│   │   │   │   ├── SidebarProfissional.vue
+│   │   │   │   └── TopNavbar.vue
+│   │   │   └── ui/
+│   │   │       ├── BaseButton.vue
+│   │   │       ├── BaseCard.vue
+│   │   │       ├── BaseInput.vue
+│   │   │       └── index.js
+│   │   ├── composables/               # COMPOSITION API
+│   │   │   ├── index.js
+│   │   │   ├── useAuth.js
+│   │   │   └── useMoodForm.js
 │   │   ├── services/                  # API CLIENTS
 │   │   │   └── api.js
 │   │   ├── router/                    # ROUTING
 │   │   │   └── index.js
 │   │   ├── store/                     # STATE MANAGEMENT
 │   │   │   └── user.js
+│   │   ├── utils/                     # UTILITIES
+│   │   │   └── jwt.js
+│   │   ├── types/                     # TYPE DEFINITIONS
+│   │   ├── constants/                 # CONSTANTS
+│   │   ├── assets/                    # STATIC ASSETS
 │   │   ├── App.vue
 │   │   └── main.js
 │   ├── package.json
@@ -414,6 +489,13 @@ mindtrace/
 │   ├── ARQUITETURA_MINDTRACE.md       # ✅ Este documento
 │   ├── TESTES_UNITARIOS_RELATORIO.md  # ✅ Documentação de testes
 │   └── Project_Architecture_Blueprint.md
+│
+├── seeders/                           # Scripts de seed do banco
+│   ├── seed.sh                        # Script principal de seed
+│   ├── seed.ps1                       # Script PowerShell
+│   ├── monitoramento.sh               # Seed de monitoramento
+│   ├── registro_humor.sh              # Seed de registros de humor
+│   └── vincular.sh                    # Seed de vínculos
 │
 └── docker-compose.yml
 ```
@@ -448,6 +530,11 @@ mindtrace/
 - **Onde:** Camada de domínio
 - **Por quê:** Modelagem rica, validações no domínio
 - **Exemplo:** `Usuario.Validar()` encapsula regras de validação
+
+#### Strategy Pattern
+- **Onde:** Sistema de questionários (algoritmos de pontuação)
+- **Por quê:** Diferentes instrumentos têm diferentes algoritmos de cálculo
+- **Exemplo:** Campo `AlgoritmoPontuacao` (`phq_9`, `gad_7`, `whoqol_bref`, `who_5`) permite extensibilidade
 
 ### 4.2 Princípios SOLID Aplicados
 
@@ -504,6 +591,12 @@ mindtrace/
 - Nomenclatura consistente (`*_test.go`)
 - Documentação inline dos testes
 
+✅ **Armazenamento Híbrido (Questionários):**
+- Instrumentos padronizados imutáveis (relacional)
+- Respostas flexíveis com JSONB (PostgreSQL)
+- Validações em múltiplas camadas (domínio + banco)
+- Índices compostos para performance
+
 ---
 
 ## 5. Justificativas
@@ -553,8 +646,20 @@ mindtrace/
 **Benefícios:**
 - ✅ ACID: Garantia de consistência
 - ✅ Constraints: Validações no banco
-- ✅ JSON: Suporte nativo para dados semiestruturados
+- ✅ JSONB: Suporte nativo para dados semiestruturados (respostas de questionários)
 - ✅ Open Source: Sem custos de licença
+
+### 5.5 Por que ApexCharts?
+
+**Problema:** Visualização de dados de humor e questionários, gráficos interativos.
+
+**Solução:** ApexCharts com vue3-apexcharts para integração Vue 3.
+
+**Benefícios:**
+- ✅ Interatividade: Gráficos responsivos com zoom, pan, tooltips
+- ✅ Variedade: Line, bar, radar, heatmap charts
+- ✅ Performance: Renderização otimizada para grandes datasets
+- ✅ Integração: Wrapper Vue 3 oficial
 
 ---
 
@@ -660,6 +765,8 @@ go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/apl
 |------|--------|------------|
 | 26/10/2025 | 1.0 | Documento inicial de arquitetura |
 | 28/10/2025 | 1.1 | ✅ Adição da seção de Infraestrutura de Testes (281 testes unitários)<br>✅ Atualização de Débitos Técnicos (testes concluídos)<br>✅ Atualização de Atributos de Qualidade (testabilidade comprovada)<br>✅ Expansão da estrutura de código com diretórios /tests<br>✅ Atualização de Boas Práticas (testes automatizados) |
+| 09/12/2025 | 1.2 | ✅ **Sistema de Questionários/Escalas Psicométricas** (5 novas entidades)<br>✅ Adição de `Instrumento`, `Pergunta`, `OpcaoEscala`, `Atribuicao`, `Resposta`<br>✅ Decisão Arquitetural D6: Armazenamento Híbrido (Relacional + JSONB)<br>✅ Novo serviço: `AnaliseServico` (analytics avançados)<br>✅ Novo controlador: `InstrumentoControlador` (6 endpoints)<br>✅ Stack tecnológico: ApexCharts, GORM Datatypes (JSONB)<br>✅ Atualização de diagramas ASCII (Visão Lógica, Database Layer)<br>✅ Estrutura de código: novos arquivos domínio/serviços/controladores<br>✅ Frontend: 4 novas views (AtribuirQuestionario, ResponderQuestionario, etc)<br>✅ Strategy Pattern para algoritmos de pontuação (PHQ-9, GAD-7, WHOQOL-BREF, WHO-5)<br>✅ 5 novas tabelas: instrumentos, perguntas, opcoes_escala, atribuicoes, respostas |
+| 09/12/2025 | 1.3 | ✅ **Revisão e Atualização Completa da Documentação**<br>✅ Estrutura de código detalhada refletindo organização atual<br>✅ Frontend: adição de diretórios `composables/`, `utils/`, `types/`, `constants/`<br>✅ Componentes organizados em `layout/` e `ui/`<br>✅ Backend: adição de `helpers/pdf.go` e `alerta_servico.go`<br>✅ Seção de seeders documentada (`seeders/` directory)<br>✅ Views detalhadas por tipo de usuário (paciente/profissional/shared)<br>✅ Confirmação de conformidade com Clean Architecture<br>✅ Atualização de marcadores "✨ NEW" para descrições funcionais |
 
 ---
 
@@ -667,4 +774,4 @@ go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/apl
 **Orientadora:** Profa. Dra. Adicinéia A. de Oliveira  
 **Disciplina:** ESII/2025-2  
 **Primeira versão:** 26/10/2025  
-**Última atualização:** 28/10/2025 (v1.1 - Infraestrutura de Testes)
+**Última atualização:** 09/12/2025 (v1.3 - Revisão Completa da Documentação)

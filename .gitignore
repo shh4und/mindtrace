@@ -22,7 +22,6 @@ pgadmin-data/
 .DS_Store
 Thumbs.db
 
-*.sql
 backend/tmp/
 *.db
 *.txt

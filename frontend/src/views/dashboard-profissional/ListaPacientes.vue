@@ -11,26 +11,37 @@
       <div 
         v-for="(patient, index) in patients" 
         :key="patient.id"
-        @click="$emit('view-patient', patient.id)"
+        @click="viewPatientReport(patient.id)"
         class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-lg hover:border-indigo-400 transition-all duration-200"
+        role="button"
+        :aria-label="`Ver relatório do paciente ${patient.name}`"
+        tabindex="0"
+        @keydown.enter="viewPatientReport(patient.id)"
+        @keydown.space.prevent="viewPatientReport(patient.id)"
       >
         <div class="flex items-center space-x-4 mb-4">
           <div :class="getAvatarClass(index)" class="w-14 h-14 rounded-full flex items-center justify-center">
-            <font-awesome-icon :icon="['fas', 'user']" class="w-8 h-8 text-white" />
+            <font-awesome-icon :icon="['fas', 'user']" class="w-8 h-8 text-white" aria-hidden="true" />
           </div>
           <div>
             <h3 class="font-semibold text-gray-900 text-lg">{{ patient.name }}</h3>
             <p class="text-sm text-gray-500">{{ patient.age }}</p>
           </div>
         </div>
-        <button @click="$emit('view-relatorios', patient.id)" class="mb-6 flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800">
-            <i class="fa-solid fa-arrow-left mr-2"></i>
-            Ver Relatorio
-          </button>
-        <!-- <div class="text-sm text-gray-600">
-          <p class="font-medium">Foco do tratamento:</p>
-          <p>{{ patient.focus }}</p>
-        </div> -->
+        <button 
+          @click.stop="viewPatientReport(patient.id)" 
+          class="flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+        >
+          <font-awesome-icon :icon="faChartLine" class="mr-2" aria-hidden="true" />
+          Ver Relatório
+        </button>
+        <button 
+          @click.stop="viewQuestFormAssign({patientId: patient.id, patientNome: patient.name})" 
+          class="flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+        >
+          <font-awesome-icon :icon="faListCheck" class="mr-2" aria-hidden="true" />
+          Atribuir Questionário
+        </button>
       </div>
     </div>
   </div>
@@ -38,16 +49,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import api from '../../services/api';
+import { useRouter } from 'vue-router';
+import api from '@/services/api';
 import { useToast } from 'vue-toastification';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faChartLine, faListCheck } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 
 library.add(faUser);
 
-defineEmits(['view-patient', 'view-relatorios']);
-
+const router = useRouter();
 const patients = ref([]);
 const isLoading = ref(true);
 const toast = useToast();
@@ -78,6 +89,20 @@ const calculateAge = (birthdate) => {
     age--;
   }
   return age;
+};
+
+const viewPatientReport = (patientId) => {
+  router.push({ 
+    name: 'profissional-paciente-relatorio', 
+    params: { patientId } 
+  });
+};
+
+const viewQuestFormAssign = ({patientId, patientNome}) => {
+  router.push({ 
+    name: 'profissional-atribuir-questionario', 
+    params: { patientId, patientNome }  // params de rota, NÃO props de componente
+  });
 };
 
 onMounted(async () => {
