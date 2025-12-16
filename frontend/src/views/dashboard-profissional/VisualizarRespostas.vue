@@ -121,6 +121,132 @@
       </div>
     </div>
 
+    <!-- Score e Classificação -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <!-- Card de Pontuação -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">
+          Pontuação Total
+        </p>
+        <p class="text-4xl font-bold text-indigo-600 mb-2">
+          {{ resposta.pontuacao_total?.toFixed(1) || "0" }}
+        </p>
+        <p class="text-sm text-gray-600">
+          <span class="font-medium text-indigo-900">Classificação:</span>
+          {{ resposta.classificacao || "Não classificado" }}
+        </p>
+      </div>
+
+      <!-- Card de Resumo -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-2">
+          Resumo da Resposta
+        </p>
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Perguntas respondidas:</span>
+            <span class="font-semibold text-gray-900">
+              {{ resposta.instrumento?.perguntas?.length || 0 }}/{{
+                resposta.instrumento?.perguntas?.length || 0
+              }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Status:</span>
+            <span
+              class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700"
+            >
+              <font-awesome-icon :icon="faCheckCircle" class="w-3 h-3 mr-1" />
+              Respondido
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Escala Comparativa (PHQ-9, GAD-7, WHO-5) -->
+    <div
+      v-if="['phq_9', 'gad_7', 'who_5'].includes(resposta.instrumento?.codigo)"
+      class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6"
+    >
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">
+        Escala de Referência
+      </h3>
+      <div class="space-y-2">
+        <div
+          v-for="range in obterEscalaReferencia(resposta.instrumento?.codigo)"
+          :key="`${range.min}-${range.max}`"
+          class="flex items-center p-3 rounded-lg border"
+          :class="
+            isScoreInRange(resposta.pontuacao_total, range)
+              ? 'border-indigo-500 bg-indigo-50'
+              : 'border-gray-200 bg-gray-50'
+          "
+        >
+          <!-- Indicador de faixa -->
+          <div
+            class="flex-shrink-0 w-20 font-mono text-sm font-semibold"
+            :class="
+              isScoreInRange(resposta.pontuacao_total, range)
+                ? 'text-indigo-700'
+                : 'text-gray-600'
+            "
+          >
+            {{ formatarFaixa(range) }}
+          </div>
+
+          <!-- Classificação -->
+          <div
+            class="flex-1 ml-4 text-sm font-medium"
+            :class="
+              isScoreInRange(resposta.pontuacao_total, range)
+                ? 'text-indigo-900'
+                : 'text-gray-700'
+            "
+          >
+            {{ range.label }}
+          </div>
+
+          <!-- Indicador de score do paciente -->
+          <div
+            v-if="isScoreInRange(resposta.pontuacao_total, range)"
+            class="flex-shrink-0 ml-2 flex items-center"
+          >
+            <span
+              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-600 text-white"
+            >
+              Score: {{ resposta.pontuacao_total?.toFixed(1) || "0" }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Domínios WHOQOL -->
+    <div
+      v-if="resposta.instrumento?.codigo === 'whoqol_bref'"
+      class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"
+    >
+      <div
+        v-for="(score, dominio) in resposta.detalhes"
+        :key="dominio"
+        class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center"
+      >
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-2 font-medium">
+          {{ formatarDominio(dominio) }}
+        </p>
+        <p class="text-3xl font-bold text-emerald-600 mb-1">
+          {{ score?.toFixed(1) || "0" }}
+        </p>
+        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div
+            class="bg-emerald-500 h-2 rounded-full transition-all"
+            :style="{ width: `${(score / 100) * 100}%` }"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- Resumo de respostas -->
     <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
       <div class="flex items-center justify-between">
@@ -130,12 +256,9 @@
             class="w-5 h-5 text-indigo-600 mr-2"
           />
           <span class="font-medium text-indigo-900"
-            >Total de perguntas respondidas</span
+            >Respostas Detalhadas</span
           >
         </div>
-        <span class="text-lg font-bold text-indigo-700">
-          {{ resposta.instrumento?.perguntas?.length || 0 }}
-        </span>
       </div>
     </div>
 
@@ -226,6 +349,36 @@ import {
   faClipboardList,
 } from "@fortawesome/free-solid-svg-icons";
 
+// Escalas de referência hardcoded
+const escalasReferencia = {
+  phq_9: [
+    { min: 0, max: 5, label: "Ausência ou sintomas depressivos mínimos" },
+    { min: 5, max: 10, label: "Sintomas depressivos leves" },
+    { min: 10, max: 15, label: "Depressão moderada" },
+    { min: 15, max: 20, label: "Depressão moderadamente grave" },
+    { min: 20, max: 27, label: "Depressão grave" },
+  ],
+  gad_7: [
+    { min: 0, max: 5, label: "Ansiedade mínima" },
+    { min: 5, max: 10, label: "Ansiedade leve" },
+    { min: 10, max: 15, label: "Ansiedade moderada" },
+    { min: 15, max: 21, label: "Ansiedade grave" },
+  ],
+  who_5: [
+    { min: 0, max: 29, label: "Bem-estar muito baixo" },
+    { min: 29, max: 50, label: "Bem-estar reduzido" },
+    { min: 50, max: 100, label: "Bem-estar preservado" },
+  ],
+};
+
+// Mapeamento de domínios WHOQOL para label em português
+const dominiosWHOQOL = {
+  fisico: "Físico",
+  psicologico: "Psicológico",
+  relacoes_sociais: "Relações Sociais",
+  ambiente: "Ambiente",
+};
+
 const props = defineProps({
   atribuicaoId: {
     type: String,
@@ -296,6 +449,33 @@ const formatDate = (dateString) => {
     hour: "2-digit",
     minute: "2-digit",
   });
+};
+
+// Função para obter a escala de referência do instrumento
+const obterEscalaReferencia = (codigo) => {
+  return escalasReferencia[codigo] || [];
+};
+
+// Função para verificar se o score está em um determinado range
+const isScoreInRange = (score, range) => {
+  if (score === null || score === undefined) return false;
+  if (range.max === null) {
+    return score >= range.min;
+  }
+  return score >= range.min && score < range.max;
+};
+
+// Função para formatar a faixa de score
+const formatarFaixa = (range) => {
+  if (range.max === null) {
+    return `≥ ${Math.floor(range.min)}`;
+  }
+  return `${Math.floor(range.min)}-${Math.floor(range.max - 0.1)}`;
+};
+
+// Função para formatar nome do domínio
+const formatarDominio = (dominio) => {
+  return dominiosWHOQOL[dominio] || dominio;
 };
 
 const voltar = () => {
