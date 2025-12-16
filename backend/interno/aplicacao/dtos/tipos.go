@@ -228,7 +228,6 @@ type RespostaDetalhadaDTOOut struct {
 	PontuacaoTotal     float64                    `json:"pontuacao_total"`
 	Classificacao      string                     `json:"classificacao"`
 	Detalhes           map[string]float64         `json:"detalhes"`
-	Alertas            []string                   `json:"alertas"`
 	Paciente           PacienteResumidoDTOOut     `json:"paciente"`
 	Profissional       ProfissionalResumidoDTOOut `json:"profissional"`
 	Instrumento        InstrumentoCompletoDTOOut  `json:"instrumento"`

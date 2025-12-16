@@ -407,7 +407,6 @@ func RespostaDetalhadaDTOOut(resp *dominio.Resposta, dadosBrutos []map[string]an
 		Perguntas:      dtoPerguntas,
 		OpcoesEscala:   dtoOpcoesEscala,
 		TotalPerguntas: totalPerguntas,
-		Alertas:        dadosProcessados.Alertas,
 		Detalhes:       dadosProcessados.Detalhes,
 	}
 }

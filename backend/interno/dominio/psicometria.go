@@ -28,7 +28,6 @@ func calcularMediaSimples(valores []float64) float64 {
 type ResultadoClinico struct {
 	ScoreTotal    float64
 	Classificacao string
-	Alertas       []string
 	Detalhes      map[string]float64
 }
 
@@ -56,15 +55,10 @@ func (av AvaliadorPHQ9) Avaliar(listaDados []map[string]any) ResultadoClinico {
 		classificacao = "Classificação inválida"
 	}
 
-	var alertas []string
-	if listaDados[8]["8"].(float64) > 0 {
-		alertas = append(alertas, "Ideação suicida presente")
-	}
-
 	return ResultadoClinico{
 		ScoreTotal:    scoreTotal,
 		Classificacao: classificacao,
-		Alertas:       alertas}
+	}
 }
 
 type AvaliadorGAD7 struct{}
@@ -154,7 +148,6 @@ func (av AvaliadorWHOQOL) Avaliar(listaDados []map[string]any) ResultadoClinico 
 	return ResultadoClinico{
 		ScoreTotal:    scoreTotal,
 		Classificacao: classificacao,
-		Alertas:       []string{},
 		Detalhes:      detalhes,
 	}
 }

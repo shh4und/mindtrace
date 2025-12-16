@@ -69,6 +69,25 @@
       </div>
     </div>
 
+    <!-- Alerta de Ideação Suicida (PHQ-9) -->
+    <div v-if="temIdeacaoSuicida" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-semibold text-red-800">
+            ⚠️ Ideação suicida presente
+          </p>
+          <p class="mt-1 text-sm text-red-700">
+            O paciente indicou pensamentos de se ferir ou que seria melhor estar morto.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Cards de informação -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <!-- Card Paciente -->
@@ -477,7 +496,27 @@ const formatarFaixa = (range) => {
 const formatarDominio = (dominio) => {
   return dominiosWHOQOL[dominio] || dominio;
 };
+// Encontrar a pergunta de ideação suicida (PHQ-9, ordem_item 9)
+const perguntaIdeacaoSuicida = computed(() => {
+  if (resposta.value.instrumento?.codigo !== 'phq_9') return null;
+  return resposta.value.perguntas?.find(p => p.ordem_item === 9);
+});
 
+// Obter a resposta dessa pergunta específica
+const respostaIdeacaoSuicida = computed(() => {
+  const pergunta = perguntaIdeacaoSuicida.value;
+  if (!pergunta) return null;
+  
+  const respostaPergunta = resposta.value.perguntas_respostas?.find(
+    r => r.pergunta_id === pergunta.id
+  );
+  return respostaPergunta ? respostaPergunta.valor : 0;
+});
+
+// Verificar se há ideação suicida (valor > 0)
+const temIdeacaoSuicida = computed(() => {
+  return respostaIdeacaoSuicida.value > 0;
+});
 const voltar = () => {
   router.push({ name: "profissional-questionarios-atribuidos" });
 };
