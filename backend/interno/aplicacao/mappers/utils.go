@@ -350,7 +350,7 @@ func AtribuicaoComPerguntasDTOOut(atrib *dominio.Atribuicao) *dtos.AtribuicaoDTO
 	}
 }
 
-func RespostaDetalhadaDTOOut(resp *dominio.Resposta, dadosBrutos []map[string]any) *dtos.RespostaDetalhadaDTOOut {
+func RespostaDetalhadaDTOOut(resp *dominio.Resposta, dadosBrutos []map[string]any, dadosProcessados *dominio.ResultadoClinico) *dtos.RespostaDetalhadaDTOOut {
 	if resp == nil {
 		return nil
 	}
@@ -383,8 +383,8 @@ func RespostaDetalhadaDTOOut(resp *dominio.Resposta, dadosBrutos []map[string]an
 		AtribuicaoID:       resp.AtribuicaoID,
 		InstrumentoID:      resp.Atribuicao.InstrumentoID,
 		PerguntasRespostas: dadosBrutos,
-		PontuacaoTotal:     resp.PontuacaoTotal,
-		Classificacao:      resp.Classificacao,
+		PontuacaoTotal:     dadosProcessados.ScoreTotal,
+		Classificacao:      dadosProcessados.Classificacao,
 		Paciente: dtos.PacienteResumidoDTOOut{
 			ID:    resp.Atribuicao.PacienteID,
 			Nome:  resp.Atribuicao.Paciente.Usuario.Nome,
@@ -407,5 +407,7 @@ func RespostaDetalhadaDTOOut(resp *dominio.Resposta, dadosBrutos []map[string]an
 		Perguntas:      dtoPerguntas,
 		OpcoesEscala:   dtoOpcoesEscala,
 		TotalPerguntas: totalPerguntas,
+		Alertas:        dadosProcessados.Alertas,
+		Detalhes:       dadosProcessados.Detalhes,
 	}
 }

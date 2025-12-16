@@ -217,6 +217,7 @@ func (is *instrumentoServico) VisualizarRespostaAtribuicao(atribuicaoId uint) (*
 
 	var resposta *dominio.Resposta
 	var dadosBrutos []map[string]any
+	var dadosProcessados *dominio.ResultadoClinico
 	err := is.db.Transaction(func(tx *gorm.DB) error {
 		var err error
 		resposta, err = is.instrumentoRepo.BuscarRespostaCompletaPorAtribuicaoID(tx, uint(atribuicaoId))
@@ -228,8 +229,16 @@ func (is *instrumentoServico) VisualizarRespostaAtribuicao(atribuicaoId uint) (*
 			return err
 		}
 
+		avaliador, err := dominio.CriarAvaliador(resposta.Atribuicao.Instrumento.Codigo)
+		if err != nil {
+			return err
+		}
+
+		resultado := avaliador.Avaliar(dadosBrutos)
+		dadosProcessados = &resultado
+
 		return nil
 	})
 
-	return mappers.RespostaDetalhadaDTOOut(resposta, dadosBrutos), err
+	return mappers.RespostaDetalhadaDTOOut(resposta, dadosBrutos, dadosProcessados), err
 }
