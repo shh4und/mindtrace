@@ -12,7 +12,7 @@
         v-for="(patient, index) in patients" 
         :key="patient.id"
         @click="viewPatientReport(patient.id)"
-        class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-lg hover:border-indigo-400 transition-all duration-200"
+        class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-lg hover:border-rose-400 transition-all duration-200"
         role="button"
         :aria-label="`Ver relatório do paciente ${patient.name}`"
         tabindex="0"
@@ -30,14 +30,14 @@
         </div>
         <button 
           @click.stop="viewPatientReport(patient.id)" 
-          class="flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+          class="flex items-center text-sm font-medium text-rose-600 hover:text-rose-800 transition-colors"
         >
           <font-awesome-icon :icon="faChartLine" class="mr-2" aria-hidden="true" />
           Ver Relatório
         </button>
         <button 
           @click.stop="viewQuestFormAssign({patientId: patient.id, patientNome: patient.name})" 
-          class="flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+          class="flex items-center text-sm font-medium text-rose-600 hover:text-rose-800 transition-colors"
         >
           <font-awesome-icon :icon="faListCheck" class="mr-2" aria-hidden="true" />
           Atribuir Questionário

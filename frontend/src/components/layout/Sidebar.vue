@@ -2,17 +2,17 @@
   <!-- Sidebar principal - Componente unificado para Paciente e Profissional -->
   <aside 
     :class="[
-      'fixed lg:static inset-y-0 left-0 transform transition-transform duration-300 ease-in-out lg:translate-x-0',
+      'fixed md:static inset-y-0 left-0 transform transition-transform duration-300 ease-in-out md:translate-x-0',
       isOpen ? 'translate-x-0' : '-translate-x-full',
-      isCollapsed ? 'lg:w-20' : 'lg:w-64',
-      'w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg lg:shadow-none',
-      variant === 'paciente' ? 'z-50' : 'z-30'
+      isCollapsed ? 'md:w-20' : 'md:w-64',
+      'w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg md:shadow-none',
+      'z-30'
     ]"
     role="navigation"
     :aria-label="`Menu de navegação do ${variantLabel}`"
   >
     <!-- Botao desktop para recolher -->
-    <div class="hidden lg:flex justify-end p-2 border-b border-gray-200">
+    <div class="hidden md:flex justify-end p-2 border-b border-gray-200">
       <button 
         @click="toggleCollapse"
         class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Lista de navegacao principal -->
-    <nav :class="['flex-1 px-3 pb-3 overflow-y-auto', variant === 'paciente' ? 'pt-16 lg:pt-3' : 'p-3']">
+    <nav class="flex-1 px-3 pb-3 overflow-y-auto pt-16 md:pt-3">
       <ul class="space-y-1" role="menubar">
         <li v-for="item in menuItems" :key="item.name" role="none">
           <button
@@ -79,7 +79,7 @@
       <div 
         v-if="isOpen"
         @click="closeSidebar"
-        class="fixed inset-0 bg-black/50 z-20 lg:hidden"
+        class="fixed inset-0 bg-black/50 z-20 md:hidden"
         aria-hidden="true"
       ></div>
     </Transition>
@@ -89,7 +89,7 @@
   <button
     @click="toggleSidebar"
     :class="[
-      'fixed bottom-4 left-4 z-40 lg:hidden text-white p-4 rounded-full shadow-lg transition-colors',
+      'fixed bottom-4 left-4 z-40 md:hidden text-white p-4 rounded-full shadow-lg transition-colors',
       mobileButtonClasses
     ]"
     :aria-label="isOpen ? 'Fechar menu' : 'Abrir menu'"

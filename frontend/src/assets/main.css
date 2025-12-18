@@ -1,16 +1,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,200..800;1,200..800&display=swap');
 @import "tailwindcss";
 
+/* =============================================
+   Design Tokens - MindTrace UI System
+   Tailwind CSS v4 @theme configuration
+   ============================================= */
 
+@theme {
+	/* ----------------------------------------
+	   Cores - Tema Paciente (Emerald)
+	   ---------------------------------------- */
+	--color-paciente-50: #ecfdf5;
+	--color-paciente-100: #d1fae5;
+	--color-paciente-200: #a7f3d0;
+	--color-paciente-500: #10b981;
+	--color-paciente-600: #059669;
+	--color-paciente-700: #047857;
+
+	/* ----------------------------------------
+	   Cores - Tema Profissional (Rose)
+	   ---------------------------------------- */
+	--color-profissional-50: #fff1f2;
+	--color-profissional-100: #ffe4e6;
+	--color-profissional-200: #fecdd3;
+	--color-profissional-500: #f43f5e;
+	--color-profissional-600: #e11d48;
+	--color-profissional-700: #be123c;
+
+	/* ----------------------------------------
+	   Escala Z-Index Padronizada
+	   ---------------------------------------- */
+	--z-overlay: 20;
+	--z-sidebar: 30;
+	--z-navbar: 40;
+	--z-modal: 50;
+	--z-tooltip: 60;
+}
 
 /* Define tokens visuais globais do projeto */
 :root {
-	/* Novos tokens de design solicitados pelo usuario */
-	--white: #ffffffff;
-	--emeral: #66ce83ff; /* Ortografia fornecida pelo usuario */
-	--aquamarine: #a5ffd6ff;
-	--melon: #ffa69eff;
-	--light-rose: oklch(71.2% 0.194 13.428); /* Tom rosa pastel usado em destaques sutis */
 	font-family: "Atkinson Hyperlegible Next", sans-serif;
 	font-weight: 400;
 }
