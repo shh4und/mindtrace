@@ -339,7 +339,12 @@ const getStatusLabel = (status) => {
 };
 
 const formatDate = (dateString) => {
+  if (!dateString) return 'Data não informada';
   const date = new Date(dateString);
+  // Verifica se a data é válida
+  if (isNaN(date.getTime()) || date.getFullYear() < 1900) {
+    return 'Data não informada';
+  }
   return date.toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: '2-digit',

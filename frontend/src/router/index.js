@@ -22,12 +22,18 @@ const PacienteQuestionariosAtribuidos = () =>
   import("@/views/dashboard-paciente/QuestionariosAtribuidos.vue");
 const PacienteResponderQuestionario = () =>
   import("@/views/dashboard-paciente/ResponderQuestionario.vue");
+const PacienteProfissionais = () =>
+  import("@/views/dashboard-paciente/ListaProfissionais.vue");
 
 // Dashboard Profissional e suas views
 const ProfissionalDashboard = () =>
   import("@/views/dashboard-profissional/ProfissionalDashboard.vue");
+const ProfissionalResumo = () =>
+  import("@/views/dashboard-profissional/Resumo.vue");
 const ProfissionalPacientes = () =>
   import("@/views/dashboard-profissional/ListaPacientes.vue");
+const ProfissionalRelatorios = () =>
+  import("@/views/dashboard-profissional/Relatorios.vue");
 const ProfissionalConvite = () =>
   import("@/views/dashboard-profissional/GerarConvite.vue");
 const ProfissionalEditarPerfil = () =>
@@ -105,6 +111,11 @@ const router = createRouter({
           component: PacienteResponderQuestionario,
         },
         {
+          path: "profissionais",
+          name: "paciente-profissionais",
+          component: PacienteProfissionais,
+        },
+        {
           path: "editar-perfil",
           name: "paciente-editar-perfil",
           component: PacienteEditarPerfil,
@@ -117,13 +128,23 @@ const router = createRouter({
       path: "/dashboard-profissional",
       name: "dashboard-profissional",
       component: ProfissionalDashboard,
-      redirect: { name: "profissional-pacientes" },
+      redirect: { name: "profissional-resumo" },
       meta: { requiresAuth: true, role: TipoUsuario.Profissional },
       children: [
+        {
+          path: "resumo",
+          name: "profissional-resumo",
+          component: ProfissionalResumo,
+        },
         {
           path: "pacientes",
           name: "profissional-pacientes",
           component: ProfissionalPacientes,
+        },
+        {
+          path: "relatorios",
+          name: "profissional-relatorios",
+          component: ProfissionalRelatorios,
         },
         {
           path: "pacientes/:patientId/relatorio",
@@ -188,7 +209,7 @@ router.beforeEach((to, from, next) => {
     // Se já está logado e tenta acessar página pública, redireciona para dashboard
     if (autenticado && role) {
       if (role === TipoUsuario.Profissional) {
-        next({ name: "profissional-pacientes" });
+        next({ name: "profissional-resumo" });
       } else if (role === TipoUsuario.Paciente) {
         next({ name: "paciente-resumo" });
       } else {
@@ -206,7 +227,7 @@ router.beforeEach((to, from, next) => {
       if (isProfissionalRoute && role !== TipoUsuario.Profissional) {
         next({ name: "paciente-resumo" });
       } else if (isPacienteRoute && role !== TipoUsuario.Paciente) {
-        next({ name: "profissional-pacientes" });
+        next({ name: "profissional-resumo" });
       } else {
         next();
       }

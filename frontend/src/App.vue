@@ -19,11 +19,8 @@
       {{ routeAnnouncement }}
     </div>
     
-    <router-view v-slot="{ Component }">
-      <transition name="page" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </router-view>
+    <!-- Router view principal - sem transição para evitar conflito com dashboards -->
+    <router-view />
   </div>
 </template>
 

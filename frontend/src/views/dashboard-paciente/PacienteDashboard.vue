@@ -8,10 +8,19 @@
     @logout="handleLogout"
     @navigate="handleNavigation"
   >
-    <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
+    <router-view v-slot="{ Component, route: childRoute }">
+      <Suspense>
+        <template #default>
+          <transition name="fade">
+            <component v-if="Component" :is="Component" :key="childRoute.fullPath" />
+          </transition>
+        </template>
+        <template #fallback>
+          <div class="flex items-center justify-center h-64">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+          </div>
+        </template>
+      </Suspense>
     </router-view>
   </DashboardLayout>
 </template>
@@ -28,7 +37,8 @@ import {
   faChartLine,
   faLink,
   faUserPen,
-  faClipboardList
+  faClipboardList,
+  faUserDoctor
 } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
@@ -41,6 +51,7 @@ const menuItems = [
   { name: 'humor', view: 'humor', label: 'Registro de Humor', icon: faFaceSmileBeam },
   { name: 'relatorios', view: 'relatorios', label: 'Relatórios', icon: faChartLine },
   { name: 'questionarios', view: 'questionarios', label: 'Questionários', icon: faClipboardList },
+  { name: 'profissionais', view: 'profissionais', label: 'Meus Profissionais', icon: faUserDoctor },
   { name: 'vincular', view: 'vincular', label: 'Vincular Profissional', icon: faLink },
   { name: 'editar', view: 'editar-perfil', label: 'Editar Perfil', icon: faUserPen }
 ];
@@ -51,6 +62,7 @@ const viewToRoute = {
   'humor': 'paciente-humor',
   'relatorios': 'paciente-relatorios',
   'questionarios': 'paciente-questionarios',
+  'profissionais': 'paciente-profissionais',
   'vincular': 'paciente-vincular',
   'editar-perfil': 'paciente-editar-perfil'
 };
@@ -61,6 +73,8 @@ const routeToView = {
   'paciente-humor': 'humor',
   'paciente-relatorios': 'relatorios',
   'paciente-questionarios': 'questionarios',
+  'paciente-responder-questionario': 'questionarios',
+  'paciente-profissionais': 'profissionais',
   'paciente-vincular': 'vincular',
   'paciente-editar-perfil': 'editar-perfil'
 };
