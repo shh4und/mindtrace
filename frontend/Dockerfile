@@ -6,8 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+# VITE_API_BASE_URL removido - frontend usa same-origin fallback via nginx proxy
 RUN npm run build
 
 # --- Estágio 2: Produção ---

@@ -24,14 +24,18 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_DB: ${POSTGRES_DB}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DRIVER: postgres
       JWT_SECRET: ${JWT_SECRET}
-      FRONTEND_ORIGINS: ${FRONTEND_ORIGINS}
+      FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:5173}
+      SKIP_DB_INIT: ${SKIP_DB_INIT:-false}
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
-    ports:
-      - "8080:8080" # expõe só internamente à rede compose
+    expose:
+      - "8080"  # interno apenas, acessível via nginx proxy
 
   frontend:
     image: ${DOCKER_HUB_USERNAME:-shh4und}/mindtrace-frontend:latest

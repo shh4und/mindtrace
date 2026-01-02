@@ -1,0 +1,93 @@
+name: Build and Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  BACKEND_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/mindtrace-backend
+  FRONTEND_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/mindtrace-frontend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build & Push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+
+      - name: Build & Push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          # VITE_API_BASE_URL removido - frontend usa same-origin via nginx proxy
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd /home/ubuntu/mindtrace || exit 1
+            
+            # Atualiza código do repositório
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # Verifica se .env.prod existe
+            if [ ! -f .env.prod ]; then
+              echo "❌ Arquivo .env.prod ausente - crie manualmente no servidor."
+              echo "Exemplo:"
+              echo "  POSTGRES_USER=admin"
+              echo "  POSTGRES_PASSWORD=sua_senha_segura"
+              echo "  POSTGRES_DB=mindtrace"
+              echo "  JWT_SECRET=seu_jwt_secret"
+              echo "  FRONTEND_ORIGINS=http://localhost:5173"
+              echo "  SKIP_DB_INIT=false"
+              exit 1
+            fi
+            
+            # Cria diretório de dados do PostgreSQL
+            mkdir -p postgres-data
+            
+            # Pull das novas imagens
+            DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }} \
+            docker compose -f docker-compose.prod.yml --env-file .env.prod pull
+            
+            # Inicia/atualiza containers
+            DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }} \
+            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --remove-orphans
+            
+            # Limpa imagens antigas para economizar espaço
+            docker image prune -f
+            
+            echo "✅ Deploy concluído com sucesso!"
+            echo "🌐 Aplicação disponível em: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
