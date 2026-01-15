@@ -1,32 +1,28 @@
 <template>
-  <div class="min-h-screen bg-gray-50 font-sans antialiased flex flex-col">
-    <!-- Navbar superior -->
-    <TopNavbar 
-      :user-type="TipoUsuario.Paciente" 
-      @edit-profile="navigateTo('paciente-editar-perfil')"
-      @logout="handleLogout"
-    />
-
-    <!-- Conteudo principal com sidebar -->
-    <div class="flex flex-1 overflow-hidden">
-      <!-- Barra lateral unificada -->
-      <Sidebar 
-        :menu-items="menuItems"
-        :active-view="activeView"
-        variant="paciente"
-        @navigate="handleNavigation" 
-      />
-
-      <!-- Area de conteudo principal com router-view -->
-      <main id="main-content" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <router-view v-slot="{ Component }">
-          <transition name="fade" mode="out-in">
-            <component :is="Component" />
+  <DashboardLayout
+    :user-type="TipoUsuario.Paciente"
+    variant="paciente"
+    :menu-items="menuItems"
+    :active-view="activeView"
+    @edit-profile="navigateTo('paciente-editar-perfil')"
+    @logout="handleLogout"
+    @navigate="handleNavigation"
+  >
+    <router-view v-slot="{ Component, route: childRoute }">
+      <Suspense>
+        <template #default>
+          <transition name="fade">
+            <component v-if="Component" :is="Component" :key="childRoute.fullPath" />
           </transition>
-        </router-view>
-      </main>
-    </div>
-  </div>
+        </template>
+        <template #fallback>
+          <div class="flex items-center justify-center h-64">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+          </div>
+        </template>
+      </Suspense>
+    </router-view>
+  </DashboardLayout>
 </template>
 
 <script setup>
@@ -34,15 +30,15 @@ import { computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/store/user';
 import { TipoUsuario } from '@/types/usuario.js';
-import TopNavbar from '@/components/layout/TopNavbar.vue';
-import Sidebar from '@/components/layout/Sidebar.vue';
+import DashboardLayout from '@/components/layout/DashboardLayout.vue';
 import { 
   faHome,
   faFaceSmileBeam,
   faChartLine,
   faLink,
   faUserPen,
-  faClipboardList
+  faClipboardList,
+  faUserDoctor
 } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
@@ -55,6 +51,7 @@ const menuItems = [
   { name: 'humor', view: 'humor', label: 'Registro de Humor', icon: faFaceSmileBeam },
   { name: 'relatorios', view: 'relatorios', label: 'Relatórios', icon: faChartLine },
   { name: 'questionarios', view: 'questionarios', label: 'Questionários', icon: faClipboardList },
+  { name: 'profissionais', view: 'profissionais', label: 'Meus Profissionais', icon: faUserDoctor },
   { name: 'vincular', view: 'vincular', label: 'Vincular Profissional', icon: faLink },
   { name: 'editar', view: 'editar-perfil', label: 'Editar Perfil', icon: faUserPen }
 ];
@@ -65,6 +62,7 @@ const viewToRoute = {
   'humor': 'paciente-humor',
   'relatorios': 'paciente-relatorios',
   'questionarios': 'paciente-questionarios',
+  'profissionais': 'paciente-profissionais',
   'vincular': 'paciente-vincular',
   'editar-perfil': 'paciente-editar-perfil'
 };
@@ -75,6 +73,8 @@ const routeToView = {
   'paciente-humor': 'humor',
   'paciente-relatorios': 'relatorios',
   'paciente-questionarios': 'questionarios',
+  'paciente-responder-questionario': 'questionarios',
+  'paciente-profissionais': 'profissionais',
   'paciente-vincular': 'vincular',
   'paciente-editar-perfil': 'editar-perfil'
 };

@@ -66,6 +66,13 @@ const api = {
   listarPacientesDoProfissional() {
     return apiClient.get("/usuarios/profissional/pacientes");
   },
+  /**
+   * Lista profissionais vinculados ao paciente
+   * NOTA: Endpoint pode não existir no backend ainda - usar fallback mock no componente
+   */
+  listarProfissionaisDoPaciente() {
+    return apiClient.get("/usuarios/paciente/profissionais");
+  },
   atualizarPerfil(data) {
     return apiClient.put("/usuarios/perfil", data);
   },

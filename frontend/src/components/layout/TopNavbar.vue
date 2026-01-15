@@ -20,7 +20,7 @@
               class="w-8 h-8 p-2 rounded-full bg-emerald-100 text-emerald-600"
             />
             <div v-if="user" class="hidden sm:block text-left">
-              <p class="text-sm font-semibold text-gray-900 leading-tight">{{ user.nome }}</p>
+              <p class="text-sm font-semibold text-gray-900 leading-tight">{{ userName }}</p>
               <p class="text-xs text-gray-500">{{ userType === TipoUsuario.Profissional ? 'Profissional' : 'Paciente' }}</p>
             </div>
             <font-awesome-icon :icon="faChevronDown" class="w-3 h-3 text-gray-400 hidden sm:block" />
@@ -48,8 +48,8 @@
                     class="w-10 h-10 p-2 rounded-full bg-emerald-100 text-emerald-600"
                   />
                   <div class="flex-1">
-                    <h3 class="font-bold text-base text-gray-900">{{ user.nome }}</h3>
-                    <p class="text-sm text-gray-600">{{ user.email }}</p>
+                    <h3 class="font-bold text-base text-gray-900">{{ userName }}</h3>
+                    <p class="text-sm text-gray-600">{{ userEmail }}</p>
                   </div>
                 </div>
               </div>
@@ -58,13 +58,13 @@
               <div class="px-4 py-3 space-y-2 text-sm border-b border-gray-100">
                 <template v-if="userType === TipoUsuario.Paciente">
                   <p><strong class="font-medium text-gray-700">Idade:</strong> <span class="text-gray-600">{{ calculateAge(user.data_nascimento) }}</span></p>
-                  <p><strong class="font-medium text-gray-700">Contato:</strong> <span class="text-gray-600">{{ user.contato || 'Não informado' }}</span></p>
+                  <p><strong class="font-medium text-gray-700">Contato:</strong> <span class="text-gray-600">{{ userContato }}</span></p>
                   <p v-if="user.dependente"><strong class="font-medium text-gray-700">Responsável:</strong> <span class="text-gray-600">{{ user.nome_responsavel }}</span></p>
                 </template>
                 <template v-else>
                   <p><strong class="font-medium text-gray-700">Especialidade:</strong> <span class="text-gray-600">{{ user.especialidade || 'Não informado' }}</span></p>
                   <p><strong class="font-medium text-gray-700">Registro:</strong> <span class="text-gray-600">{{ user.registro_profissional || 'Não informado' }}</span></p>
-                  <p><strong class="font-medium text-gray-700">Contato:</strong> <span class="text-gray-600">{{ user.contato || 'Não informado' }}</span></p>
+                  <p><strong class="font-medium text-gray-700">Contato:</strong> <span class="text-gray-600">{{ userContato }}</span></p>
                 </template>
               </div>
 
@@ -130,6 +130,24 @@ const profileDropdownContainer = ref(null);
 
 // Usuario logado obtido da store
 const user = computed(() => userStore.user);
+
+// Computed properties para acessar dados do usuário independente da estrutura
+// O backend retorna dados aninhados em 'usuario' para paciente/profissional
+const userName = computed(() => {
+  if (!user.value) return '';
+  // Verifica se existe estrutura aninhada (PacienteDTOOut/ProfissionalDTOOut)
+  return user.value.usuario?.nome || user.value.nome || '';
+});
+
+const userEmail = computed(() => {
+  if (!user.value) return '';
+  return user.value.usuario?.email || user.value.email || '';
+});
+
+const userContato = computed(() => {
+  if (!user.value) return 'Não informado';
+  return user.value.usuario?.contato || user.value.contato || 'Não informado';
+});
 
 // Alterna exibicao do dropdown de perfil
 const toggleProfileDropdown = () => {

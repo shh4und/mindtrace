@@ -34,74 +34,72 @@
           <form v-if="form.userType" @submit.prevent="handleRegister" class="space-y-6" novalidate>
             <!-- Campos comuns -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label for="nome" class="block text-base font-medium text-gray-700 mb-1">Nome Completo</label>
-                <input type="text" id="nome" v-model="form.nome" autocomplete="name" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required aria-required="true" />
-              </div>
-              <div>
-                <label for="cpf" class="block text-base font-medium text-gray-700 mb-1">CPF</label>
-                <input type="text" id="cpf" v-model="form.cpf" inputmode="numeric" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required aria-required="true" />
-              </div>
-              <div>
-                <label for="email" class="block text-base font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" id="email" v-model="form.email" autocomplete="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required aria-required="true" />
-              </div>
-              <div>
-                <label for="senha" class="block text-base font-medium text-gray-700 mb-1">Senha</label>
-                <input 
-                  type="password" 
-                  id="senha" 
-                  v-model="form.senha" 
-                  @input="validatePassword"
-                  autocomplete="new-password"
-                  :aria-invalid="!!passwordError"
-                  :aria-describedby="passwordError ? 'senha-error senha-hint' : 'senha-hint'"
-                  class="w-full px-4 py-3 rounded-lg border outline-none transition-colors focus:ring-2 focus:ring-emerald-500/20"
-                  :class="passwordError ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-emerald-500'"
-                  required 
-                  aria-required="true" 
-                />
-                <p v-if="passwordError" id="senha-error" class="text-sm text-red-600 mt-1" role="alert">{{ passwordError }}</p>
-                <p id="senha-hint" class="text-sm text-gray-500 mt-1">Use 8+ caracteres com letras, números e símbolos como !@#$%^&*</p>
-              </div>
-              <div>
-                <label for="confirm_password" class="block text-base font-medium text-gray-700 mb-1">Confirme sua Senha</label>
-                <input 
-                  type="password" 
-                  id="confirm_password" 
-                  v-model="form.confirm_password" 
-                  autocomplete="new-password"
-                  :aria-invalid="form.confirm_password && form.senha !== form.confirm_password"
-                  :aria-describedby="form.confirm_password && form.senha !== form.confirm_password ? 'confirm-error' : undefined"
-                  class="w-full px-4 py-3 rounded-lg border outline-none transition-colors focus:ring-2 focus:ring-emerald-500/20"
-                  :class="form.confirm_password && form.senha !== form.confirm_password ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-emerald-500'"
-                  required 
-                  aria-required="true"
-                />
-                <p v-if="form.confirm_password && form.senha !== form.confirm_password" id="confirm-error" class="text-sm text-red-600 mt-1" role="alert">As senhas não coincidem</p>
-              </div>
-              <div>
-                <label for="contato" class="block text-base font-medium text-gray-700 mb-1">Número para Contato (Opcional)</label>
-                <input type="tel" id="contato" v-model="form.contato" autocomplete="tel" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" />
-              </div>
-              <div>
-                <label for="data_nascimento" class="block text-base font-medium text-gray-700 mb-1">Data de Nascimento</label>
-                <input type="date" id="data_nascimento" v-model="form.data_nascimento" autocomplete="bday" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required aria-required="true" />
-              </div>
+              <BaseInput
+                v-model="form.nome"
+                label="Nome Completo"
+                autocomplete="name"
+                required
+              />
+              <BaseInput
+                v-model="form.cpf"
+                label="CPF"
+                inputmode="numeric"
+                required
+              />
+              <BaseInput
+                v-model="form.email"
+                type="email"
+                label="Email"
+                autocomplete="email"
+                required
+              />
+              <BaseInput
+                v-model="form.senha"
+                type="password"
+                label="Senha"
+                autocomplete="new-password"
+                :error="passwordError"
+                hint="Use 8+ caracteres com letras, números e símbolos como !@#$%^&*"
+                required
+                @blur="validatePassword"
+              />
+              <BaseInput
+                v-model="form.confirm_password"
+                type="password"
+                label="Confirme sua Senha"
+                autocomplete="new-password"
+                :error="form.confirm_password && form.senha !== form.confirm_password ? 'As senhas não coincidem' : ''"
+                required
+              />
+              <BaseInput
+                v-model="form.contato"
+                type="tel"
+                label="Número para Contato (Opcional)"
+                autocomplete="tel"
+              />
+              <BaseInput
+                v-model="form.data_nascimento"
+                type="date"
+                label="Data de Nascimento"
+                autocomplete="bday"
+                required
+              />
             </div>
 
             <!-- Campos profissional -->
             <fieldset v-if="form.userType === TipoUsuario.Profissional" class="pt-4 border-t border-gray-300">
               <legend class="sr-only">Informações profissionais</legend>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label for="especialidade" class="block text-base font-medium text-gray-700 mb-1">Especialidade</label>
-                  <input type="text" id="especialidade" v-model="form.especialidade" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required aria-required="true" />
-                </div>
-                <div>
-                  <label for="registro_profissional" class="block text-base font-medium text-gray-700 mb-1">Nº Registro Profissional (CRP, etc)</label>
-                  <input type="text" id="registro_profissional" v-model="form.registro_profissional" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required aria-required="true" />
-                </div>
+                <BaseInput
+                  v-model="form.especialidade"
+                  label="Especialidade"
+                  required
+                />
+                <BaseInput
+                  v-model="form.registro_profissional"
+                  label="Nº Registro Profissional (CRP, etc)"
+                  required
+                />
               </div>
             </fieldset>
 
@@ -114,26 +112,31 @@
                   <label for="dependente" class="text-base font-medium text-gray-700">É dependente?</label>
                 </div>
 
-                <div v-if="form.dependente === true">
-                  <label for="nome_responsavel" class="block text-base font-medium text-gray-700 mb-1">Nome do Responsável</label>
-                  <input type="text" id="nome_responsavel" v-model="form.nome_responsavel" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required aria-required="true" />
-                </div>
-                <div v-if="form.dependente === true">
-                  <label for="contato_responsavel" class="block text-base font-medium text-gray-700 mb-1">Contato do Responsável</label>
-                  <input id="contato_responsavel" v-model="form.contato_responsavel" type="tel" class="w-full px-4 py-3 rounded-lg border border-gray-300 outline-none transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" required aria-required="true" />
-                </div>
+                <BaseInput
+                  v-if="form.dependente === true"
+                  v-model="form.nome_responsavel"
+                  label="Nome do Responsável"
+                  required
+                />
+                <BaseInput
+                  v-if="form.dependente === true"
+                  v-model="form.contato_responsavel"
+                  type="tel"
+                  label="Contato do Responsável"
+                  required
+                />
               </div>
             </fieldset>
 
-            <button 
-              type="submit" 
+            <BaseButton
+              type="submit"
+              :variant="form.userType === TipoUsuario.Profissional ? 'rose' : 'emerald'"
+              size="lg"
+              full-width
               :disabled="isSubmitDisabled"
-              :aria-disabled="isSubmitDisabled"
-              class="w-full font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-offset-2 outline-none"
-              :class="isSubmitDisabled ? 'bg-gray-400 cursor-not-allowed text-gray-200' : 'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500'"
             >
               Criar Conta de {{ form.userType === TipoUsuario.Paciente ? 'Paciente' : 'Profissional' }}
-            </button>
+            </BaseButton>
           </form>
 
           <div class="mt-6 text-center">
@@ -154,6 +157,7 @@ import { useToast } from 'vue-toastification';
 import { useUserStore } from '@/store/user';
 import { TipoUsuario } from '@/types/usuario.js';
 import NavbarPublic from '@/components/layout/NavbarPublic.vue';
+import { BaseInput, BaseButton } from '@/components/ui';
 
 const router = useRouter();
 const toast = useToast();

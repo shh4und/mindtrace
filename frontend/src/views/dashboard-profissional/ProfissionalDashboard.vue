@@ -1,32 +1,28 @@
 <template>
-  <div class="min-h-screen bg-gray-50 font-sans antialiased flex flex-col">
-    <!-- Navbar superior -->
-    <TopNavbar 
-      :user-type="TipoUsuario.Profissional" 
-      @edit-profile="navigateTo('profissional-editar-perfil')"
-      @logout="handleLogout"
-    />
-
-    <!-- Conteudo principal com sidebar -->
-    <div class="flex flex-1 overflow-hidden">
-      <!-- Barra lateral unificada -->
-      <Sidebar 
-        :menu-items="menuItems"
-        :active-view="activeView"
-        variant="profissional"
-        @navigate="handleNavigation" 
-      />
-
-      <!-- Area de conteudo principal com router-view -->
-      <main id="main-content" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <router-view v-slot="{ Component, route: childRoute }">
-          <transition name="fade" mode="out-in">
-            <component :is="Component" :key="childRoute.fullPath" />
+  <DashboardLayout
+    :user-type="TipoUsuario.Profissional"
+    variant="profissional"
+    :menu-items="menuItems"
+    :active-view="activeView"
+    @edit-profile="navigateTo('profissional-editar-perfil')"
+    @logout="handleLogout"
+    @navigate="handleNavigation"
+  >
+    <router-view v-slot="{ Component, route: childRoute }">
+      <Suspense>
+        <template #default>
+          <transition name="fade">
+            <component v-if="Component" :is="Component" :key="childRoute.fullPath" />
           </transition>
-        </router-view>
-      </main>
-    </div>
-  </div>
+        </template>
+        <template #fallback>
+          <div class="flex items-center justify-center h-64">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
+          </div>
+        </template>
+      </Suspense>
+    </router-view>
+  </DashboardLayout>
 </template>
 
 <script setup>
@@ -34,13 +30,14 @@ import { computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/store/user';
 import { TipoUsuario } from '@/types/usuario.js';
-import TopNavbar from '@/components/layout/TopNavbar.vue';
-import Sidebar from '@/components/layout/Sidebar.vue';
+import DashboardLayout from '@/components/layout/DashboardLayout.vue';
 import { 
+  faHome,
   faUsers,
   faEnvelope,
   faUserPen,
-  faClipboardList
+  faClipboardList,
+  faChartLine
 } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
@@ -49,7 +46,9 @@ const userStore = useUserStore();
 
 // Itens do menu para profissional
 const menuItems = [
+  { name: 'resumo', view: 'resumo', label: 'Resumo', icon: faHome },
   { name: 'pacientes', view: 'pacientes', label: 'Meus Pacientes', icon: faUsers },
+  { name: 'relatorios', view: 'relatorios', label: 'Relatórios', icon: faChartLine },
   { name: 'questionarios', view: 'questionarios-atribuidos', label: 'Questionários', icon: faClipboardList },
   { name: 'convite', view: 'convite', label: 'Gerar Convite', icon: faEnvelope },
   { name: 'editar', view: 'editar-perfil', label: 'Editar Perfil', icon: faUserPen }
@@ -57,7 +56,9 @@ const menuItems = [
 
 // Mapeamento de view para nome de rota
 const viewToRoute = {
+  'resumo': 'profissional-resumo',
   'pacientes': 'profissional-pacientes',
+  'relatorios': 'profissional-relatorios',
   'questionarios-atribuidos': 'profissional-questionarios-atribuidos',
   'convite': 'profissional-convite',
   'editar-perfil': 'profissional-editar-perfil'
@@ -65,16 +66,19 @@ const viewToRoute = {
 
 // Mapeamento reverso para determinar view ativa baseado na rota atual
 const routeToView = {
+  'profissional-resumo': 'resumo',
   'profissional-pacientes': 'pacientes',
-  'profissional-paciente-relatorio': 'pacientes', // Relatório faz parte da seção pacientes
-  'profissional-atribuir-questionario': 'pacientes', // Atribuir faz parte da seção pacientes
+  'profissional-paciente-relatorio': 'relatorios',
+  'profissional-relatorios': 'relatorios',
+  'profissional-atribuir-questionario': 'pacientes',
   'profissional-questionarios-atribuidos': 'questionarios-atribuidos',
+  'profissional-visualizar-respostas': 'questionarios-atribuidos',
   'profissional-convite': 'convite',
   'profissional-editar-perfil': 'editar-perfil'
 };
 
 // View ativa baseada na rota atual
-const activeView = computed(() => routeToView[route.name] || 'pacientes');
+const activeView = computed(() => routeToView[route.name] || 'resumo');
 
 const handleNavigation = (view) => {
   const routeName = viewToRoute[view];

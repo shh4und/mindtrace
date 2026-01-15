@@ -1,9 +1,9 @@
 <template>
   <div>
     <header class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Meus Pacientes</h1>
+      <h1 class="text-3xl font-bold text-gray-900">Relatórios</h1>
       <p class="text-gray-600 mt-1">
-        Gerencie seus pacientes vinculados e acompanhe seu progresso.
+        Selecione um paciente para visualizar o relatório de acompanhamento.
       </p>
     </header>
 
@@ -17,7 +17,7 @@
       <font-awesome-icon :icon="faUsers" class="w-16 h-16 text-gray-300 mb-4" />
       <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhum paciente vinculado</h3>
       <p class="text-gray-500 mb-6">
-        Gere um convite para vincular seu primeiro paciente.
+        Você precisa ter pacientes vinculados para visualizar relatórios.
       </p>
       <router-link 
         to="/dashboard-profissional/convite"
@@ -28,7 +28,7 @@
       </router-link>
     </div>
 
-    <!-- Lista de pacientes -->
+    <!-- Lista de pacientes para seleção -->
     <template v-else>
       <!-- Barra de busca -->
       <div class="mb-6">
@@ -48,18 +48,28 @@
 
       <!-- Grid de pacientes -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <CardListaUsuario
-          v-for="(patient, index) in filteredPatients"
+        <div 
+          v-for="(patient, index) in filteredPatients" 
           :key="patient.id"
-          :title="patient.name"
-          :subtitle="patient.age"
-          variant="profissional"
-          :avatar-color="getAvatarColor(index)"
-          :actions="cardActions"
-          :aria-label="`Ver detalhes de ${patient.name}`"
           @click="viewPatientReport(patient.id)"
-          @action="handleAction($event, patient)"
-        />
+          class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-lg hover:border-rose-400 transition-all duration-200"
+          role="button"
+          :aria-label="`Ver relatório de ${patient.name}`"
+          tabindex="0"
+          @keydown.enter="viewPatientReport(patient.id)"
+          @keydown.space.prevent="viewPatientReport(patient.id)"
+        >
+          <div class="flex items-center space-x-4">
+            <div :class="[getAvatarColor(index), 'w-14 h-14 rounded-full flex items-center justify-center shrink-0']">
+              <font-awesome-icon :icon="faUser" class="w-7 h-7 text-white" aria-hidden="true" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-gray-900 text-lg truncate">{{ patient.name }}</h3>
+              <p class="text-sm text-gray-500">{{ patient.age }}</p>
+            </div>
+            <font-awesome-icon :icon="faChartLine" class="w-6 h-6 text-rose-400" />
+          </div>
+        </div>
       </div>
 
       <!-- Sem resultados da busca -->
@@ -74,23 +84,23 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import api from '@/services/api';
 import { useToast } from 'vue-toastification';
-import { CardListaUsuario } from '@/components/ui';
+import api from '@/services/api';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { 
   faUsers, 
+  faUser, 
   faEnvelope, 
-  faChartLine, 
-  faListCheck,
+  faChartLine,
   faSearch
 } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
+const toast = useToast();
+
 const patients = ref([]);
 const isLoading = ref(true);
 const searchQuery = ref('');
-const toast = useToast();
 
 // Cores para avatares
 const avatarColors = [
@@ -106,12 +116,6 @@ const avatarColors = [
 
 const getAvatarColor = (index) => avatarColors[index % avatarColors.length];
 
-// Ações do card
-const cardActions = [
-  { id: 'report', label: 'Ver Relatório', icon: faChartLine },
-  { id: 'assign', label: 'Atribuir Questionário', icon: faListCheck }
-];
-
 // Filtrar pacientes pela busca
 const filteredPatients = computed(() => {
   if (!searchQuery.value) return patients.value;
@@ -121,6 +125,7 @@ const filteredPatients = computed(() => {
   );
 });
 
+// Calcular idade
 const calculateAge = (birthdate) => {
   if (!birthdate) return '';
   const birthDate = new Date(birthdate);
@@ -133,6 +138,7 @@ const calculateAge = (birthdate) => {
   return age;
 };
 
+// Navegar para relatório do paciente
 const viewPatientReport = (patientId) => {
   router.push({ 
     name: 'profissional-paciente-relatorio', 
@@ -140,29 +146,15 @@ const viewPatientReport = (patientId) => {
   });
 };
 
-const viewQuestFormAssign = ({patientId, patientNome}) => {
-  router.push({ 
-    name: 'profissional-atribuir-questionario', 
-    params: { patientId, patientNome }
-  });
-};
-
-const handleAction = (actionId, patient) => {
-  if (actionId === 'report') {
-    viewPatientReport(patient.id);
-  } else if (actionId === 'assign') {
-    viewQuestFormAssign({ patientId: patient.id, patientNome: patient.name });
-  }
-};
-
-onMounted(async () => {
+// Buscar pacientes
+const fetchPatients = async () => {
+  isLoading.value = true;
   try {
     const response = await api.listarPacientesDoProfissional();
     patients.value = (response.data || []).map(paciente => ({
       id: paciente.id,
       name: paciente.usuario?.nome || 'Paciente',
-      age: `${calculateAge(paciente.data_nascimento)} anos`,
-      focus: paciente.usuario?.bio || "Tratamento em andamento.",
+      age: `${calculateAge(paciente.data_nascimento)} anos`
     }));
   } catch (error) {
     console.error('Erro ao buscar pacientes:', error);
@@ -170,5 +162,7 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
-});
+};
+
+onMounted(fetchPatients);
 </script>

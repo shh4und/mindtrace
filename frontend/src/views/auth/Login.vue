@@ -12,40 +12,35 @@
 
           <form @submit.prevent="handleLogin" class="space-y-6">
             <!-- Campo email -->
-            <div>
-              <label for="email" class="block text-lg font-medium text-gray-700 mb-2">
-                E-mail
-              </label>
-              <input type="email" id="email" v-model="email" placeholder="Digite seu e-mail"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900 placeholder-gray-500"
-                required />
-            </div>
+            <BaseInput
+              v-model="email"
+              type="email"
+              label="E-mail"
+              placeholder="Digite seu e-mail"
+              autocomplete="email"
+              required
+              size="lg"
+            />
 
             <!-- Campo senha -->
-            <div>
-              <label for="password" class="block text-lg font-medium text-gray-700 mb-2">
-                Senha
-              </label>
-              <div class="relative">
-                <input :type="passwordFieldType" id="password" v-model="password" placeholder="Digite sua senha"
-                  class="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900 placeholder-gray-500"
-                  required />
-                <button type="button" @click="togglePasswordVisibility"
-                  class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                  <span v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <font-awesome-icon :icon="faEye"></font-awesome-icon>
-                  </span>
-                  <span v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <font-awesome-icon :icon="faEyeSlash"></font-awesome-icon>
-                  </span>
-                </button>
-              </div>
-            </div>
+            <BaseInput
+              v-model="password"
+              type="password"
+              label="Senha"
+              placeholder="Digite sua senha"
+              autocomplete="current-password"
+              required
+              size="lg"
+            />
 
-            <button type="submit"
-              class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 outline-none">
+            <BaseButton
+              type="submit"
+              variant="emerald"
+              size="lg"
+              full-width
+            >
               Entrar
-            </button>
+            </BaseButton>
           </form>
 
           <div class="mt-6 text-center space-y-3">
@@ -64,14 +59,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { useUserStore } from '@/store/user';
 import { TipoUsuario } from '@/types/usuario.js';
 import { parseJwt, getStoredToken } from '@/utils/jwt.js';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import NavbarPublic from '@/components/layout/NavbarPublic.vue';
+import { BaseInput, BaseButton } from '@/components/ui';
 
 const router = useRouter();
 const toast = useToast();
@@ -79,13 +74,6 @@ const userStore = useUserStore();
 
 const email = ref('');
 const password = ref('');
-const showPassword = ref(false);
-
-const passwordFieldType = computed(() => (showPassword.value ? 'text' : 'password'));
-
-const togglePasswordVisibility = () => {
-  showPassword.value = !showPassword.value;
-};
 
 const handleLogin = async () => {
   try {
