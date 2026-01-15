@@ -1,0 +1,95 @@
+@startuml fluxo-questionarios
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+title Fluxo de Questionários Padronizados - MindTrace
+
+actor "Profissional" as prof #lightblue
+actor "Paciente" as pac #lightgreen
+database "PostgreSQL" as db #orange
+participant "InstrumentoServico" as svc #yellow
+participant "Algoritmo\nPontuação" as alg #pink
+
+== 1. Listagem de Instrumentos Disponíveis ==
+prof -> svc: ListarInstrumentos()
+svc -> db: SELECT * FROM instrumentos\nWHERE esta_ativo = TRUE
+db --> svc: [PHQ-9, GAD-7, WHOQOL-BREF]
+svc --> prof: Lista de instrumentos padronizados
+
+== 2. Atribuição de Questionário ==
+prof -> svc: CriarAtribuicao(pacienteID, instrumentoID)
+svc -> db: INSERT INTO atribuicoes\n(paciente_id, instrumento_id,\nprofissional_id, status='PENDENTE')
+db --> svc: Atribuição criada (ID: 123)
+svc --> prof: ✅ Questionário atribuído
+
+note right of db
+  **Status possíveis:**
+  • PENDENTE
+  • RESPONDIDO
+  • EXPIRADO
+end note
+
+== 3. Paciente Visualiza Questionários ==
+pac -> svc: ListarAtribuicoesPaciente(pacienteID)
+svc -> db: SELECT * FROM atribuicoes\nWHERE paciente_id = ? AND status = 'PENDENTE'
+db --> svc: Lista de atribuições pendentes
+svc --> pac: Questionários a responder
+
+== 4. Paciente Responde Questionário ==
+pac -> svc: ListarPerguntasAtribuicao(atribuicaoID)
+svc -> db: SELECT instrumento, perguntas, opcoes_escala\nFROM atribuicoes JOIN instrumentos
+db --> svc: Perguntas + Opções de Escala
+svc --> pac: Formulário renderizado
+
+pac -> pac: Preenche respostas\n{"q1": 2, "q2": 1, "q3": 3, ...}
+
+pac -> svc: CriarRespostasAtribuicao(atribuicaoID, respostas)
+svc -> alg: CalcularPontuacao(instrumento, respostas)
+
+alt PHQ-9 (Depressão)
+    alg -> alg: Soma simples (0-27)\nClassificação por faixa
+    alg --> svc: pontuacao=18, classificacao="Depressão Moderadamente Grave"
+else GAD-7 (Ansiedade)
+    alg -> alg: Soma simples (0-21)\nClassificação por faixa
+    alg --> svc: pontuacao=12, classificacao="Ansiedade Moderada"
+else WHOQOL-BREF (Qualidade de Vida)
+    alg -> alg: Média por domínio\n(Físico, Psicológico, Social, Ambiente)
+    alg --> svc: pontuacao=3.2, classificacao="Qualidade Regular"
+end
+
+svc -> db: INSERT INTO respostas\n(atribuicao_id, pontuacao_total,\nclassificacao, dados_brutos JSONB)
+svc -> db: UPDATE atribuicoes\nSET status='RESPONDIDO', data_resposta=NOW()
+db --> svc: ✅ Resposta registrada
+svc --> pac: Questionário enviado com sucesso
+
+note left of db
+  **Armazenamento Híbrido:**
+  • pontuacao_total (DECIMAL)
+  • classificacao (VARCHAR)
+  • dados_brutos (JSONB)
+  
+  Permite consultas SQL rápidas
+  E preserva dados originais
+end note
+
+== 5. Profissional Analisa Resultados ==
+prof -> svc: ListarAtribuicoesProfissional(profissionalID)
+svc -> db: SELECT atribuicoes, respostas\nWHERE profissional_id = ? AND status='RESPONDIDO'
+db --> svc: Atribuições com respostas
+svc --> prof: Lista com pontuações e classificações
+
+prof -> prof: Analisa tendências\nIdentifica alertas clínicos\nToma decisões terapêuticas
+
+note right of prof
+  **Instrumentos Imutáveis:**
+  PHQ-9, GAD-7, WHOQOL-BREF
+  são templates padronizados
+  do sistema (READ-ONLY)
+  
+  Garante integridade clínica
+  e comparabilidade de dados
+end note
+
+@enduml
