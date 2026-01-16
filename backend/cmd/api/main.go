@@ -82,9 +82,9 @@ func main() {
 		registroHumorRepo = sqlite_repo.NovoGormRegistroHumorRepositorio(db)
 		conviteRepo = sqlite_repo.NovoGormConviteRepositorio(db)
 	}
-
+	emailSvc := servicos.NovoEmailServico(db)
 	// Inicializa servicos
-	usuarioSvc := servicos.NovoUsuarioServico(db, usuarioRepo)
+	usuarioSvc := servicos.NovoUsuarioServico(db, usuarioRepo, emailSvc)
 	analiseSvc := servicos.NovoAnaliseServico(db, registroHumorRepo, usuarioRepo)
 	registroHumorSvc := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo, analiseSvc)
 	resumoSvc := servicos.NovoResumoServico(db, registroHumorRepo, usuarioRepo)

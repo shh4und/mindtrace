@@ -2,6 +2,7 @@ package servicos
 
 import (
 	"errors"
+	"log"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/dominio"
@@ -33,11 +34,12 @@ type UsuarioServico interface {
 type usuarioServico struct {
 	db          *gorm.DB
 	repositorio repositorios.UsuarioRepositorio
+	email       EmailServico
 }
 
 // NovoUsuarioServico cria uma nova instancia de UsuarioServico
-func NovoUsuarioServico(db *gorm.DB, repo repositorios.UsuarioRepositorio) UsuarioServico {
-	return &usuarioServico{db: db, repositorio: repo}
+func NovoUsuarioServico(db *gorm.DB, repo repositorios.UsuarioRepositorio, emailSvc EmailServico) UsuarioServico {
+	return &usuarioServico{db: db, repositorio: repo, email: emailSvc}
 }
 
 // RegistrarProfissional registra um novo profissional no sistema
@@ -96,6 +98,12 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 
 		// Prepara o objeto de retorno completo
 		profissionalRegistrado = novoProfissional
+		token, _ := GenerateSecureToken()
+		go func() { // Rodar em goroutine para não travar a resposta HTTP
+			if err := s.email.EnviarEmailAtivacao(dtoIn.Email, token); err != nil {
+				log.Printf("Error at sending activation email in go routine: %v", err)
+			}
+		}()
 
 		return nil
 	})
@@ -155,7 +163,12 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 
 		// Prepara o objeto de retorno completo
 		pacienteCompleto = novoPaciente
-
+		token, _ := GenerateSecureToken()
+		go func() { // Rodar em goroutine para não travar a resposta HTTP
+			if err := s.email.EnviarEmailAtivacao(dtoIn.Email, token); err != nil {
+				log.Printf("Error at sending activation email in go routine: %v", err)
+			}
+		}()
 		return nil
 	})
 

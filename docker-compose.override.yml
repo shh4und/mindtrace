@@ -1,4 +1,33 @@
 services:
+  db:
+    image: postgres:17-alpine
+    container_name: mindtrace-db
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - go-mailpit-network
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -h localhost -p 5432 -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    tty: true
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP server
+    networks:
+      - go-mailpit-network
   backend:
     image: mindtrace-backend-dev
     build:
@@ -13,6 +42,8 @@ services:
     env_file:
       - .env
     environment:
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_DB=${POSTGRES_DB}
@@ -22,6 +53,9 @@ services:
       - DB_DRIVER=${DB_DRIVER}
       - GO_ENV=${GO_ENV}
       - SKIP_DB_INIT=${SKIP_DB_INIT}
+      - FRONTEND_ORIGINS=${FRONTEND_ORIGINS}
+    networks:
+      - go-mailpit-network
     ports:
       - "9090:9090"
     depends_on:
@@ -39,6 +73,8 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    networks:
+      - go-mailpit-network
     environment:
       - CHOKIDAR_USEPOLLING=true
       - VITE_API_BASE_URL=${VITE_API_BASE_URL}
@@ -50,3 +86,6 @@ services:
 
 volumes:
   go-mod-cache:
+networks:
+  go-mailpit-network:
+    driver: bridge
