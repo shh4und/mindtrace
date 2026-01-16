@@ -42,6 +42,14 @@ func NovoUsuarioServico(db *gorm.DB, repo repositorios.UsuarioRepositorio, email
 	return &usuarioServico{db: db, repositorio: repo, email: emailSvc}
 }
 
+/*
+TODO:
+  - INSERIR USUARIO COM EMAIL HASH NO DB
+  - USAR FLAG EstaAtivo PARA PERMITIR LOGIN
+  - ADICIONAR TIMEOUT += 48H PARA INVALIDAR TOKEN
+  - NOVO CONTROLADOR/ROTA PARA ATIVACAO DE EMAIL
+  - testar.
+*/
 // RegistrarProfissional registra um novo profissional no sistema
 func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissionalDTOIn) (*dtos.ProfissionalDTOOut, error) {
 	var profissionalRegistrado *dominio.Profissional
@@ -111,6 +119,14 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 	return mappers.ProfissionalParaDTOOut(profissionalRegistrado), err
 }
 
+/*
+TODO:
+  - INSERIR USUARIO COM EMAIL HASH NO DB
+  - USAR FLAG EstaAtivo PARA PERMITIR LOGIN
+  - ADICIONAR TIMEOUT += 48H PARA INVALIDAR TOKEN
+  - NOVO CONTROLADOR/ROTA PARA ATIVACAO DE EMAIL
+  - testar.
+*/
 func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (*dtos.PacienteDTOOut, error) {
 	var pacienteCompleto *dominio.Paciente
 

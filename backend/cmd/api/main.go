@@ -107,7 +107,14 @@ func main() {
 	roteador.SetTrustedProxies([]string{"127.0.0.1"})
 	// Inclui middleware cors padrao aceitando chamadas do frontend
 	roteador.Use(middlewares.CORSMiddleware())
-
+	/*
+	   TODO:
+	     - INSERIR USUARIO COM EMAIL HASH NO DB
+	     - USAR FLAG EstaAtivo PARA PERMITIR LOGIN
+	     - ADICIONAR TIMEOUT += 48H PARA INVALIDAR TOKEN
+	     - NOVO CONTROLADOR/ROTA PARA ATIVACAO DE EMAIL
+	     - testar.
+	*/
 	api := roteador.Group("/api/v1")
 	{
 		// --- ROTAS PUBLICAS ---
