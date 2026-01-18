@@ -9,7 +9,6 @@ import (
 	postgres_repo "mindtrace/backend/interno/persistencia/postgres"
 	"mindtrace/backend/interno/persistencia/repositorios"
 	"mindtrace/backend/interno/persistencia/seeds"
-	sqlite_repo "mindtrace/backend/interno/persistencia/sqlite"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -28,11 +27,6 @@ func main() {
 		db, err = postgres_repo.NewDB()
 		if err != nil {
 			log.Fatalf("falha ao conectar ao postgres: %v", err)
-		}
-	case "sqlite":
-		db, err = sqlite_repo.NewDB()
-		if err != nil {
-			log.Fatalf("falha ao conectar ao sqlite: %v", err)
 		}
 	default:
 		log.Fatalf("DB_DRIVER invalido: %s", dbDriver)
@@ -77,12 +71,8 @@ func main() {
 		registroHumorRepo = postgres_repo.NovoGormRegistroHumorRepositorio(db)
 		conviteRepo = postgres_repo.NovoGormConviteRepositorio(db)
 		instrumentoRepo = postgres_repo.NovoGormInstrumentoRepositorio(db)
-	case "sqlite":
-		usuarioRepo = sqlite_repo.NovoGormUsuarioRepositorio(db)
-		registroHumorRepo = sqlite_repo.NovoGormRegistroHumorRepositorio(db)
-		conviteRepo = sqlite_repo.NovoGormConviteRepositorio(db)
 	}
-	emailSvc := servicos.NovoEmailServico(db)
+	emailSvc := servicos.NovoEmailServico(db, usuarioRepo)
 	// Inicializa servicos
 	usuarioSvc := servicos.NovoUsuarioServico(db, usuarioRepo, emailSvc)
 	analiseSvc := servicos.NovoAnaliseServico(db, registroHumorRepo, usuarioRepo)
@@ -95,7 +85,7 @@ func main() {
 	profissionalCtrl := controladores.NovoProfissionalControlador(usuarioSvc)
 	pacienteCtrl := controladores.NovoPacienteControlador(usuarioSvc)
 	autCtrl := controladores.NovoAutControlador(usuarioSvc)
-	usuarioCtrl := controladores.NovoUsuarioControlador(usuarioSvc)
+	usuarioCtrl := controladores.NovoUsuarioControlador(usuarioSvc, emailSvc)
 	registroHumorCtrl := controladores.NovoRegistroHumorControlador(registroHumorSvc)
 	relatorioCtrl := controladores.NovoRelatorioControlador(analiseSvc)
 	resumoCtrl := controladores.NovoResumoControlador(resumoSvc)
@@ -121,6 +111,7 @@ func main() {
 		auth := api.Group("/entrar")
 		{
 			auth.POST("/login", autCtrl.Login)
+			auth.POST("/ativar", usuarioCtrl.AtivarConta)
 		}
 
 		profissionais := api.Group("/profissionais")
