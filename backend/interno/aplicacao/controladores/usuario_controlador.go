@@ -12,11 +12,12 @@ import (
 // UsuarioControlador gerencia requisicoes HTTP relacionadas ao gerenciamento de usuarios
 type UsuarioControlador struct {
 	usuarioServico servicos.UsuarioServico
+	emailServico   servicos.EmailServico
 }
 
 // NovoUsuarioControlador cria uma nova instancia de UsuarioControlador com o UsuarioServico fornecido
-func NovoUsuarioControlador(us servicos.UsuarioServico) *UsuarioControlador {
-	return &UsuarioControlador{usuarioServico: us}
+func NovoUsuarioControlador(us servicos.UsuarioServico, es servicos.EmailServico) *UsuarioControlador {
+	return &UsuarioControlador{usuarioServico: us, emailServico: es}
 }
 
 // BuscarPerfil busca o perfil do usuario autenticado
@@ -122,4 +123,22 @@ func (uc *UsuarioControlador) DeletarPerfil(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"mensagem": "Conta deletada com sucesso"})
+}
+
+func (uc *UsuarioControlador) AtivarConta(c *gin.Context) {
+	tokenAtivacao := c.Query("token")
+	if tokenAtivacao == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "Link invalido"})
+		return
+	}
+
+	err := uc.emailServico.VerificarHashToken(tokenAtivacao)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "Token invalido"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"mensagem": "Conta ativada com sucesso"})
+
 }

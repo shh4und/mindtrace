@@ -111,7 +111,7 @@ func main() {
 		auth := api.Group("/entrar")
 		{
 			auth.POST("/login", autCtrl.Login)
-			auth.POST("/ativar", usuarioCtrl.AtivarConta)
+			auth.GET("/ativar", usuarioCtrl.AtivarConta)
 		}
 
 		profissionais := api.Group("/profissionais")

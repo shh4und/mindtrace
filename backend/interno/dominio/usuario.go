@@ -27,16 +27,16 @@ var (
 
 // Usuario e a base para todos os tipos de usuarios.
 type Usuario struct {
-	ID             uint   `gorm:"primaryKey"`
-	TipoUsuario    uint8  `gorm:"type:smallint;not null;check:tipo_usuario >= 1"`
-	Nome           string `gorm:"type:varchar(255);not null"`
-	Email          string `gorm:"type:varchar(255);unique;not null"`
-	Senha          string `gorm:"type:text;not null"`
-	Contato        string `gorm:"type:varchar(11)"`
-	Bio            string `gorm:"type:text"`
-	CPF            string `gorm:"type:varchar(11);unique"`
-	EstaAtivo      bool   `gorm:"type:boolean;default:false"`
-	EmailVerifHash string `gorm:"type:varchar(64)"`
+	ID             uint    `gorm:"primaryKey"`
+	TipoUsuario    uint8   `gorm:"type:smallint;not null;check:tipo_usuario >= 1"`
+	Nome           string  `gorm:"type:varchar(255);not null"`
+	Email          string  `gorm:"type:varchar(255);unique;not null"`
+	Senha          string  `gorm:"type:text;not null"`
+	Contato        string  `gorm:"type:varchar(11)"`
+	Bio            string  `gorm:"type:text"`
+	CPF            string  `gorm:"type:varchar(11);unique"`
+	EstaAtivo      bool    `gorm:"type:boolean;default:false"`
+	EmailVerifHash *string `gorm:"type:varchar(64)"`
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	DeletedAt      gorm.DeletedAt `gorm:"index"`

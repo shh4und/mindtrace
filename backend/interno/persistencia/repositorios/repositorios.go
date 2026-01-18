@@ -35,6 +35,7 @@ type UsuarioRepositorio interface {
 	AtualizarProfissional(tx *gorm.DB, profissional *dominio.Profissional) error
 	AtualizarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error
 	DeletarUsuario(tx *gorm.DB, id uint) error
+	BuscarUsuarioPorTokenHash(tokenHash string) (*dominio.Usuario, error)
 }
 
 type InstrumentoRepositorio interface {

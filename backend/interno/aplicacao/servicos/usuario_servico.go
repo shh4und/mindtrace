@@ -90,8 +90,16 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 		if err != nil {
 			return err
 		}
+
+		// Gera hash token para posterior verificacao/ativacao de conta
+		tokenHash, err := GenerateSecureToken()
+		if err != nil {
+			return err
+		}
+
 		novoUsuario.Senha = string(hashSenha)
 		novoUsuario.TipoUsuario = dominio.TipoUsuarioProfissional
+		novoUsuario.EmailVerifHash = &tokenHash
 
 		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
@@ -106,9 +114,8 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 
 		// Prepara o objeto de retorno completo
 		profissionalRegistrado = novoProfissional
-		token, _ := GenerateSecureToken()
 		go func() { // Rodar em goroutine para não travar a resposta HTTP
-			if err := s.email.EnviarEmailAtivacao(dtoIn.Email, token); err != nil {
+			if err := s.email.EnviarEmailAtivacao(dtoIn.Email, tokenHash); err != nil {
 				log.Printf("Error at sending activation email in go routine: %v", err)
 			}
 		}()
@@ -164,8 +171,15 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 		if err != nil {
 			return err
 		}
+		// Gera hash token para posterior verificacao/ativacao de conta
+		tokenHash, err := GenerateSecureToken()
+		if err != nil {
+			return err
+		}
+
 		novoUsuario.Senha = string(hashSenha)
-		novoUsuario.TipoUsuario = dominio.TipoUsuarioPaciente
+		novoUsuario.TipoUsuario = dominio.TipoUsuarioProfissional
+		novoUsuario.EmailVerifHash = &tokenHash
 		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
@@ -179,9 +193,8 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 
 		// Prepara o objeto de retorno completo
 		pacienteCompleto = novoPaciente
-		token, _ := GenerateSecureToken()
 		go func() { // Rodar em goroutine para não travar a resposta HTTP
-			if err := s.email.EnviarEmailAtivacao(dtoIn.Email, token); err != nil {
+			if err := s.email.EnviarEmailAtivacao(dtoIn.Email, tokenHash); err != nil {
 				log.Printf("Error at sending activation email in go routine: %v", err)
 			}
 		}()
