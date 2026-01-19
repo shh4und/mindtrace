@@ -17,7 +17,7 @@ import (
 type EmailServico interface {
 	EnviarEmailAtivacao(toEmail string, emailVerifHash string) error
 	VerificarHashToken(tokenHash string) error
-	EnviarEmail(toEmail, subject, body string) error
+	EnviarEmail(toEmails []string, subject, body string) error
 }
 
 // emailServico implementa a interface EmailServico
@@ -39,9 +39,8 @@ func (es *emailServico) EnviarEmailAtivacao(toEmail string, emailVerifHash strin
 	if frontendURL == "" {
 		frontendURL = "http://localhost:5173"
 	}
-	frontendURL = "http://localhost:9090/api/v1/entrar"
 
-	link := fmt.Sprintf("%s/ativar?token=%s", frontendURL, emailVerifHash)
+	link := fmt.Sprintf("%s/ativacao?token=%s", frontendURL, emailVerifHash)
 
 	ativacaoAbsPathAuto, err := filepath.Abs("interno/aplicacao/servicos/templates/ativacao.html")
 	if err != nil {
@@ -58,14 +57,14 @@ func (es *emailServico) EnviarEmailAtivacao(toEmail string, emailVerifHash strin
 		return err
 	}
 
-	if err := es.EnviarEmail(toEmail, subject, bodyBuffer.String()); err != nil {
+	if err := es.EnviarEmail([]string{toEmail}, subject, bodyBuffer.String()); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (es *emailServico) EnviarEmail(toEmail, subject, body string) error {
+func (es *emailServico) EnviarEmail(toEmails []string, subject, body string) error {
 
 	smtpHost := os.Getenv("SMTP_HOST")
 	smtpPort := os.Getenv("SMTP_PORT")
@@ -76,7 +75,7 @@ func (es *emailServico) EnviarEmail(toEmail, subject, body string) error {
 	message := []byte(subject + mime + body)
 
 	fmt.Println("message:", string(message))
-	err := smtp.SendMail(address, nil, "no-reply@mindtrace.services", []string{toEmail}, message)
+	err := smtp.SendMail(address, nil, "no-reply@mindtrace.services", toEmails, message)
 	if err != nil {
 		log.Printf("u.Sendmail() err: %v", err)
 		return err

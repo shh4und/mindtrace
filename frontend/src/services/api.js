@@ -52,7 +52,9 @@ const api = {
   registrarProfissional(data) {
     return apiClient.post("/profissionais/registrar", data);
   },
-
+  ativarConta(token) {
+    return apiClient.get(`/entrar/ativar?token=${token}`);
+  },
   // --- Usuario ---
   buscarPerfil() {
     return apiClient.get("/usuarios/");

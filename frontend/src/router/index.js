@@ -7,6 +7,7 @@ const Landpage = () => import("@/views/Landpage.vue");
 const Login = () => import("@/views/auth/Login.vue");
 const Cadastro = () => import("@/views/auth/Cadastro.vue");
 const ForgotPassword = () => import("@/views/auth/ForgotPassword.vue");
+const Ativacao = () => import("@/views/auth/Ativacao.vue");
 
 // Dashboard Paciente e suas views
 const PacienteDashboard = () =>
@@ -71,6 +72,7 @@ const router = createRouter({
       name: "forgot-password",
       component: ForgotPassword,
     },
+    { path: "/ativacao", name: "ativacao", component: Ativacao },
     // Dashboard Paciente com nested routes
     {
       path: "/dashboard-paciente",
@@ -194,7 +196,13 @@ router.beforeEach((to, from, next) => {
   const autenticado = isAuthenticated();
 
   // Rotas públicas que não precisam de autenticação
-  const rotasPublicas = ["landpage", "login", "cadastro", "forgot-password"];
+  const rotasPublicas = [
+    "landpage",
+    "login",
+    "cadastro",
+    "forgot-password",
+    "ativacao",
+  ];
 
   // Verifica se é rota pública (incluindo rotas filhas de dashboards)
   const isPublicRoute = rotasPublicas.includes(to.name);
