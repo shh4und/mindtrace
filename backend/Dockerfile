@@ -7,6 +7,8 @@ FROM golang:1.25.1-alpine AS builder
 # Define o diretório de trabalho dentro do container
 WORKDIR /app
 
+COPY interno/aplicacao/servicos/templates interno/aplicacao/servicos/templates
+
 # Copia os arquivos de gerenciamento de dependências primeiro
 # Isso aproveita o cache do Docker. Se go.mod e go.sum não mudarem,
 # o Docker não vai baixar as dependências de novo.

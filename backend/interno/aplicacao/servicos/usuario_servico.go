@@ -193,10 +193,12 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 
 		// Prepara o objeto de retorno completo
 		pacienteCompleto = novoPaciente
-		go func() { // Rodar em goroutine para não travar a resposta HTTP
+		go func() error { // Rodar em goroutine para não travar a resposta HTTP
 			if err := s.email.EnviarEmailAtivacao(dtoIn.Email, tokenHash); err != nil {
 				log.Printf("Error at sending activation email in go routine: %v", err)
+				return err
 			}
+			return nil
 		}()
 		return nil
 	})

@@ -1,10 +1,14 @@
 package servicos
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"mindtrace/backend/interno/persistencia/repositorios"
 	"net/smtp"
 	"os"
+	"path/filepath"
+	"text/template"
 
 	"gorm.io/gorm"
 )
@@ -13,6 +17,7 @@ import (
 type EmailServico interface {
 	EnviarEmailAtivacao(toEmail string, emailVerifHash string) error
 	VerificarHashToken(tokenHash string) error
+	EnviarEmail(toEmail, subject, body string) error
 }
 
 // emailServico implementa a interface EmailServico
@@ -28,17 +33,7 @@ func NovoEmailServico(db *gorm.DB, ur repositorios.UsuarioRepositorio) EmailServ
 
 func (es *emailServico) EnviarEmailAtivacao(toEmail string, emailVerifHash string) error {
 	// Configuração da mensagem
-	subject := "Teste de Implementação Go SMTP | MindTrace"
-	smtpHost := os.Getenv("SMTP_HOST")
-	smtpPort := os.Getenv("SMTP_PORT")
-
-	// Fallback para segurança se esquecer de configurar
-	if smtpHost == "" {
-		smtpHost = "localhost"
-	}
-	if smtpPort == "" {
-		smtpPort = "1025"
-	}
+	subject := "Go SMTP | MindTrace | Ativacao de Email"
 
 	frontendURL := os.Getenv("FRONTEND_ORIGINS")
 	if frontendURL == "" {
@@ -47,18 +42,44 @@ func (es *emailServico) EnviarEmailAtivacao(toEmail string, emailVerifHash strin
 	frontendURL = "http://localhost:9090/api/v1/entrar"
 
 	link := fmt.Sprintf("%s/ativar?token=%s", frontendURL, emailVerifHash)
-	body := fmt.Sprintf("Olá!\n\nClique no link abaixo para ativar sua conta:\n%s", link)
-	msg := fmt.Appendf(nil, "To: %s\r\n"+
-		"Subject: %s\r\n"+
-		"\r\n"+
-		"%s\r\n", toEmail, subject, body)
 
-	// Endereço completo
-	addr := fmt.Sprintf("%s:%s", smtpHost, smtpPort)
-
-	err := smtp.SendMail(addr, nil, "no-reply@mindtrace.services", []string{toEmail}, msg)
+	ativacaoAbsPathAuto, err := filepath.Abs("interno/aplicacao/servicos/templates/ativacao.html")
 	if err != nil {
-		return fmt.Errorf("falha ao enviar email: %w", err)
+		log.Fatal(err)
+	}
+	tmpl, err := template.ParseFiles(ativacaoAbsPathAuto)
+	if err != nil {
+		return err
+	}
+
+	var bodyBuffer bytes.Buffer
+	err = tmpl.Execute(&bodyBuffer, struct{ Link string }{Link: link})
+	if err != nil {
+		return err
+	}
+
+	if err := es.EnviarEmail(toEmail, subject, bodyBuffer.String()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (es *emailServico) EnviarEmail(toEmail, subject, body string) error {
+
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+	address := smtpHost + ":" + smtpPort
+	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	subject = "Subject: " + subject + "\n"
+	body = "<body>" + body + "</body>"
+	message := []byte(subject + mime + body)
+
+	fmt.Println("message:", string(message))
+	err := smtp.SendMail(address, nil, "no-reply@mindtrace.services", []string{toEmail}, message)
+	if err != nil {
+		log.Printf("u.Sendmail() err: %v", err)
+		return err
 	}
 	return nil
 }
