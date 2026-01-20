@@ -89,6 +89,10 @@ type RegistroRespostaDTOIn struct {
 	PerguntasRespostas datatypes.JSON `json:"respostas"`
 }
 
+type ReenvioAtivacaoDTOIn struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
 // PontoDeDadosDTOOut representa um ponto de dados para graficos
 type PontoDeDadosDTOOut struct {
 	Data  time.Time `json:"data"`

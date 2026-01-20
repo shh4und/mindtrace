@@ -148,10 +148,7 @@ func (uc *UsuarioControlador) AtivarConta(c *gin.Context) {
 }
 
 func (uc *UsuarioControlador) ReenviarAtivacao(c *gin.Context) {
-	var req struct {
-		Email string `json:"email" binding:"required,email"`
-	}
-
+	var req dtos.ReenvioAtivacaoDTOIn
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Email inválido"})
 		return
