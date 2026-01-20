@@ -128,7 +128,7 @@ func (uc *UsuarioControlador) DeletarPerfil(c *gin.Context) {
 func (uc *UsuarioControlador) AtivarConta(c *gin.Context) {
 	tokenAtivacao := c.Query("token")
 	if tokenAtivacao == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"erro": "Link invalido"})
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "Link inválido ou expirado"})
 		return
 	}
 
@@ -136,10 +136,10 @@ func (uc *UsuarioControlador) AtivarConta(c *gin.Context) {
 
 	if err != nil {
 		if err == dominio.ErrTokenExpirado {
-			c.JSON(http.StatusBadRequest, gin.H{"erro": "Token expirado"})
+			c.JSON(http.StatusBadRequest, gin.H{"erro": "Link inválido ou expirado"})
 			return
 		}
-		c.JSON(http.StatusBadRequest, gin.H{"erro": "Token invalido"})
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "Link inválido ou expirado"})
 		return
 	}
 
@@ -153,7 +153,7 @@ func (uc *UsuarioControlador) ReenviarAtivacao(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"erro": "email inválido"})
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "Email inválido"})
 		return
 	}
 
@@ -163,5 +163,5 @@ func (uc *UsuarioControlador) ReenviarAtivacao(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"mensagem": "Reenvio de link de ativacao realizado com sucesso"})
+	c.JSON(http.StatusOK, gin.H{"mensagem": "Reenvio de link de ativação realizado com sucesso"})
 }

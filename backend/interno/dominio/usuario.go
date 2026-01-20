@@ -25,6 +25,7 @@ var (
 	ErrNomeVazio             = errors.New("nome nao pode estar vazio")
 	ErrUsuarioNaoAtivo       = errors.New("usuario nao verificado no sistema")
 	ErrTokenExpirado         = errors.New("token de verificacao expirado")
+	ErrUsuarioJaAtivo        = errors.New("este usuário já está ativado")
 )
 
 // Usuario e a base para todos os tipos de usuarios.

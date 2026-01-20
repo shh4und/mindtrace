@@ -54,6 +54,7 @@ TODO:
 // RegistrarProfissional registra um novo profissional no sistema
 func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissionalDTOIn) (*dtos.ProfissionalDTOOut, error) {
 	var profissionalRegistrado *dominio.Profissional
+	var tokenParaEnviar, emailDestino string
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		// Verifica se o e-mail ja esta cadastrado
@@ -119,14 +120,19 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 
 		// Prepara o objeto de retorno completo
 		profissionalRegistrado = novoProfissional
-		go func() { // Rodar em goroutine para não travar a resposta HTTP
-			if err := s.email.EnviarEmailAtivacao(dtoIn.Email, tokenHash); err != nil {
-				log.Printf("Error at sending activation email in go routine: %v", err)
-			}
-		}()
+		tokenParaEnviar = tokenHash
+		emailDestino = dtoIn.Email
 
 		return nil
 	})
+
+	if err == nil {
+		go func() {
+			if err := s.email.EnviarEmailAtivacao(emailDestino, tokenParaEnviar); err != nil {
+				log.Printf("Erro ao enviar email na go routine(): %v", err)
+			}
+		}()
+	}
 
 	return mappers.ProfissionalParaDTOOut(profissionalRegistrado), err
 }
@@ -141,6 +147,7 @@ TODO:
 */
 func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (*dtos.PacienteDTOOut, error) {
 	var pacienteCompleto *dominio.Paciente
+	var tokenParaEnviar, emailDestino string
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		// Verifica se o e-mail ja esta cadastrado
@@ -202,13 +209,19 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 
 		// Prepara o objeto de retorno completo
 		pacienteCompleto = novoPaciente
-		go func() { // Rodar em goroutine para não travar a resposta HTTP
-			if err := s.email.EnviarEmailAtivacao(dtoIn.Email, tokenHash); err != nil {
-				log.Printf("Error at sending activation email in go routine: %v", err)
-			}
-		}()
+		tokenParaEnviar = tokenHash
+		emailDestino = dtoIn.Email
 		return nil
 	})
+
+	if err == nil {
+		go func() {
+			if err := s.email.EnviarEmailAtivacao(emailDestino, tokenParaEnviar); err != nil {
+				log.Printf("Erro ao enviar email na go routine(): %v", err)
+			}
+		}()
+
+	}
 
 	return mappers.PacienteParaDTOOut(pacienteCompleto), err
 }
@@ -446,6 +459,8 @@ func (s *usuarioServico) DeletarPerfil(userID uint) error {
 }
 
 func (s *usuarioServico) ReenviarEmailAtivacao(email string) error {
+	var tokenParaEnviar, emailDestino string
+
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 
 		usuario, err := s.repositorio.BuscarPorEmail(email)
@@ -456,7 +471,7 @@ func (s *usuarioServico) ReenviarEmailAtivacao(email string) error {
 			return err
 		}
 		if usuario.EstaAtivo {
-			return errors.New("este usuário já está ativado")
+			return dominio.ErrUsuarioJaAtivo
 		}
 		tokenHash, err := GenerateSecureToken()
 		if err != nil {
@@ -470,14 +485,18 @@ func (s *usuarioServico) ReenviarEmailAtivacao(email string) error {
 		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
 			return err
 		}
-		go func() {
-			if err := s.email.EnviarEmailAtivacao(email, tokenHash); err != nil {
-				log.Printf("Error at sending activation email in go routine: %v", err)
-			}
-		}()
-
+		tokenParaEnviar = tokenHash
+		emailDestino = email
 		return nil
 	})
 
+	if err == nil {
+		go func() {
+			if err := s.email.EnviarEmailAtivacao(emailDestino, tokenParaEnviar); err != nil {
+				log.Printf("Erro ao enviar email na go routine(): %v", err)
+			}
+		}()
+
+	}
 	return err
 }

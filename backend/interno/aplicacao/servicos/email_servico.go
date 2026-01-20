@@ -2,18 +2,23 @@ package servicos
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"log"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
 	"net/smtp"
 	"os"
-	"path/filepath"
 	"text/template"
 	"time"
 
 	"gorm.io/gorm"
 )
+
+//go:embed templates/ativacao.html
+var templateAtivacaoString string
+
+var tmplAtivacao = template.Must(template.New("ativacao").Parse(templateAtivacaoString))
 
 // EmailServico define os metodos para gerenciamento de emails
 type EmailServico interface {
@@ -44,18 +49,8 @@ func (es *emailServico) EnviarEmailAtivacao(toEmail string, emailVerifHash strin
 
 	link := fmt.Sprintf("%s/ativacao?token=%s", frontendURL, emailVerifHash)
 
-	ativacaoAbsPathAuto, err := filepath.Abs("interno/aplicacao/servicos/templates/ativacao.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	tmpl, err := template.ParseFiles(ativacaoAbsPathAuto)
-	if err != nil {
-		return err
-	}
-
 	var bodyBuffer bytes.Buffer
-	err = tmpl.Execute(&bodyBuffer, struct{ Link string }{Link: link})
-	if err != nil {
+	if err := tmplAtivacao.Execute(&bodyBuffer, struct{ Link string }{Link: link}); err != nil {
 		return err
 	}
 
@@ -70,14 +65,29 @@ func (es *emailServico) EnviarEmail(toEmails []string, subject, body string) err
 
 	smtpHost := os.Getenv("SMTP_HOST")
 	smtpPort := os.Getenv("SMTP_PORT")
-	address := smtpHost + ":" + smtpPort
+	smtpUser := os.Getenv("SMTP_USER")
+	smtpPass := os.Getenv("SMTP_PASS")
+
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	subject = "Subject: " + subject + "\n"
 	body = "<body>" + body + "</body>"
 	message := []byte(subject + mime + body)
 
+	var fromEmail string
+	var auth smtp.Auth
+
+	if smtpPass == "" || smtpUser == "" {
+		auth = nil
+		fromEmail = "no-reply@mindtrace.services"
+	} else {
+		auth = smtp.PlainAuth("", smtpUser, smtpPass, smtpHost)
+		fromEmail = smtpUser
+	}
+
+	address := smtpHost + ":" + smtpPort
+
 	fmt.Println("message:", string(message))
-	err := smtp.SendMail(address, nil, "no-reply@mindtrace.services", toEmails, message)
+	err := smtp.SendMail(address, auth, fromEmail, toEmails, message)
 	if err != nil {
 		log.Printf("u.Sendmail() err: %v", err)
 		return err
