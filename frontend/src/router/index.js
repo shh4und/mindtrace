@@ -8,6 +8,7 @@ const Login = () => import("@/views/auth/Login.vue");
 const Cadastro = () => import("@/views/auth/Cadastro.vue");
 const ForgotPassword = () => import("@/views/auth/ForgotPassword.vue");
 const Ativacao = () => import("@/views/auth/Ativacao.vue");
+const ReenvioAtivacao = () => import("@/views/auth/ReenvioAtivacao.vue");
 
 // Dashboard Paciente e suas views
 const PacienteDashboard = () =>
@@ -72,7 +73,16 @@ const router = createRouter({
       name: "forgot-password",
       component: ForgotPassword,
     },
-    { path: "/ativacao", name: "ativacao", component: Ativacao },
+    {
+      path: "/ativacao",
+      name: "ativacao",
+      component: Ativacao,
+    },
+    {
+      path: "/reenvio",
+      name: "reenvio-ativacao",
+      component: ReenvioAtivacao,
+    },
     // Dashboard Paciente com nested routes
     {
       path: "/dashboard-paciente",
@@ -202,6 +212,7 @@ router.beforeEach((to, from, next) => {
     "cadastro",
     "forgot-password",
     "ativacao",
+    "reenvio-ativacao",
   ];
 
   // Verifica se é rota pública (incluindo rotas filhas de dashboards)

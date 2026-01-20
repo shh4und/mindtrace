@@ -105,7 +105,7 @@ func (r *gormUsuarioRepositorio) DeletarUsuario(tx *gorm.DB, id uint) error {
 
 func (r *gormUsuarioRepositorio) BuscarUsuarioPorTokenHash(tokenHash string) (*dominio.Usuario, error) {
 	var usuario dominio.Usuario
-	if err := r.db.Where("email_verif_hash = ?", tokenHash).First(&usuario).Error; err != nil {
+	if err := r.db.Where("email_verif_token = ?", tokenHash).First(&usuario).Error; err != nil {
 		return nil, err
 	}
 	return &usuario, nil

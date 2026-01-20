@@ -55,6 +55,9 @@ const api = {
   ativarConta(token) {
     return apiClient.get(`/entrar/ativar?token=${token}`);
   },
+  reenvioAtivacao(payload) {
+    return apiClient.post("/entrar/ativar/reenviar", payload);
+  },
   // --- Usuario ---
   buscarPerfil() {
     return apiClient.get("/usuarios/");
