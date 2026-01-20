@@ -28,6 +28,7 @@ type UsuarioServico interface {
 	AtualizarPerfil(userID uint, dtoIn *dtos.AtualizarPerfilDTOIn) error
 	AlterarSenha(userID uint, dtoIn *dtos.AlterarSenhaDTOIn) error
 	DeletarPerfil(userID uint) error
+	ReenviarEmailAtivacao(email string) error
 }
 
 // usuarioServico implementa a interface UsuarioServico
@@ -97,9 +98,13 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 			return err
 		}
 
+		now := time.Now()
+		tokenExpiracao := now.AddDate(0, 0, 2)
+
 		novoUsuario.Senha = string(hashSenha)
 		novoUsuario.TipoUsuario = dominio.TipoUsuarioProfissional
-		novoUsuario.EmailVerifHash = &tokenHash
+		novoUsuario.EmailVerifToken = &tokenHash
+		novoUsuario.EmailVerifExpiracao = &tokenExpiracao
 
 		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
@@ -177,9 +182,13 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 			return err
 		}
 
+		now := time.Now()
+		tokenExpiracao := now.AddDate(0, 0, 2)
+
 		novoUsuario.Senha = string(hashSenha)
-		novoUsuario.TipoUsuario = dominio.TipoUsuarioProfissional
-		novoUsuario.EmailVerifHash = &tokenHash
+		novoUsuario.TipoUsuario = dominio.TipoUsuarioPaciente
+		novoUsuario.EmailVerifToken = &tokenHash
+		novoUsuario.EmailVerifExpiracao = &tokenExpiracao
 		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
@@ -193,12 +202,10 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 
 		// Prepara o objeto de retorno completo
 		pacienteCompleto = novoPaciente
-		go func() error { // Rodar em goroutine para não travar a resposta HTTP
+		go func() { // Rodar em goroutine para não travar a resposta HTTP
 			if err := s.email.EnviarEmailAtivacao(dtoIn.Email, tokenHash); err != nil {
 				log.Printf("Error at sending activation email in go routine: %v", err)
-				return err
 			}
-			return nil
 		}()
 		return nil
 	})
@@ -215,6 +222,10 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 			return "", dominio.ErrUsuarioNaoEncontrado
 		}
 		return "", err
+	}
+
+	if !usuario.EstaAtivo {
+		return "", dominio.ErrUsuarioNaoAtivo
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(senha))
@@ -432,4 +443,41 @@ func (s *usuarioServico) DeletarPerfil(userID uint) error {
 		}
 		return s.repositorio.DeletarUsuario(tx, userID)
 	})
+}
+
+func (s *usuarioServico) ReenviarEmailAtivacao(email string) error {
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+
+		usuario, err := s.repositorio.BuscarPorEmail(email)
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return dominio.ErrUsuarioNaoEncontrado
+			}
+			return err
+		}
+		if usuario.EstaAtivo {
+			return errors.New("este usuário já está ativado")
+		}
+		tokenHash, err := GenerateSecureToken()
+		if err != nil {
+			return err
+		}
+		now := time.Now()
+		tokenExpiracao := now.AddDate(0, 0, 2)
+		usuario.EmailVerifToken = &tokenHash
+		usuario.EmailVerifExpiracao = &tokenExpiracao
+
+		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
+			return err
+		}
+		go func() {
+			if err := s.email.EnviarEmailAtivacao(email, tokenHash); err != nil {
+				log.Printf("Error at sending activation email in go routine: %v", err)
+			}
+		}()
+
+		return nil
+	})
+
+	return err
 }

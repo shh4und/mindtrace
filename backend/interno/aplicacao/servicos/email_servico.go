@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
 	"net/smtp"
 	"os"
 	"path/filepath"
 	"text/template"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -89,12 +91,28 @@ func (es *emailServico) VerificarHashToken(tokenHash string) error {
 		if err != nil {
 			return err
 		}
-		usuario.EstaAtivo = true
-		usuario.EmailVerifHash = nil
 
-		if err := es.usuarioRepo.Atualizar(tx, usuario); err != nil {
-			return err
+		if usuario.EmailVerifExpiracao == nil {
+			return dominio.ErrTokenExpirado
 		}
+
+		now := time.Now()
+		if now.After(*usuario.EmailVerifExpiracao) {
+			// usuario.EstaAtivo = false
+			// usuario.EmailVerifToken = nil
+			// if err := es.usuarioRepo.Atualizar(tx, usuario); err != nil {
+			// 	return err
+			// }
+			return dominio.ErrTokenExpirado
+		} else {
+			usuario.EstaAtivo = true
+			usuario.EmailVerifToken = nil
+			usuario.EmailVerifExpiracao = nil
+			if err := es.usuarioRepo.Atualizar(tx, usuario); err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	return err

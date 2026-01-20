@@ -112,6 +112,7 @@ func main() {
 		{
 			auth.POST("/login", autCtrl.Login)
 			auth.GET("/ativar", usuarioCtrl.AtivarConta)
+			auth.POST("/ativar/reenviar", usuarioCtrl.ReenviarAtivacao)
 		}
 
 		profissionais := api.Group("/profissionais")

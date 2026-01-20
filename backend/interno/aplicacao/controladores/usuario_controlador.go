@@ -135,10 +135,33 @@ func (uc *UsuarioControlador) AtivarConta(c *gin.Context) {
 	err := uc.emailServico.VerificarHashToken(tokenAtivacao)
 
 	if err != nil {
+		if err == dominio.ErrTokenExpirado {
+			c.JSON(http.StatusBadRequest, gin.H{"erro": "Token expirado"})
+			return
+		}
 		c.JSON(http.StatusBadRequest, gin.H{"erro": "Token invalido"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"mensagem": "Conta ativada com sucesso"})
 
+}
+
+func (uc *UsuarioControlador) ReenviarAtivacao(c *gin.Context) {
+	var req struct {
+		Email string `json:"email" binding:"required,email"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "email inválido"})
+		return
+	}
+
+	err := uc.usuarioServico.ReenviarEmailAtivacao(req.Email)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"mensagem": "Reenvio de link de ativacao realizado com sucesso"})
 }
