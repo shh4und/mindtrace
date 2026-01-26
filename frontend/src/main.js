@@ -32,18 +32,18 @@ app.use(VueApexCharts)
 
 // configuracoes padrao para notificacoes toast
 const options = {
-    position: 'top-right',
-    timeout: 2000,
+    position: 'bottom-right',
+    timeout: 4000,
     closeOnClick: true,
-    pauseOnFocusLoss: true,
+    pauseOnFocusLoss: false,
     pauseOnHover: true,
-    draggable: true,
-    draggablePercent: 0.6,
-    showCloseButtonOnHover: false,
-    hideProgressBar: false,
+    draggable: false,
+    showCloseButtonOnHover: true,
+    hideProgressBar: true,
     closeButton: 'button',
     icon: true,
-    rtl: false
+    rtl: false,
+    transition: "Vue-Toastification__fade",
 };
 
 app.use(Toast, options);

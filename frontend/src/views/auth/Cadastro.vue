@@ -242,14 +242,9 @@ const handleRegister = async () => {
       };
     }
 
-    const result = await userStore.register(data, form.userType);
-
-    if (result.success) {
-      toast.success(result.message);
-      router.push('/login');
-    } else {
-      toast.error(result.error);
-    }
+    const response = await userStore.register(data, form.userType);
+    toast.success(response.data.mensagem || "Cadastro realizado com sucesso! Verifique seu e-mail para ativar a conta.");
+    router.push('/login');
 
   } catch (error) {
     const errorMessage = error.response?.data?.erro || 'Erro desconhecido no cadastro.';

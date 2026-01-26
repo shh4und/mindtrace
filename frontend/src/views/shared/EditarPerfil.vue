@@ -176,7 +176,7 @@ onMounted(async () => {
       profile.value.contato_responsavel = pacResponse.data.contato_responsavel;
     }
 
-    toast.success('Perfil carregado com sucesso!');
+    // toast.success('Perfil carregado com sucesso!');
   } catch (error) {
     toast.error('Erro ao carregar perfil.');
   }
@@ -228,11 +228,12 @@ const deleteAccount = async () => {
   const confirmed = confirm('Tem certeza de que deseja apagar sua conta? Esta ação não pode ser desfeita.');
   if (!confirmed) return;
 
-  const result = await userStore.deleteAccount();
-  if (result.success) {
-    toast.success('Conta deletada com sucesso.');
-  } else {
-    toast.error(result.error);
+  try {
+    await userStore.deleteAccount();
+    // No success toast here because of redirection after successful deletion
+  } catch (error) {
+    toast.error('Erro ao apagar a conta.');
+    console.error("Erro ao apagar conta:", error);
   }
 };
 </script>

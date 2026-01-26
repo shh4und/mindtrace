@@ -1,19 +1,24 @@
 <template>
   <!-- Sidebar principal - Componente unificado para Paciente e Profissional -->
-  <aside 
+  <aside
     :class="[
       'fixed md:static inset-y-0 left-0 transform transition-transform duration-300 ease-in-out md:translate-x-0',
       isOpen ? 'translate-x-0' : '-translate-x-full',
       isCollapsed ? 'md:w-20' : 'md:w-64',
       'w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg md:shadow-none',
-      'z-30'
+      'z-30',
     ]"
     role="navigation"
     :aria-label="`Menu de navegação do ${variantLabel}`"
   >
     <!-- Botao desktop para recolher -->
-    <div class="hidden md:flex justify-end p-2 border-b border-gray-200">
-      <button 
+    <div
+      :class="[
+        'hidden md:flex p-2 border-b border-gray-200',
+        isCollapsed ? 'justify-center' : 'justify-end',
+      ]"
+    >
+      <button
         @click="toggleCollapse"
         class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
         :aria-label="isCollapsed ? 'Expandir menu' : 'Recolher menu'"
@@ -33,24 +38,21 @@
             :aria-current="activeView === item.view ? 'page' : undefined"
             :class="[
               'w-full flex items-center px-3 py-3 rounded-lg font-medium transition-all duration-200',
-              activeView === item.view 
-                ? activeItemClasses 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              activeView === item.view
+                ? activeItemClasses
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
             ]"
             :title="isCollapsed ? item.label : ''"
           >
-            <font-awesome-icon 
-              :icon="item.icon" 
-              :class="[
-                'w-5 h-5 flex-shrink-0',
-                isCollapsed ? 'mx-auto' : 'mr-3'
-              ]"
+            <font-awesome-icon
+              :icon="item.icon"
+              :class="['w-5 h-5 shrink-0', isCollapsed ? 'mx-auto' : 'mr-3']"
               aria-hidden="true"
             />
             <transition name="fade">
               <span v-if="!isCollapsed" class="truncate">{{ item.label }}</span>
             </transition>
-            <font-awesome-icon 
+            <font-awesome-icon
               v-if="!isCollapsed && activeView === item.view"
               :icon="faCheck"
               :class="['w-4 h-4 ml-auto', checkIconClass]"
@@ -62,10 +64,7 @@
     </nav>
 
     <!-- Informacoes no rodape -->
-    <div 
-      v-if="!isCollapsed"
-      class="p-4 border-t border-gray-200 bg-gray-50"
-    >
+    <div v-if="!isCollapsed" class="p-4 border-t border-gray-200 bg-gray-50">
       <div class="text-xs text-gray-500 text-center">
         <p class="font-medium">🧠 MindTrace</p>
         <p>{{ variantLabel }}</p>
@@ -76,7 +75,7 @@
   <!-- Sobreposicao mobile -->
   <Teleport to="body">
     <Transition name="overlay">
-      <div 
+      <div
         v-if="isOpen"
         @click="closeSidebar"
         class="fixed inset-0 bg-black/50 z-20 md:hidden"
@@ -90,7 +89,7 @@
     @click="toggleSidebar"
     :class="[
       'fixed bottom-4 left-4 z-40 md:hidden text-white p-4 rounded-full shadow-lg transition-colors',
-      mobileButtonClasses
+      mobileButtonClasses,
     ]"
     :aria-label="isOpen ? 'Fechar menu' : 'Abrir menu'"
     :aria-expanded="isOpen"
@@ -102,12 +101,12 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { 
+import {
   faChevronLeft,
   faChevronRight,
   faCheck,
   faBars,
-  faTimes
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 
 /**
@@ -122,16 +121,14 @@ const props = defineProps({
   menuItems: {
     type: Array,
     required: true,
-    validator: (items) => items.every(item => 
-      item.name && item.view && item.label && item.icon
-    )
+    validator: (items) => items.every((item) => item.name && item.view && item.label && item.icon),
   },
   /**
    * View atualmente ativa
    */
   activeView: {
     type: String,
-    default: ''
+    default: '',
   },
   /**
    * Variante visual: 'paciente' (emerald) ou 'profissional' (rose)
@@ -139,8 +136,8 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'paciente',
-    validator: (v) => ['paciente', 'profissional'].includes(v)
-  }
+    validator: (v) => ['paciente', 'profissional'].includes(v),
+  },
 });
 
 const emit = defineEmits(['navigate']);

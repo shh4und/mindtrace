@@ -180,6 +180,6 @@ func main() {
 		}
 	}
 
-	log.Println("servidor iniciado na porta 8080")
-	roteador.Run(":8080")
+	log.Println("servidor iniciado na porta 9090")
+	roteador.Run(":9090")
 }
