@@ -26,8 +26,12 @@ func (cc *ConviteControlador) GerarConvite(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
 		return
 	}
-
-	conviteOut, err := cc.conviteServico.GerarConvite(userID.(uint))
+	var req dtos.CriarConviteDTOIn
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		return
+	}
+	conviteOut, err := cc.conviteServico.GerarConvite(userID.(uint), req.Email)
 	if err != nil {
 		if err == dominio.ErrUsuarioNaoEncontrado {
 			c.JSON(http.StatusNotFound, gin.H{"erro": err.Error()})

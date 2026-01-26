@@ -17,14 +17,18 @@ import (
 
 //go:embed templates/ativacao.html
 var templateAtivacaoString string
-
 var tmplAtivacao = template.Must(template.New("ativacao").Parse(templateAtivacaoString))
+
+//go:embed templates/convite_profissional.html
+var templateConviteString string
+var tmplConvite = template.Must(template.New("ativacao").Parse(templateConviteString))
 
 // EmailServico define os metodos para gerenciamento de emails
 type EmailServico interface {
 	EnviarEmailAtivacao(toEmail string, emailVerifHash string) error
 	VerificarHashToken(tokenHash string) error
 	EnviarEmail(toEmails []string, subject, body string) error
+	EnviarEmailConvite(toEmail string, emailVerifHash string) error
 }
 
 // emailServico implementa a interface EmailServico
@@ -51,6 +55,29 @@ func (es *emailServico) EnviarEmailAtivacao(toEmail string, emailVerifHash strin
 
 	var bodyBuffer bytes.Buffer
 	if err := tmplAtivacao.Execute(&bodyBuffer, struct{ Link string }{Link: link}); err != nil {
+		return err
+	}
+
+	if err := es.EnviarEmail([]string{toEmail}, subject, bodyBuffer.String()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (es *emailServico) EnviarEmailConvite(toEmail string, tokenVinculo string) error {
+	// Configuração da mensagem
+	subject := "Go SMTP | MindTrace | Convite de Vínculo"
+
+	frontendURL := os.Getenv("FRONTEND_ORIGINS")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:5173"
+	}
+
+	link := fmt.Sprintf("%s/convites/vincular?token=%s", frontendURL, tokenVinculo)
+
+	var bodyBuffer bytes.Buffer
+	if err := tmplConvite.Execute(&bodyBuffer, struct{ Link string }{Link: link}); err != nil {
 		return err
 	}
 
@@ -108,11 +135,7 @@ func (es *emailServico) VerificarHashToken(tokenHash string) error {
 
 		now := time.Now()
 		if now.After(*usuario.EmailVerifExpiracao) {
-			// usuario.EstaAtivo = false
-			// usuario.EmailVerifToken = nil
-			// if err := es.usuarioRepo.Atualizar(tx, usuario); err != nil {
-			// 	return err
-			// }
+
 			return dominio.ErrTokenExpirado
 		} else {
 			usuario.EstaAtivo = true

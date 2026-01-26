@@ -95,7 +95,6 @@ func (s *conviteServico) GerarConvite(userID uint, emailPac string) (*dtos.Convi
 		if err := s.conviteRepositorio.CriarConvite(tx, convite); err != nil {
 			return err
 		}
-
 		conviteGerado = convite
 		return nil
 
@@ -108,7 +107,7 @@ func (s *conviteServico) GerarConvite(userID uint, emailPac string) (*dtos.Convi
 	*/
 	if emailValido {
 		go func() {
-			s.emailServico.EnviarEmail([]string{emailPac}, "Convite de Vínculo", "link ativacao")
+			s.emailServico.EnviarEmailConvite(emailPac, conviteGerado.Token)
 		}()
 	}
 
