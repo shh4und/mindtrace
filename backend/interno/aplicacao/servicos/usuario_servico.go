@@ -2,6 +2,7 @@ package servicos
 
 import (
 	"errors"
+	"log"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/dominio"
@@ -27,22 +28,33 @@ type UsuarioServico interface {
 	AtualizarPerfil(userID uint, dtoIn *dtos.AtualizarPerfilDTOIn) error
 	AlterarSenha(userID uint, dtoIn *dtos.AlterarSenhaDTOIn) error
 	DeletarPerfil(userID uint) error
+	ReenviarEmailAtivacao(email string) error
 }
 
 // usuarioServico implementa a interface UsuarioServico
 type usuarioServico struct {
 	db          *gorm.DB
 	repositorio repositorios.UsuarioRepositorio
+	email       EmailServico
 }
 
 // NovoUsuarioServico cria uma nova instancia de UsuarioServico
-func NovoUsuarioServico(db *gorm.DB, repo repositorios.UsuarioRepositorio) UsuarioServico {
-	return &usuarioServico{db: db, repositorio: repo}
+func NovoUsuarioServico(db *gorm.DB, repo repositorios.UsuarioRepositorio, emailSvc EmailServico) UsuarioServico {
+	return &usuarioServico{db: db, repositorio: repo, email: emailSvc}
 }
 
+/*
+TODO:
+  - INSERIR USUARIO COM EMAIL HASH NO DB
+  - USAR FLAG EstaAtivo PARA PERMITIR LOGIN
+  - ADICIONAR TIMEOUT += 48H PARA INVALIDAR TOKEN
+  - NOVO CONTROLADOR/ROTA PARA ATIVACAO DE EMAIL
+  - testar.
+*/
 // RegistrarProfissional registra um novo profissional no sistema
 func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissionalDTOIn) (*dtos.ProfissionalDTOOut, error) {
 	var profissionalRegistrado *dominio.Profissional
+	var tokenParaEnviar, emailDestino string
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		// Verifica se o e-mail ja esta cadastrado
@@ -80,8 +92,20 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 		if err != nil {
 			return err
 		}
+
+		// Gera hash token para posterior verificacao/ativacao de conta
+		tokenHash, err := GenerateSecureToken()
+		if err != nil {
+			return err
+		}
+
+		now := time.Now()
+		tokenExpiracao := now.AddDate(0, 0, 2)
+
 		novoUsuario.Senha = string(hashSenha)
 		novoUsuario.TipoUsuario = dominio.TipoUsuarioProfissional
+		novoUsuario.EmailVerifToken = &tokenHash
+		novoUsuario.EmailVerifExpiracao = &tokenExpiracao
 
 		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
@@ -96,15 +120,34 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 
 		// Prepara o objeto de retorno completo
 		profissionalRegistrado = novoProfissional
+		tokenParaEnviar = tokenHash
+		emailDestino = dtoIn.Email
 
 		return nil
 	})
 
+	if err == nil {
+		go func() {
+			if err := s.email.EnviarEmailAtivacao(emailDestino, tokenParaEnviar); err != nil {
+				log.Printf("Erro ao enviar email na go routine(): %v", err)
+			}
+		}()
+	}
+
 	return mappers.ProfissionalParaDTOOut(profissionalRegistrado), err
 }
 
+/*
+TODO:
+  - INSERIR USUARIO COM EMAIL HASH NO DB
+  - USAR FLAG EstaAtivo PARA PERMITIR LOGIN
+  - ADICIONAR TIMEOUT += 48H PARA INVALIDAR TOKEN
+  - NOVO CONTROLADOR/ROTA PARA ATIVACAO DE EMAIL
+  - testar.
+*/
 func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (*dtos.PacienteDTOOut, error) {
 	var pacienteCompleto *dominio.Paciente
+	var tokenParaEnviar, emailDestino string
 
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		// Verifica se o e-mail ja esta cadastrado
@@ -140,8 +183,19 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 		if err != nil {
 			return err
 		}
+		// Gera hash token para posterior verificacao/ativacao de conta
+		tokenHash, err := GenerateSecureToken()
+		if err != nil {
+			return err
+		}
+
+		now := time.Now()
+		tokenExpiracao := now.AddDate(0, 0, 2)
+
 		novoUsuario.Senha = string(hashSenha)
 		novoUsuario.TipoUsuario = dominio.TipoUsuarioPaciente
+		novoUsuario.EmailVerifToken = &tokenHash
+		novoUsuario.EmailVerifExpiracao = &tokenExpiracao
 		// Cria o usuario
 		if err := s.repositorio.CriarUsuario(tx, novoUsuario); err != nil {
 			return err
@@ -155,9 +209,19 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 
 		// Prepara o objeto de retorno completo
 		pacienteCompleto = novoPaciente
-
+		tokenParaEnviar = tokenHash
+		emailDestino = dtoIn.Email
 		return nil
 	})
+
+	if err == nil {
+		go func() {
+			if err := s.email.EnviarEmailAtivacao(emailDestino, tokenParaEnviar); err != nil {
+				log.Printf("Erro ao enviar email na go routine(): %v", err)
+			}
+		}()
+
+	}
 
 	return mappers.PacienteParaDTOOut(pacienteCompleto), err
 }
@@ -171,6 +235,10 @@ func (s *usuarioServico) Login(email, senha string) (string, error) {
 			return "", dominio.ErrUsuarioNaoEncontrado
 		}
 		return "", err
+	}
+
+	if !usuario.EstaAtivo {
+		return "", dominio.ErrUsuarioNaoAtivo
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(senha))
@@ -388,4 +456,47 @@ func (s *usuarioServico) DeletarPerfil(userID uint) error {
 		}
 		return s.repositorio.DeletarUsuario(tx, userID)
 	})
+}
+
+func (s *usuarioServico) ReenviarEmailAtivacao(email string) error {
+	var tokenParaEnviar, emailDestino string
+
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+
+		usuario, err := s.repositorio.BuscarPorEmail(email)
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return dominio.ErrUsuarioNaoEncontrado
+			}
+			return err
+		}
+		if usuario.EstaAtivo {
+			return dominio.ErrUsuarioJaAtivo
+		}
+		tokenHash, err := GenerateSecureToken()
+		if err != nil {
+			return err
+		}
+		now := time.Now()
+		tokenExpiracao := now.AddDate(0, 0, 2)
+		usuario.EmailVerifToken = &tokenHash
+		usuario.EmailVerifExpiracao = &tokenExpiracao
+
+		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
+			return err
+		}
+		tokenParaEnviar = tokenHash
+		emailDestino = email
+		return nil
+	})
+
+	if err == nil {
+		go func() {
+			if err := s.email.EnviarEmailAtivacao(emailDestino, tokenParaEnviar); err != nil {
+				log.Printf("Erro ao enviar email na go routine(): %v", err)
+			}
+		}()
+
+	}
+	return err
 }

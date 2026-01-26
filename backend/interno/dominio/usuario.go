@@ -23,21 +23,27 @@ var (
 	ErrSenhaFraca            = errors.New("senha deve ter no minimo 8 caracteres")
 	ErrSenhaInvalida         = errors.New("senha com caracteres invalidos")
 	ErrNomeVazio             = errors.New("nome nao pode estar vazio")
+	ErrUsuarioNaoAtivo       = errors.New("usuario nao verificado no sistema")
+	ErrTokenExpirado         = errors.New("token de verificacao expirado")
+	ErrUsuarioJaAtivo        = errors.New("este usuário já está ativado")
 )
 
 // Usuario e a base para todos os tipos de usuarios.
 type Usuario struct {
-	ID          uint   `gorm:"primaryKey"`
-	TipoUsuario uint8  `gorm:"type:smallint;not null;check:tipo_usuario >= 1"`
-	Nome        string `gorm:"type:varchar(255);not null"`
-	Email       string `gorm:"type:varchar(255);unique;not null"`
-	Senha       string `gorm:"type:text;not null"`
-	Contato     string `gorm:"type:varchar(11)"`
-	Bio         string `gorm:"type:text"`
-	CPF         string `gorm:"type:varchar(11);unique"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	ID                  uint   `gorm:"primaryKey"`
+	TipoUsuario         uint8  `gorm:"type:smallint;not null;check:tipo_usuario >= 1"`
+	Nome                string `gorm:"type:varchar(255);not null"`
+	Email               string `gorm:"type:varchar(255);unique;not null"`
+	Senha               string `gorm:"type:text;not null"`
+	Contato             string `gorm:"type:varchar(11)"`
+	Bio                 string `gorm:"type:text"`
+	CPF                 string `gorm:"type:varchar(11);unique"`
+	EstaAtivo           bool   `gorm:"type:boolean;default:false"`
+	EmailVerifExpiracao *time.Time
+	EmailVerifToken     *string `gorm:"type:varchar(64)"`
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
+	DeletedAt           gorm.DeletedAt `gorm:"index"`
 }
 
 func (Usuario) TableName() string {
