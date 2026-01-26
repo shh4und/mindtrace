@@ -84,7 +84,7 @@ type VincularPacienteDTOIn struct {
 }
 
 type CriarConviteDTOIn struct {
-	Email string `json:"email" binding:"required,min=10"`
+	Email string `json:"email,omitempty"`
 }
 
 type RegistroRespostaDTOIn struct {

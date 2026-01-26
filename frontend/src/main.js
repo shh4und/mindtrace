@@ -1,20 +1,19 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
-import './assets/main.css'
-import VueApexCharts from 'vue3-apexcharts'
-import { createPinia } from 'pinia'
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router';
+import './assets/main.css';
+import VueApexCharts from 'vue3-apexcharts';
+import { createPinia } from 'pinia';
 
-import Toast from 'vue-toastification'
-import 'vue-toastification/dist/index.css'
-const pinia = createPinia()
+import Toast from 'vue-toastification';
+import 'vue-toastification/dist/index.css';
+const pinia = createPinia();
 
 /* importa o nucleo do fontawesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 
 /* importa o componente de icone do fontawesome */
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-
 /* importa os icones utilizados na aplicacao */
 import { faHouse, faUser, faSearch } from '@fortawesome/free-solid-svg-icons';
 
@@ -22,30 +21,30 @@ import { faHouse, faUser, faSearch } from '@fortawesome/free-solid-svg-icons';
 library.add(faHouse, faUser, faSearch);
 
 // cria a aplicacao principal com dependencias globais
-const app = createApp(App)
+const app = createApp(App);
 app.component('font-awesome-icon', FontAwesomeIcon);
 
-app.use(pinia)
-app.use(router)
+app.use(pinia);
+app.use(router);
 // habilita componentes apexcharts como plugin global
-app.use(VueApexCharts)
+app.use(VueApexCharts);
 
 // configuracoes padrao para notificacoes toast
 const options = {
-    position: 'bottom-right',
-    timeout: 4000,
-    closeOnClick: true,
-    pauseOnFocusLoss: false,
-    pauseOnHover: true,
-    draggable: false,
-    showCloseButtonOnHover: true,
-    hideProgressBar: true,
-    closeButton: 'button',
-    icon: true,
-    rtl: false,
-    transition: "Vue-Toastification__fade",
+  position: 'bottom-right',
+  timeout: 4000,
+  closeOnClick: true,
+  pauseOnFocusLoss: false,
+  pauseOnHover: true,
+  draggable: false,
+  showCloseButtonOnHover: true,
+  hideProgressBar: true,
+  closeButton: 'button',
+  icon: true,
+  rtl: false,
+  transition: 'Vue-Toastification__fade',
 };
 
 app.use(Toast, options);
 // inicia o aplicativo montando na raiz html
-app.mount('#app')
+app.mount('#app');

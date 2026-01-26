@@ -58,6 +58,20 @@ VALUES (
 )
 ON CONFLICT (email) DO NOTHING;
 
+-- Paciente 3 (tipo_usuario = 3) - Adulto independente
+INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, created_at, updated_at)
+VALUES (
+    3,
+    'Ano Costo',
+    'ano.costo@mindtrace.dev',
+    '$2a$10$JhWPWQ4Wy3at5lO3Rn7JmOHqC3jsoUEHsxy5X9HD.ZsQpHf2VHpCW',
+    '11666660001',
+    'Paciente em acompanhamento para ansiedade.',
+    '98765432102',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+)
+ON CONFLICT (email) DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- 2. Inserção de Profissional
@@ -110,7 +124,20 @@ FROM usuarios
 WHERE email = 'bruno.lima@mindtrace.dev'
 ON CONFLICT (usuario_id) DO NOTHING;
 
-
+-- Paciente 3 - Ano (adulto, independente)
+INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, created_at, updated_at)
+SELECT 
+    id,
+    '1995-03-20'::timestamp with time zone,
+    FALSE,
+    NULL,
+    NULL,
+    '2025-10-01'::timestamp with time zone,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+FROM usuarios 
+WHERE email = 'ano.costo@mindtrace.dev'
+ON CONFLICT (usuario_id) DO NOTHING;
 -- -----------------------------------------------------------------------------
 -- 4. Vinculação Profissional-Paciente (Many-to-Many)
 -- -----------------------------------------------------------------------------

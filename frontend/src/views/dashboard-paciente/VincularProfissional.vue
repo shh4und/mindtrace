@@ -1,63 +1,129 @@
 <template>
   <div class="flex justify-center items-start pt-10">
-    <div class="w-full max-w-lg bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+    <div class="w-full space-y-4 max-w-lg bg-white rounded-xl shadow-sm border border-gray-200 p-8">
       <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">Vincular a um Profissional</h1>
-      <p class="text-gray-500 mb-8 text-center">Insira o token de convite fornecido pelo seu profissional.</p>
+      <p class="text-gray-500 mb-8 text-center">
+        Insira o token de convite fornecido pelo seu profissional clique no link recebido por
+        e-mail.
+      </p>
 
-      <form @submit.prevent="submitToken" class="space-y-4">
-        <div>
-          <label for="token" class="block text-base font-medium text-gray-700 mb-1">Token de Convite</label>
-          <input 
-            type="text" 
-            id="token" 
-            v-model="token"
-            placeholder="Cole o token aqui"
-            class="w-full font-mono tracking-wider px-4 py-3 rounded-lg border border-gray-300 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-            required 
-          />
+      <BaseInput
+        v-model="token"
+        label="Código do Convite"
+        placeholder="Cole o token aqui..."
+        :disabled="loading"
+        @input="verificarTokenManualmente"
+      />
+      <div
+        v-if="dadosConvite"
+        class="bg-emerald-50 p-4 rounded-lg border border-emerald-200 flex items-center gap-3"
+      >
+        <div class="bg-emerald-100 p-2 rounded-full text-emerald-600">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
         </div>
+        <div>
+          <p class="text-sm text-emerald-800 font-medium">Convite encontrado:</p>
+          <p class="text-lg font-bold text-emerald-900">{{ dadosConvite.nomeProfissional }}</p>
+          <p class="text-xs text-emerald-700">{{ dadosConvite.especialidade }}</p>
+        </div>
+      </div>
 
-        <button 
-          type="submit"
-          :disabled="isLoading || !token.trim()"
-          class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 outline-none disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          <span v-if="!isLoading">Vincular Agora</span>
-          <span v-else>Vinculando...</span>
-        </button>
-      </form>
+      <p v-if="erro" class="text-red-500 text-sm mt-1">{{ erro }}</p>
+      <BaseButton
+        variant="emerald"
+        full-width
+        :loading="loadingVinculo"
+        :disabled="!dadosConvite"
+        @click="bindWithToken"
+        >Confirmar Vínculo
+      </BaseButton>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import api from '@/services/api';
 import { useToast } from 'vue-toastification';
-import api from '../../services/api';
+import { BaseInput, BaseButton } from '@/components/ui';
+import { debounce } from 'lodash';
 
-const token = ref('');
-const isLoading = ref(false);
+const route = useRoute();
+const router = useRouter();
 const toast = useToast();
 
-const submitToken = async () => {
+const token = ref('');
+const dadosConvite = ref(null);
+const erro = ref('');
+const loading = ref(false);
+const loadingVinculo = ref(false);
+
+onMounted(() => {
+  const tokenUrl = route.query.token;
+  if (tokenUrl) {
+    token.value = tokenUrl;
+    router.replace({ query: null });
+  }
+});
+
+/**
+ * TODO:
+ * CONTINUAR DAQUI
+ */
+
+// Função que consulta a API para ver de quem é o convite
+const buscarInfoToken = async (tokenValue) => {
+  if (!tokenValue || tokenValue.length < 10) return; // Tamanho mínimo para evitar chamadas inúteis
+
+  loading.value = true;
+  erro.value = '';
+  dadosConvite.value = null;
+
+  try {
+    // GET /convites/info/:token
+    const response = await api.consultarToken(tokenValue);
+    dadosConvite.value = response.data;
+  } catch (err) {
+    erro.value = 'Código inválido ou expirado.';
+    dadosConvite.value = null;
+  } finally {
+    loading.value = false;
+  }
+};
+// Debounce para não chamar a API a cada letra digitada (se for digitação manual)
+const verificarTokenManualmente = debounce(() => {
+  buscarInfoToken(token.value);
+}, 500);
+const bindWithToken = async () => {
   if (!token.value.trim()) {
-    toast.error("Por favor, insira um token.");
     return;
   }
 
-  isLoading.value = true;
+  loadingVinculo.value = true;
   try {
-    const response = await api.vincularComToken(token.value.trim());
-  toast.success(response.data.mensagem || "Vínculo realizado com sucesso!");
-  token.value = ''; // Limpa o campo apos o sucesso
+    await api.vincularComToken(token.value.trim());
+    toast.success(`Você agora está vinculado a ${dadosConvite.value.nomeProfissional}`);
+    router.push({ name: 'paciente-profissionais' });
   } catch (error) {
-    const errorMessage = error.response?.data?.erro || "Falha ao processar o token.";
+    toast.error(err.response?.data?.erro || 'Erro ao vincular.');
     toast.error(errorMessage);
-    console.error("Erro ao vincular com token:", error);
+    console.error('Erro ao vincular com token:', error);
   } finally {
-    isLoading.value = false;
+    loadingVinculo.value = false;
   }
 };
 </script>
-
-

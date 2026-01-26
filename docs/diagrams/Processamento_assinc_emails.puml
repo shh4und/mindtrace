@@ -1,0 +1,49 @@
+@startuml
+!theme plain
+autonumber
+title Processamento Assíncrono de Email (Atribuição de Instrumento)
+
+actor "Frontend (Vue.js)" as Client
+participant "Instrumento\nControlador" as Ctrl
+participant "Instrumento\nServico" as Svc
+participant "Instrumento\nRepositorio" as Repo
+participant "Email\nServico" as Email
+participant "Servidor SMTP" as SMTP
+
+Client -> Ctrl: POST /api/v1/instrumentos/atribuir
+activate Ctrl
+
+Ctrl -> Svc: AtribuirInstrumento(pacienteID, instrumentoID)
+activate Svc
+
+Svc -> Repo: CriarAtribuicao(novaAtribuicao)
+activate Repo
+Repo --> Svc: Sucesso (ID: 123)
+deactivate Repo
+
+group Goroutine (Async)
+    Svc -> Svc: go func() {
+    activate Svc #DarkSalmon
+    note right: O fluxo principal continua\nsem esperar este bloco
+    
+    Svc -> Email: EnviarNotificacaoAtribuicao(email, dados)
+    activate Email
+    
+    Email -> Email: Renderizar Template HTML
+    Email -> SMTP: SendMail(to, subject, body)
+    activate SMTP
+    SMTP --> Email: 250 OK
+    deactivate SMTP
+    
+    deactivate Email
+    deactivate Svc
+    Svc -> Svc: }
+end
+
+Svc --> Ctrl: Retorna DTO Atribuição
+deactivate Svc
+
+Ctrl --> Client: 200 OK (JSON)
+deactivate Ctrl
+
+@enduml
