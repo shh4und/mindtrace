@@ -190,7 +190,7 @@ onMounted(async () => {
     const response = await api.listarAtribuicoesPaciente();
     allQuestions.value = response.data || [];
     isLoading.value = false;
-    toast.success("Seus questionários carregados com sucesso.");
+    // toast.success("Seus questionários carregados com sucesso.");
   } catch (error) {
     toast.error("Erro ao carregar seus questionários.");
     console.error(error);

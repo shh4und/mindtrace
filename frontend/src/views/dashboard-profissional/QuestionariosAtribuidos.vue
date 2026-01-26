@@ -396,7 +396,7 @@ onMounted(async () => {
   try {
     const response = await api.listarAtribuicoesProfissional();
     atribuicoes.value = response.data;
-    toast.success('Atribuições carregadas com sucesso!');
+    // toast.success('Atribuições carregadas com sucesso!');
   } catch (error) {
     toast.error('Erro ao carregar atribuições.');
     console.error(error);

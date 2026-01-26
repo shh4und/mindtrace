@@ -99,7 +99,7 @@ onMounted(async () => {
       const qtdInstrumentos = response.data.length
       instrumentos.value = response.data
       
-      toast.success(`${qtdInstrumentos} questionários carregados com sucesso.`)
+      // toast.success(`${qtdInstrumentos} questionários carregados com sucesso.`)
     }
     else{
       toast.warning(`Houve um problema ao carregar ou não há questionários cadastrados.`)
