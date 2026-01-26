@@ -78,7 +78,7 @@ func main() {
 	analiseSvc := servicos.NovoAnaliseServico(db, registroHumorRepo, usuarioRepo)
 	registroHumorSvc := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo, analiseSvc)
 	resumoSvc := servicos.NovoResumoServico(db, registroHumorRepo, usuarioRepo)
-	conviteSvc := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo)
+	conviteSvc := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo, emailSvc)
 	instrumentoSvc := servicos.NovoInstrumentoServico(db, instrumentoRepo, usuarioRepo)
 
 	// Inicializa controladores

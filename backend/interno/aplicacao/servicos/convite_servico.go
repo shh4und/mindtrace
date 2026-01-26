@@ -15,7 +15,7 @@ import (
 
 // ConviteServico define os metodos para gerenciamento de convites
 type ConviteServico interface {
-	GerarConvite(userID uint) (*dtos.ConviteDTOOut, error)
+	GerarConvite(userID uint, emailPac string) (*dtos.ConviteDTOOut, error)
 	VincularPaciente(userID uint, token string) error
 }
 
@@ -24,19 +24,22 @@ type conviteServico struct {
 	db                 *gorm.DB
 	conviteRepositorio repositorios.ConviteRepositorio
 	usuarioRepositorio repositorios.UsuarioRepositorio
+	emailServico       EmailServico
 }
 
 // NovoConviteServico cria uma nova instancia de ConviteServico
-func NovoConviteServico(db *gorm.DB, cr repositorios.ConviteRepositorio, ur repositorios.UsuarioRepositorio) ConviteServico {
+func NovoConviteServico(db *gorm.DB, cr repositorios.ConviteRepositorio, ur repositorios.UsuarioRepositorio, es EmailServico) ConviteServico {
 	return &conviteServico{
 		db:                 db,
 		conviteRepositorio: cr,
 		usuarioRepositorio: ur,
+		emailServico:       es,
 	}
 }
 
 // GerarConvite gera um novo convite para o profissional
-func (s *conviteServico) GerarConvite(userID uint) (*dtos.ConviteDTOOut, error) {
+func (s *conviteServico) GerarConvite(userID uint, emailPac string) (*dtos.ConviteDTOOut, error) {
+	emailValido := false
 	var conviteGerado *dominio.Convite
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		profissional, err := s.usuarioRepositorio.BuscarProfissionalPorUsuarioID(tx, userID)
@@ -47,6 +50,28 @@ func (s *conviteServico) GerarConvite(userID uint) (*dtos.ConviteDTOOut, error) 
 			return err
 		}
 
+		if emailPac != "" {
+			usuarioPaciente, err := s.usuarioRepositorio.BuscarPorEmail(emailPac)
+			if err != nil {
+				emailValido = false
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+
+					return dominio.ErrUsuarioNaoEncontrado
+				}
+				return err
+			}
+			_, err = s.usuarioRepositorio.BuscarPacientePorUsuarioID(tx, usuarioPaciente.ID)
+			if err != nil {
+				emailValido = false
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+
+					return dominio.ErrUsuarioNaoEncontrado
+				}
+				return err
+			}
+
+			emailValido = true
+		}
 		// token criptografado aleatoriamente
 		tokenBytes := make([]byte, 16)
 		if _, err := rand.Read(tokenBytes); err != nil {
@@ -75,6 +100,17 @@ func (s *conviteServico) GerarConvite(userID uint) (*dtos.ConviteDTOOut, error) 
 		return nil
 
 	})
+
+	/*
+		TODO:
+		- terminar funcionalidade de envio de email de convite
+		- testar
+	*/
+	if emailValido {
+		go func() {
+			s.emailServico.EnviarEmail([]string{emailPac}, "Convite de Vínculo", "link ativacao")
+		}()
+	}
 
 	return mappers.ConviteParaDTOOut(conviteGerado), err // err = nil
 }
