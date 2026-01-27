@@ -77,7 +77,10 @@ func (es *emailServico) EnviarEmailConvite(toEmail string, tokenVinculo string) 
 	link := fmt.Sprintf("%s/dashboard-paciente/vincular?token=%s", frontendURL, tokenVinculo)
 
 	var bodyBuffer bytes.Buffer
-	if err := tmplConvite.Execute(&bodyBuffer, struct{ Link string }{Link: link}); err != nil {
+	if err := tmplConvite.Execute(&bodyBuffer, struct {
+		Link         string
+		TokenVinculo string
+	}{Link: link, TokenVinculo: tokenVinculo}); err != nil {
 		return err
 	}
 
