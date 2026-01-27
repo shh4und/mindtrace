@@ -19,24 +19,22 @@
               placeholder="Digite novamente seu e-mail para ativação."
               autocomplete="email"
               required
-              size="lg"
+              size="md"
             />
 
-            <BaseButton type="submit" variant="emerald" size="lg" full-width>
+            <BaseButton type="submit" variant="emerald" size="md" full-width>
               Reenviar link para e-mail
             </BaseButton>
           </form>
 
           <div class="mt-6 text-center space-y-3">
+            <h3 class="text-sm text-gray-600 mt-5">Verifique sua caixa de correspôndencia</h3>
             <router-link
               to="/login"
-              class="text-lg text-gray-600 hover:text-emerald-600 transition-colors"
+              class="text-sm text-gray-600 hover:text-emerald-600 transition-colors underline"
             >
               Voltar para o Login
             </router-link>
-            <h3 class="text-sm text-gray-600 mt-5">
-              Verifique sua caixa de correspôndencia
-            </h3>
           </div>
         </div>
       </div>
@@ -45,25 +43,25 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import api from "@/services/api";
-import { useToast } from "vue-toastification";
-import { BaseInput, BaseButton } from "@/components/ui";
+import { ref } from 'vue';
+import api from '@/services/api';
+import { useToast } from 'vue-toastification';
+import { BaseInput, BaseButton } from '@/components/ui';
 
 const toast = useToast();
 
-import NavbarPublic from "@/components/layout/NavbarPublic.vue";
+import NavbarPublic from '@/components/layout/NavbarPublic.vue';
 
-const emailReenvio = ref("");
+const emailReenvio = ref('');
 const payload = {
-  email: "",
+  email: '',
 };
 const handleReenvio = async () => {
   try {
     payload.email = emailReenvio.value;
     await api.reenvioAtivacao(payload);
 
-    toast.success("Email reenviado com sucesso!");
+    toast.success('Email reenviado com sucesso!');
   } catch (error) {
     console.log(error);
   }

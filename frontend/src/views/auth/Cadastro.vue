@@ -11,22 +11,36 @@
           <!-- Seletor tipo conta -->
           <fieldset class="mb-8">
             <legend class="sr-only">Tipo de conta</legend>
-            <div class="grid grid-cols-2 gap-4" role="radiogroup" aria-label="Selecione o tipo de conta">
-              <button 
+            <div
+              class="grid grid-cols-2 gap-4"
+              role="radiogroup"
+              aria-label="Selecione o tipo de conta"
+            >
+              <button
                 type="button"
                 @click="form.userType = TipoUsuario.Paciente"
                 :aria-pressed="form.userType === TipoUsuario.Paciente"
-                :class="['p-4 rounded-lg border-2 text-center transition', form.userType === TipoUsuario.Paciente ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300 bg-white hover:border-emerald-400']"
+                :class="[
+                  'p-4 rounded-lg border-2 text-center transition',
+                  form.userType === TipoUsuario.Paciente
+                    ? 'border-emerald-500 bg-emerald-50'
+                    : 'border-gray-300 bg-white hover:border-emerald-400',
+                ]"
               >
-                <span class="text-lg font-medium">Sou Paciente</span>
+                <span class="text-md font-medium">Sou Paciente</span>
               </button>
-              <button 
+              <button
                 type="button"
                 @click="form.userType = TipoUsuario.Profissional"
                 :aria-pressed="form.userType === TipoUsuario.Profissional"
-                :class="['p-4 rounded-lg border-2 text-center transition', form.userType === TipoUsuario.Profissional ? 'border-rose-500 bg-rose-50' : 'border-gray-300 bg-white hover:border-rose-400']"
+                :class="[
+                  'p-4 rounded-lg border-2 text-center transition',
+                  form.userType === TipoUsuario.Profissional
+                    ? 'border-rose-500 bg-rose-50'
+                    : 'border-gray-300 bg-white hover:border-rose-400',
+                ]"
               >
-                <span class="text-lg font-medium">Sou Profissional</span>
+                <span class="text-md font-medium">Sou Profissional</span>
               </button>
             </div>
           </fieldset>
@@ -34,18 +48,8 @@
           <form v-if="form.userType" @submit.prevent="handleRegister" class="space-y-6" novalidate>
             <!-- Campos comuns -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <BaseInput
-                v-model="form.nome"
-                label="Nome Completo"
-                autocomplete="name"
-                required
-              />
-              <BaseInput
-                v-model="form.cpf"
-                label="CPF"
-                inputmode="numeric"
-                required
-              />
+              <BaseInput v-model="form.nome" label="Nome Completo" autocomplete="name" required />
+              <BaseInput v-model="form.cpf" label="CPF" inputmode="numeric" required />
               <BaseInput
                 v-model="form.email"
                 type="email"
@@ -68,7 +72,11 @@
                 type="password"
                 label="Confirme sua Senha"
                 autocomplete="new-password"
-                :error="form.confirm_password && form.senha !== form.confirm_password ? 'As senhas não coincidem' : ''"
+                :error="
+                  form.confirm_password && form.senha !== form.confirm_password
+                    ? 'As senhas não coincidem'
+                    : ''
+                "
                 required
               />
               <BaseInput
@@ -87,14 +95,13 @@
             </div>
 
             <!-- Campos profissional -->
-            <fieldset v-if="form.userType === TipoUsuario.Profissional" class="pt-4 border-t border-gray-300">
+            <fieldset
+              v-if="form.userType === TipoUsuario.Profissional"
+              class="pt-4 border-t border-gray-300"
+            >
               <legend class="sr-only">Informações profissionais</legend>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <BaseInput
-                  v-model="form.especialidade"
-                  label="Especialidade"
-                  required
-                />
+                <BaseInput v-model="form.especialidade" label="Especialidade" required />
                 <BaseInput
                   v-model="form.registro_profissional"
                   label="Nº Registro Profissional (CRP, etc)"
@@ -104,12 +111,22 @@
             </fieldset>
 
             <!-- Campos paciente -->
-            <fieldset v-if="form.userType === TipoUsuario.Paciente" class="pt-4 border-t border-gray-300">
+            <fieldset
+              v-if="form.userType === TipoUsuario.Paciente"
+              class="pt-4 border-t border-gray-300"
+            >
               <legend class="sr-only">Informações do paciente</legend>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="flex flex-row items-center gap-2">
-                  <input id="dependente" v-model="form.dependente" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
-                  <label for="dependente" class="text-base font-medium text-gray-700">É dependente?</label>
+                  <input
+                    id="dependente"
+                    v-model="form.dependente"
+                    type="checkbox"
+                    class="h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <label for="dependente" class="text-base font-medium text-gray-700"
+                    >É dependente?</label
+                  >
                 </div>
 
                 <BaseInput
@@ -131,16 +148,20 @@
             <BaseButton
               type="submit"
               :variant="form.userType === TipoUsuario.Profissional ? 'rose' : 'emerald'"
-              size="lg"
+              size="md"
               full-width
               :disabled="isSubmitDisabled"
             >
-              Criar Conta de {{ form.userType === TipoUsuario.Paciente ? 'Paciente' : 'Profissional' }}
+              Criar Conta de
+              {{ form.userType === TipoUsuario.Paciente ? 'Paciente' : 'Profissional' }}
             </BaseButton>
           </form>
 
           <div class="mt-6 text-center">
-            <router-link to="/login" class="text-lg text-gray-600 hover:text-emerald-600 transition-colors">
+            <router-link
+              to="/login"
+              class="text-sm text-gray-600 hover:text-emerald-600 transition-colors underline"
+            >
               Já tem uma conta? Faça login
             </router-link>
           </div>
@@ -243,9 +264,11 @@ const handleRegister = async () => {
     }
 
     const response = await userStore.register(data, form.userType);
-    toast.success(response.data.mensagem || "Cadastro realizado com sucesso! Verifique seu e-mail para ativar a conta.");
+    toast.success(
+      response.data.mensagem ||
+        'Cadastro realizado com sucesso! Verifique seu e-mail para ativar a conta.'
+    );
     router.push('/login');
-
   } catch (error) {
     const errorMessage = error.response?.data?.erro || 'Erro desconhecido no cadastro.';
     toast.error(errorMessage);
