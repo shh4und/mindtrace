@@ -164,6 +164,7 @@ func main() {
 			{
 				convites.POST("/gerar", conviteCtrl.GerarConvite)
 				convites.POST("/vincular", conviteCtrl.VincularPaciente)
+				convites.GET("/info", conviteCtrl.ObterInfo)
 			}
 
 			instrumentos := protegido.Group("/instrumentos")

@@ -109,6 +109,9 @@ const api = {
   vincularComToken(token) {
     return apiClient.post('/convites/vincular', { token });
   },
+  consultarToken(tokenValue) {
+    return apiClient.get(`/convites/info?token=${tokenValue}`);
+  },
 
   listarQuestionarios() {
     return apiClient.get('/instrumentos/listar-instrumentos');

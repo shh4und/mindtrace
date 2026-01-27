@@ -258,3 +258,9 @@ type ProfissionalResumidoDTOOut struct {
 	Email         string `json:"email"`
 	Especialidade string `json:"especialidade"`
 }
+
+type DadosConviteDTOOut struct {
+	NomeProfissional string `json:"nome_profissional"`
+	Especialidade    string `json:"especialidade"`
+	Valido           bool   `json:"valido"`
+}

@@ -36,7 +36,7 @@
         </div>
         <div>
           <p class="text-sm text-emerald-800 font-medium">Convite encontrado:</p>
-          <p class="text-lg font-bold text-emerald-900">{{ dadosConvite.nomeProfissional }}</p>
+          <p class="text-lg font-bold text-emerald-900">{{ dadosConvite.nome_profissional }}</p>
           <p class="text-xs text-emerald-700">{{ dadosConvite.especialidade }}</p>
         </div>
       </div>
@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/services/api';
 import { useToast } from 'vue-toastification';
@@ -67,7 +67,11 @@ const router = useRouter();
 const toast = useToast();
 
 const token = ref('');
-const dadosConvite = ref(null);
+const dadosConvite = ref({
+  nome_profissional: '',
+  especialidade: '',
+  valido: false,
+});
 const erro = ref('');
 const loading = ref(false);
 const loadingVinculo = ref(false);
@@ -94,7 +98,6 @@ const buscarInfoToken = async (tokenValue) => {
   dadosConvite.value = null;
 
   try {
-    // GET /convites/info/:token
     const response = await api.consultarToken(tokenValue);
     dadosConvite.value = response.data;
   } catch (err) {
@@ -108,6 +111,7 @@ const buscarInfoToken = async (tokenValue) => {
 const verificarTokenManualmente = debounce(() => {
   buscarInfoToken(token.value);
 }, 500);
+
 const bindWithToken = async () => {
   if (!token.value.trim()) {
     return;
@@ -116,10 +120,10 @@ const bindWithToken = async () => {
   loadingVinculo.value = true;
   try {
     await api.vincularComToken(token.value.trim());
-    toast.success(`Você agora está vinculado a ${dadosConvite.value.nomeProfissional}`);
+    toast.success(`Você agora está vinculado a ${dadosConvite.value.nome_profissional}`);
     router.push({ name: 'paciente-profissionais' });
   } catch (error) {
-    toast.error(err.response?.data?.erro || 'Erro ao vincular.');
+    toast.error(error.response?.data?.erro || 'Erro ao vincular.');
     toast.error(errorMessage);
     console.error('Erro ao vincular com token:', error);
   } finally {

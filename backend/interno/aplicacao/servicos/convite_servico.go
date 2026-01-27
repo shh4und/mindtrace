@@ -17,6 +17,7 @@ import (
 type ConviteServico interface {
 	GerarConvite(userID uint, emailPac string) (*dtos.ConviteDTOOut, error)
 	VincularPaciente(userID uint, token string) error
+	ObterInfoPorToken(tokenVinculo string) (*dtos.DadosConviteDTOOut, error)
 }
 
 // conviteServico implementa a interface ConviteServico
@@ -153,4 +154,34 @@ func (s *conviteServico) VincularPaciente(userID uint, token string) error {
 
 		return s.conviteRepositorio.MarcarConviteComoUsado(tx, convite)
 	})
+}
+
+func (s *conviteServico) ObterInfoPorToken(tokenVinculo string) (*dtos.DadosConviteDTOOut, error) {
+	var dadosConv *dominio.Convite
+	var conviteValido bool
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		// Buscar convite pelo token recebido
+		conv, err := s.conviteRepositorio.BuscarConvitePorToken(tx, tokenVinculo)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return dominio.ErrTokenConviteInvalido
+			}
+			return err
+		}
+		// Validar se o convite recebido esta valido com os metodos de dominio
+		if !conv.EstaValido() {
+			if conv.EstaExpirado() {
+				return dominio.ErrConviteExpirado
+			}
+			if conv.JaFoiUtilizado() {
+				return dominio.ErrConviteJaUtilizado
+			}
+		}
+		conviteValido = true
+		dadosConv = conv
+		// Busca paciente
+		return nil
+	})
+
+	return mappers.DadosConviteParaDTOOut(dadosConv, conviteValido), err
 }
