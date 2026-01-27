@@ -23,7 +23,7 @@ var (
 	ErrSenhaFraca            = errors.New("senha deve ter no minimo 8 caracteres")
 	ErrSenhaInvalida         = errors.New("senha com caracteres invalidos")
 	ErrNomeVazio             = errors.New("nome nao pode estar vazio")
-	ErrUsuarioNaoAtivo       = errors.New("usuario nao verificado no sistema")
+	ErrUsuarioNaoAtivo       = errors.New("Usuário não verificado no sistema")
 	ErrTokenExpirado         = errors.New("token de verificacao expirado")
 	ErrUsuarioJaAtivo        = errors.New("este usuário já está ativado")
 )
