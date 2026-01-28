@@ -15,6 +15,7 @@ var (
 	ErrAutoCuidadoInvalido      = errors.New("auto cuidado deve ter no minimo 3 caracteres")
 	ErrDataHoraRegistroVazia    = errors.New("data e hora do registro e obrigatoria")
 	ErrDataHoraRegistroNoFuturo = errors.New("data e hora do registro nao pode ser no futuro")
+	ErrRegistroHumorMuitoRecente = errors.New("seu registro diário já foi realizado")
 )
 
 // RegistroHumor armazena as entradas de humor do paciente.

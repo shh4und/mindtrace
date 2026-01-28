@@ -161,56 +161,138 @@ const sortedChartData = computed(() =>
 );
 
 // --- OPÇÕES DOS GRÁFICOS (adaptado para reatividade com ref) ---
-const getChartOptions = (title) => ({
+const getChartOptions = (title, color, dataKey) => ({
   chart: {
     type: 'area',
     height: 350,
     zoom: { enabled: false },
-    toolbar: { show: true, tools: { download: true, selection: false, zoom: false, zoomin: false, zoomout: false, pan: false, reset: true } },
+    toolbar: { 
+      show: true, 
+      tools: { 
+        download: true, 
+        selection: false, 
+        zoom: false, 
+        zoomin: false, 
+        zoomout: false, 
+        pan: false, 
+        reset: true 
+      } 
+    },
+    animations: {
+      enabled: true,
+      easing: 'easeinout',
+      speed: 800,
+    }
+  },
+  colors: [color],
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shadeIntensity: 1,
+      opacityFrom: 0.45,
+      opacityTo: 0.05,
+      stops: [0, 100]
+    }
   },
   dataLabels: { enabled: false },
   stroke: { curve: 'smooth', width: 3 },
   xaxis: {
     type: 'datetime',
     categories: sortedChartData.value.map(d => d.date),
-    labels: { show: false },
-    title: { text: `Tempo (${timeRanges.find(r => r.days === selectedRange.value)?.label})`, style: { fontSize: '14px', fontWeight: 400, color: '#6B7280' } },
+    labels: { 
+      show: true,
+      style: { colors: '#9CA3AF', fontSize: '12px' },
+      datetimeFormatter: {
+        year: 'yyyy',
+        month: 'MMM',
+        day: 'dd',
+        hour: 'HH:mm'
+      }
+    },
+    title: { 
+      text: `Tempo (${timeRanges.find(r => r.days === selectedRange.value)?.label})`, 
+      style: { fontSize: '14px', fontWeight: 500, color: '#6B7280' },
+      offsetY: 80
+    },
+    axisBorder: { show: false },
+    axisTicks: { show: false },
     tooltip: { enabled: false },
   },
-  yaxis: { title: { text: title } },
-  markers: { size: 5, hover: { size: 7 } },
-  grid: { borderColor: '#e7e7e7', row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
+  yaxis: { 
+    title: { text: title, style: { color: '#6B7280', fontWeight: 500 } },
+    labels: { style: { colors: '#9CA3AF' } }
+  },
+  markers: { 
+    size: 4, 
+    colors: [color],
+    strokeColors: '#fff',
+    strokeWidth: 2,
+    hover: { size: 6 } 
+  },
+  grid: { 
+    borderColor: '#F3F4F6', 
+    strokeDashArray: 4,
+    xaxis: { lines: { show: true } },
+    yaxis: { lines: { show: true } },
+    padding: { bottom: 10 }
+  },
+  annotations: {
+    points: sortedChartData.value.map((point) => ({
+      x: new Date(point.date).getTime(),
+      y: point[dataKey],
+      marker: {
+        size: 0,
+      },
+      label: {
+        borderColor: 'transparent',
+        offsetY: -10,
+        style: {
+          background: 'transparent',
+          color: '#333',
+          fontSize: '16px',
+        },
+        text: moodOptions[point.humor - 1]?.emoji || ''
+      }
+    }))
+  },
   tooltip: {
+    theme: 'light',
     custom: function ({ series, seriesIndex, dataPointIndex, w }) {
         const pointData = sortedChartData.value[dataPointIndex];
         if (!pointData) return '';
         const seriesName = w.globals.seriesNames[seriesIndex];
+        const color = w.globals.colors[seriesIndex];
         return `
-          <div style="padding: 10px 14px; background: #FFF; border: 1px solid #DDD; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border-radius: 6px;">
-            <div style="font-weight: 600; color: #333; margin-bottom: 6px;">
-              ${new Date(pointData.date).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          <div class="p-3 bg-white border border-gray-100 shadow-lg rounded-lg text-sm">
+            <div class="font-bold text-gray-800 mb-2 border-b border-gray-50 pb-1">
+              ${new Date(pointData.date).toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
             </div>
-            <div style="font-size: 13px; color: #555;">
-              <span style="display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; background-color: ${w.globals.colors[seriesIndex]};"></span>
-              <span>${seriesName}: <strong>${series[seriesIndex][dataPointIndex]}</strong></span>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="w-2 h-2 rounded-full" style="background-color: ${color}"></span>
+              <span class="text-gray-600">${seriesName}: <span class="font-bold text-gray-900">${series[seriesIndex][dataPointIndex]}</span></span>
             </div>
-            <div style="font-size: 13px; color: #555; margin-top: 5px;">
-              <span style="display: inline-block; width: 10px; height: 10px; margin-right: 6px;"></span>
-              <span>Humor: <strong>${moodOptions[pointData.humor-1].label} - ${moodOptions[pointData.humor-1].emoji}</strong></span>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="w-2 h-2"></span>
+              <span class="text-gray-600">Humor: <span class="font-bold text-gray-900">${moodOptions[pointData.humor-1].emoji} ${moodOptions[pointData.humor-1].label}</span></span>
             </div>
+            ${pointData.anotacao ? `
+              <div class="mt-2 pt-2 border-top border-gray-50 max-w-[200px] text-xs text-gray-500 italic">
+                "${pointData.anotacao.length > 50 ? pointData.anotacao.substring(0, 50) + '...' : pointData.anotacao}"
+              </div>
+            ` : ''}
           </div>
         `;
     }
   },
 });
 
-const sleepChartOptions = computed(() => ({ ...getChartOptions('Horas'), colors: ['#3B82F6'] }));
+const sleepChartOptions = computed(() => getChartOptions('Horas', '#3B82F6', 'valor_sono'));
 const sleepSeries = computed(() => [{ name: 'Horas de Sono', data: sortedChartData.value.map(d => d.valor_sono) }]);
 
-const energyChartOptions = computed(() => ({ ...getChartOptions('Nível (0-10)'), colors: ['#F59E0B'] }));
+const energyChartOptions = computed(() => getChartOptions('Nível (0-10)', '#F59E0B', 'valor_energia'));
 const energySeries = computed(() => [{ name: 'Nível de Energia', data: sortedChartData.value.map(d => d.valor_energia) }]);
 
-const stressChartOptions = computed(() => ({ ...getChartOptions('Nível (0-10)'), colors: ['#EF4444'] }));
+const stressChartOptions = computed(() => getChartOptions('Nível (0-10)', '#EF4444', 'valor_stress'));
 const stressSeries = computed(() => [{ name: 'Nível de Stress', data: sortedChartData.value.map(d => d.valor_stress) }]);
 
 </script>

@@ -98,7 +98,7 @@ ON CONFLICT (usuario_id) DO NOTHING;
 -- -----------------------------------------------------------------------------
 
 -- Paciente 1 - Ana (adulta, independente)
-INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, created_at, updated_at)
+INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, esta_ativo, created_at, updated_at)
 SELECT 
     id,
     '1995-03-20'::timestamp with time zone,
@@ -106,6 +106,7 @@ SELECT
     NULL,
     NULL,
     '2025-10-01'::timestamp with time zone,
+    TRUE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 FROM usuarios 
@@ -113,7 +114,7 @@ WHERE email = 'ana.costa@mindtrace.dev'
 ON CONFLICT (usuario_id) DO NOTHING;
 
 -- Paciente 2 - Bruno (menor, dependente)
-INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, created_at, updated_at)
+INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, esta_ativo, created_at, updated_at)
 SELECT 
     id,
     '2010-07-22'::timestamp with time zone,
@@ -121,6 +122,7 @@ SELECT
     'Maria Lima',
     '11666660001',
     '2025-10-15'::timestamp with time zone,
+    TRUE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 FROM usuarios 
@@ -128,7 +130,7 @@ WHERE email = 'bruno.lima@mindtrace.dev'
 ON CONFLICT (usuario_id) DO NOTHING;
 
 -- Paciente 3 - Ano (adulto, independente)
-INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, created_at, updated_at)
+INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, esta_ativo, created_at, updated_at)
 SELECT 
     id,
     '1995-03-20'::timestamp with time zone,
@@ -136,6 +138,7 @@ SELECT
     NULL,
     NULL,
     '2025-10-01'::timestamp with time zone,
+    TRUE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 FROM usuarios 

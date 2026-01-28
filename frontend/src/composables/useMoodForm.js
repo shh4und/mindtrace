@@ -123,7 +123,8 @@ export function useMoodForm() {
       reset();
       return true;
     } catch (error) {
-      toast.error('Houve um erro ao registrar seu humor.');
+      const errorMsg = error.response?.data?.message || 'Houve um erro ao registrar seu humor.';
+      toast.error(errorMsg);
       console.error('Erro ao registrar humor:', error);
       return false;
     } finally {
