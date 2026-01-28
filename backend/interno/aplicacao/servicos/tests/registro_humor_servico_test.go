@@ -99,6 +99,14 @@ func (m *MockUsuarioRepositorioRH) BuscarPacientesDoProfissional(tx *gorm.DB, pr
 	return nil, nil
 }
 
+func (m *MockUsuarioRepositorioRH) BuscarProfissionaisDoPaciente(tx *gorm.DB, pacienteID uint) (*dominio.Paciente, error) {
+	args := m.Called(tx, pacienteID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*dominio.Paciente), args.Error(1)
+}
+
 func (m *MockUsuarioRepositorioRH) Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error {
 	return nil
 }
@@ -111,6 +119,10 @@ func (m *MockUsuarioRepositorioRH) AtualizarPaciente(tx *gorm.DB, paciente *domi
 	return nil
 }
 
+func (m *MockUsuarioRepositorioRH) BuscarUsuarioPorTokenHash(tokenHash string) (*dominio.Usuario, error) {
+	return nil, nil
+}
+
 func (m *MockUsuarioRepositorioRH) DeletarUsuario(tx *gorm.DB, id uint) error {
 	return nil
 }
@@ -120,8 +132,8 @@ type MockAnaliseServico struct {
 	mock.Mock
 }
 
-func (m *MockAnaliseServico) GerarAnaliseHistorica(pacienteID uint, dias int) (*dtos.AnalisePacienteDTOOut, error) {
-	args := m.Called(pacienteID, dias)
+func (m *MockAnaliseServico) GerarAnaliseHistorica(usuarioID, pacienteID uint, tipoUsuario string, dias int) (*dtos.AnalisePacienteDTOOut, error) {
+	args := m.Called(usuarioID, pacienteID, tipoUsuario, dias)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -166,12 +178,13 @@ func TestRegistroHumorServico_CriarRegistroHumor_Sucesso(t *testing.T) {
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(8)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
-		HorasSono:        8,
+		HorasSono:        &horasSono,
 		NivelEnergia:     7,
 		NivelStress:      3,
-		AutoCuidado:      "Exercício físico",
+		AutoCuidado:      []string{"Exercício físico"},
 		Observacoes:      "Dia produtivo",
 		DataHoraRegistro: time.Now(),
 	}
@@ -179,7 +192,7 @@ func TestRegistroHumorServico_CriarRegistroHumor_Sucesso(t *testing.T) {
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 	mockRegistroHumorRepo.On("CriarRegistroHumor", mock.Anything, mock.AnythingOfType("*dominio.RegistroHumor")).Return(nil)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, resultado)
@@ -187,7 +200,7 @@ func TestRegistroHumorServico_CriarRegistroHumor_Sucesso(t *testing.T) {
 	assert.Equal(t, int16(8), resultado.HorasSono)
 	assert.Equal(t, int16(7), resultado.NivelEnergia)
 	assert.Equal(t, int16(3), resultado.NivelStress)
-	assert.Equal(t, "Exercício físico", resultado.AutoCuidado)
+	assert.Contains(t, resultado.AutoCuidado, "Exercício físico")
 	assert.Equal(t, uint(1), resultado.PacienteID)
 	mockUsuarioRepo.AssertExpectations(t)
 	mockRegistroHumorRepo.AssertExpectations(t)
@@ -201,18 +214,19 @@ func TestRegistroHumorServico_CriarRegistroHumor_PacienteNaoEncontrado(t *testin
 
 	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
+	horasSono := int16(8)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
-		HorasSono:        8,
+		HorasSono:        &horasSono,
 		NivelEnergia:     7,
 		NivelStress:      3,
-		AutoCuidado:      "Exercício físico",
+		AutoCuidado:      []string{"Exercício físico"},
 		DataHoraRegistro: time.Now(),
 	}
 
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(999)).Return(nil, gorm.ErrRecordNotFound)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 999)
+	resultado, err := servico.CriarRegistroHumor(&dto, 999)
 
 	assert.Error(t, err)
 	assert.Equal(t, dominio.ErrUsuarioNaoEncontrado, err)
@@ -229,19 +243,20 @@ func TestRegistroHumorServico_CriarRegistroHumor_ErroAoBuscarPaciente(t *testing
 
 	servico := servicos.NovoRegistroHumorServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockAnaliseServico)
 
+	horasSono := int16(8)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
-		HorasSono:        8,
+		HorasSono:        &horasSono,
 		NivelEnergia:     7,
 		NivelStress:      3,
-		AutoCuidado:      "Exercício físico",
+		AutoCuidado:      []string{"Exercício físico"},
 		DataHoraRegistro: time.Now(),
 	}
 
 	erroGenerico := errors.New("erro de conexão com banco de dados")
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(nil, erroGenerico)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.Error(t, err)
 	assert.Equal(t, erroGenerico, err)
@@ -263,18 +278,19 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoNivelHumorInvalido(t *
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(8)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       0, // Inválido
-		HorasSono:        8,
+		HorasSono:        &horasSono,
 		NivelEnergia:     7,
 		NivelStress:      3,
-		AutoCuidado:      "Exercício físico",
+		AutoCuidado:      []string{"Exercício físico"},
 		DataHoraRegistro: time.Now(),
 	}
 
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.Error(t, err)
 	assert.Equal(t, dominio.ErrNivelHumorInvalido, err)
@@ -296,18 +312,19 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoHorasSonoInvalido(t *t
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(15) // Inválido
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
-		HorasSono:        15, // Inválido
+		HorasSono:        &horasSono,
 		NivelEnergia:     7,
 		NivelStress:      3,
-		AutoCuidado:      "Exercício físico",
+		AutoCuidado:      []string{"Exercício físico"},
 		DataHoraRegistro: time.Now(),
 	}
 
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.Error(t, err)
 	assert.Equal(t, dominio.ErrHorasSonoInvalido, err)
@@ -329,18 +346,19 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoNivelEnergiaInvalido(t
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(8)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
-		HorasSono:        8,
+		HorasSono:        &horasSono,
 		NivelEnergia:     0, // Inválido
 		NivelStress:      3,
-		AutoCuidado:      "Exercício físico",
+		AutoCuidado:      []string{"Exercício físico"},
 		DataHoraRegistro: time.Now(),
 	}
 
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.Error(t, err)
 	assert.Equal(t, dominio.ErrNivelEnergiaInvalido, err)
@@ -362,18 +380,19 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoNivelStressInvalido(t 
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(8)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
-		HorasSono:        8,
+		HorasSono:        &horasSono,
 		NivelEnergia:     7,
 		NivelStress:      11, // Inválido
-		AutoCuidado:      "Exercício físico",
+		AutoCuidado:      []string{"Exercício físico"},
 		DataHoraRegistro: time.Now(),
 	}
 
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.Error(t, err)
 	assert.Equal(t, dominio.ErrNivelStressInvalido, err)
@@ -395,18 +414,19 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoAutoCuidadoVazio(t *te
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(8)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
-		HorasSono:        8,
+		HorasSono:        &horasSono,
 		NivelEnergia:     7,
 		NivelStress:      3,
-		AutoCuidado:      "", // Inválido
+		AutoCuidado:      []string{}, // Inválido (vazio)
 		DataHoraRegistro: time.Now(),
 	}
 
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.Error(t, err)
 	assert.Equal(t, dominio.ErrAutoCuidadoVazio, err)
@@ -428,18 +448,19 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValidacaoDataHoraRegistroVazia(
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(8)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
-		HorasSono:        8,
+		HorasSono:        &horasSono,
 		NivelEnergia:     7,
 		NivelStress:      3,
-		AutoCuidado:      "Exercício físico",
+		AutoCuidado:      []string{"Exercício físico"},
 		DataHoraRegistro: time.Time{}, // Inválido
 	}
 
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.Error(t, err)
 	assert.Equal(t, dominio.ErrDataHoraRegistroVazia, err)
@@ -461,12 +482,13 @@ func TestRegistroHumorServico_CriarRegistroHumor_ErroAoCriarRegistro(t *testing.
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(8)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
-		HorasSono:        8,
+		HorasSono:        &horasSono,
 		NivelEnergia:     7,
 		NivelStress:      3,
-		AutoCuidado:      "Exercício físico",
+		AutoCuidado:      []string{"Exercício físico"},
 		DataHoraRegistro: time.Now(),
 	}
 
@@ -474,7 +496,7 @@ func TestRegistroHumorServico_CriarRegistroHumor_ErroAoCriarRegistro(t *testing.
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 	mockRegistroHumorRepo.On("CriarRegistroHumor", mock.Anything, mock.AnythingOfType("*dominio.RegistroHumor")).Return(erroGenerico)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.Error(t, err)
 	assert.Equal(t, erroGenerico, err)
@@ -498,12 +520,13 @@ func TestRegistroHumorServico_CriarRegistroHumor_ComObservacoes(t *testing.T) {
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(9)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       5,
-		HorasSono:        9,
+		HorasSono:        &horasSono,
 		NivelEnergia:     8,
 		NivelStress:      2,
-		AutoCuidado:      "Meditação e yoga",
+		AutoCuidado:      []string{"Meditação", "Yoga"},
 		Observacoes:      "Excelente dia, me senti muito bem após a sessão de terapia",
 		DataHoraRegistro: time.Now(),
 	}
@@ -511,7 +534,7 @@ func TestRegistroHumorServico_CriarRegistroHumor_ComObservacoes(t *testing.T) {
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 	mockRegistroHumorRepo.On("CriarRegistroHumor", mock.Anything, mock.AnythingOfType("*dominio.RegistroHumor")).Return(nil)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, resultado)
@@ -535,19 +558,20 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValoresMinimos(t *testing.T) {
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(0)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       1,
-		HorasSono:        0,
+		HorasSono:        &horasSono,
 		NivelEnergia:     1,
 		NivelStress:      1,
-		AutoCuidado:      "Nenhum",
+		AutoCuidado:      []string{"Nenhum"},
 		DataHoraRegistro: time.Now(),
 	}
 
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 	mockRegistroHumorRepo.On("CriarRegistroHumor", mock.Anything, mock.AnythingOfType("*dominio.RegistroHumor")).Return(nil)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, resultado)
@@ -574,19 +598,20 @@ func TestRegistroHumorServico_CriarRegistroHumor_ValoresMaximos(t *testing.T) {
 		UsuarioID: 10,
 	}
 
+	horasSono := int16(12)
 	dto := dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       5,
-		HorasSono:        12,
+		HorasSono:        &horasSono,
 		NivelEnergia:     10,
 		NivelStress:      10,
-		AutoCuidado:      "Todas as atividades possíveis",
+		AutoCuidado:      []string{"Todas as atividades possíveis"},
 		DataHoraRegistro: time.Now(),
 	}
 
 	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(10)).Return(pacienteExistente, nil)
 	mockRegistroHumorRepo.On("CriarRegistroHumor", mock.Anything, mock.AnythingOfType("*dominio.RegistroHumor")).Return(nil)
 
-	resultado, err := servico.CriarRegistroHumor(dto, 10)
+	resultado, err := servico.CriarRegistroHumor(&dto, 10)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, resultado)

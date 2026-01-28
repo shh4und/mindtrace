@@ -66,7 +66,7 @@ func (rh *RegistroHumor) ValidarNivelStress() error {
 }
 
 func (rh *RegistroHumor) ValidarAutoCuidado() error {
-	if rh.AutoCuidado == "" {
+	if rh.AutoCuidado == "" || rh.AutoCuidado == "[]" || rh.AutoCuidado == "null" {
 		return ErrAutoCuidadoVazio
 	}
 	return nil

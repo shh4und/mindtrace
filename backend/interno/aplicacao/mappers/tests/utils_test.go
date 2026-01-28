@@ -405,26 +405,28 @@ func TestRegistrarPacienteDTOInParaEntidade_Dependente(t *testing.T) {
 
 func TestCriarRegistroHumorDTOInParaEntidade(t *testing.T) {
 	now := time.Now()
+	horasSono := int16(8)
 	dtoIn := &dtos.CriarRegistroHumorDTOIn{
 		NivelHumor:       4,
-		HorasSono:        8,
+		HorasSono:        &horasSono,
 		NivelStress:      3,
 		NivelEnergia:     7,
-		AutoCuidado:      "Exercício físico",
+		AutoCuidado:      []string{"Exercício físico"},
 		Observacoes:      "Dia produtivo",
 		DataHoraRegistro: now,
 	}
 	pacienteID := uint(5)
 
-	result := mappers.CriarRegistroHumorDTOInParaEntidade(dtoIn, pacienteID)
+	result, err := mappers.CriarRegistroHumorDTOInParaEntidade(dtoIn, pacienteID)
 
+	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Equal(t, pacienteID, result.PacienteID)
 	assert.Equal(t, dtoIn.NivelHumor, result.NivelHumor)
-	assert.Equal(t, dtoIn.HorasSono, result.HorasSono)
+	assert.Equal(t, *dtoIn.HorasSono, result.HorasSono)
 	assert.Equal(t, dtoIn.NivelStress, result.NivelStress)
 	assert.Equal(t, dtoIn.NivelEnergia, result.NivelEnergia)
-	assert.Equal(t, dtoIn.AutoCuidado, result.AutoCuidado)
+	assert.Contains(t, result.AutoCuidado, "Exercício físico") // Verifica se contem a string apos marshalling
 	assert.Equal(t, dtoIn.Observacoes, result.Observacoes)
 	assert.Equal(t, dtoIn.DataHoraRegistro, result.DataHoraRegistro)
 }
@@ -533,4 +535,119 @@ func TestRegistroHumorParaDTOOut_SemObservacoes(t *testing.T) {
 
 	assert.NotNil(t, result)
 	assert.Empty(t, result.Observacoes)
+}
+
+// ========== Testes para Mappers de Questionários ==========
+
+func TestInstrumentosParaDTOOut(t *testing.T) {
+	instrumentos := []*dominio.Instrumento{
+		{ID: 1, Codigo: "phq_9", Nome: "PHQ-9", Descricao: "Depressão", Versao: 1},
+		{ID: 2, Codigo: "gad_7", Nome: "GAD-7", Descricao: "Ansiedade", Versao: 1},
+	}
+
+	result := mappers.InstrumentosParaDTOOut(instrumentos)
+
+	assert.Len(t, result, 2)
+	assert.Equal(t, "phq_9", result[0].Codigo)
+	assert.Equal(t, "PHQ-9", result[0].Nome)
+	assert.Equal(t, "gad_7", result[1].Codigo)
+}
+
+func TestAtribuicaoParaDTOOutPaciente(t *testing.T) {
+	now := time.Now()
+	atrib := &dominio.Atribuicao{
+		ID:     1,
+		Status: dominio.StatusPendente,
+		Instrumento: dominio.Instrumento{
+			Codigo:    "phq_9",
+			Nome:      "PHQ-9",
+			Descricao: "Questionário de Depressão",
+			Perguntas: []dominio.Pergunta{{ID: 1}, {ID: 2}}, // 2 perguntas
+		},
+		Profissional: dominio.Profissional{
+			ID: 1,
+			Usuario: dominio.Usuario{
+				Nome:  "Dr. Teste",
+				Email: "dr@teste.com",
+			},
+			Especialidade: "Psicologia",
+		},
+		CreatedAt: now,
+	}
+
+	result := mappers.AtribuicaoParaDTOOutPaciente(atrib)
+
+	assert.NotNil(t, result)
+	assert.Equal(t, uint(1), result.ID)
+	assert.Equal(t, dominio.StatusPendente, result.Status)
+	assert.Equal(t, "PHQ-9", result.Instrumento.Nome)
+	assert.Equal(t, 2, result.Instrumento.TotalPerguntas)
+	assert.Equal(t, "Dr. Teste", result.Profissional.Nome)
+}
+
+func TestAtribuicaoParaDTOOutProfissional(t *testing.T) {
+	now := time.Now()
+	atrib := &dominio.Atribuicao{
+		ID:     1,
+		Status: dominio.StatusRespondido,
+		Instrumento: dominio.Instrumento{
+			Codigo: "gad_7",
+			Nome:   "GAD-7",
+			Perguntas: []dominio.Pergunta{
+				{ID: 1, Conteudo: "Pergunta 1", OrdemItem: 1},
+			},
+			OpcoesEscala: []dominio.OpcaoEscala{
+				{ID: 1, Valor: 0, Rotulo: "Nunca"},
+			},
+		},
+		Paciente: dominio.Paciente{
+			ID: 1,
+			Usuario: dominio.Usuario{
+				Nome:  "Paciente Teste",
+				Email: "pac@teste.com",
+			},
+		},
+		CreatedAt: now,
+	}
+
+	result := mappers.AtribuicaoParaDTOOutProfissional(atrib)
+
+	assert.NotNil(t, result)
+	assert.Equal(t, uint(1), result.ID)
+	assert.Equal(t, dominio.StatusRespondido, result.Status)
+	assert.Equal(t, "GAD-7", result.Instrumento.Nome)
+	assert.Len(t, result.Instrumento.Perguntas, 1)
+	assert.Len(t, result.Instrumento.OpcoesEscala, 1)
+	assert.Equal(t, "Paciente Teste", result.Paciente.Nome)
+}
+
+func TestDadosConviteParaDTOOut(t *testing.T) {
+	convite := &dominio.Convite{
+		Profissional: dominio.Profissional{
+			Usuario:       dominio.Usuario{Nome: "Dr. Convite"},
+			Especialidade: "Psiquiatria",
+		},
+	}
+
+	result := mappers.DadosConviteParaDTOOut(convite, true)
+
+	assert.NotNil(t, result)
+	assert.Equal(t, "Dr. Convite", result.NomeProfissional)
+	assert.Equal(t, "Psiquiatria", result.Especialidade)
+	assert.True(t, result.Valido)
+}
+
+func TestRespostaDetalhadaDTOOut_Nil(t *testing.T) {
+	result := mappers.RespostaDetalhadaDTOOut(nil, nil, nil)
+	assert.Nil(t, result)
+}
+
+func TestAtribuicaoParaDTOOutPaciente_Nil(t *testing.T) {
+	result := mappers.AtribuicaoParaDTOOutPaciente(nil)
+	assert.Nil(t, result)
+}
+
+func TestAtribuicaoParaDTOOutProfissional_Nil(t *testing.T) {
+	result := mappers.AtribuicaoParaDTOOutProfissional(nil)
+	assert.Nil(t, result)
 }
