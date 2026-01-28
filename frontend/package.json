@@ -35,6 +35,7 @@
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.6.2",
+    "lodash": "^4.17.23",
     "swagger-autogen": "^2.23.7",
     "vite": "^7.0.6",
     "vite-plugin-vue-devtools": "^8.0.0"

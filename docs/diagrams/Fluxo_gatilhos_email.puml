@@ -1,0 +1,42 @@
+@startuml Fluxo
+!theme plain
+title Fluxo de Gatilhos de Email - MindTrace
+
+|Atores|
+start
+if (Qual ação iniciada?) then (Atribuir Questionário)
+    :Profissional seleciona Paciente\ne Instrumento;
+    
+    |Backend MindTrace|
+    :Receber Requisição (POST);
+    :Persistir Atribuição no DB;
+    
+    if (Email do Paciente válido?) then (Sim)
+        :Preparar Template de Notificação;
+        :Disparar Email: "Novo Questionário Disponível";
+    else (Não)
+    endif
+    
+    |Atores|
+    :Paciente recebe notificação;
+
+else (Registrar Humor)
+    |Atores|
+    :Paciente registra humor diário;
+    
+    |Backend MindTrace|
+    :Persistir Registro de Humor;
+    :AnaliseServico: Calcular Médias Recentes;
+    
+    if (Padrão de Risco Detectado?) then (Sim (Média < X))
+        :Preparar Template de Alerta;
+        :Disparar Email ao Profissional: "Alerta de Risco";
+    else (Não)
+    endif
+    
+    |Atores|
+    :Profissional recebe alerta;
+endif
+
+stop
+@enduml

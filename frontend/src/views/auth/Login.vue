@@ -1,12 +1,12 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-  <!-- Navbar publica -->
+    <!-- Navbar publica -->
     <NavbarPublic :show-menu="false" />
 
-  <!-- Container do formulario de login -->
+    <!-- Container do formulario de login -->
     <div class="flex items-center justify-center px-4 mt-16">
       <div class="w-full max-w-md">
-  <!-- Formulario de login -->
+        <!-- Formulario de login -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
           <h2 class="text-3xl font-semibold text-center text-gray-900 mb-8">Entrar</h2>
 
@@ -19,7 +19,7 @@
               placeholder="Digite seu e-mail"
               autocomplete="email"
               required
-              size="lg"
+              size="md"
             />
 
             <!-- Campo senha -->
@@ -30,26 +30,31 @@
               placeholder="Digite sua senha"
               autocomplete="current-password"
               required
-              size="lg"
+              size="md"
             />
 
-            <BaseButton
-              type="submit"
-              variant="emerald"
-              size="lg"
-              full-width
-            >
-              Entrar
-            </BaseButton>
+            <BaseButton type="submit" variant="emerald" size="md" full-width> Entrar </BaseButton>
           </form>
 
           <div class="mt-6 text-center space-y-3">
-            <router-link to="/recuperar-senha"
-              class="block text-lg text-gray-600 hover:text-emerald-600 transition-colors">
+            <router-link
+              to="/cadastro"
+              class="block text-sm text-gray-600 hover:text-emerald-600 transition-colors underline"
+            >
+              Criar conta
+            </router-link>
+            <router-link
+              to="/recuperar-senha"
+              class="block text-sm text-gray-600 hover:text-emerald-600 transition-colors underline"
+            >
               Esqueceu sua senha?
             </router-link>
-            <router-link to="/cadastro" class="block text-lg text-gray-600 hover:text-emerald-600 transition-colors">
-              Criar conta
+            <span class="text-sm text-pretty text-gray-600">Ainda não ativou sua conta?</span>
+            <router-link
+              to="/reenvio"
+              class="block text-pretty text-sm text-gray-600 hover:text-emerald-600 transition-colors underline"
+            >
+              Reenvie o e-mail de ativação
             </router-link>
           </div>
         </div>
@@ -79,11 +84,11 @@ const handleLogin = async () => {
   try {
     await userStore.login({ email: email.value, senha: password.value });
     toast.success('Login realizado com sucesso!');
-    
+
     // O redirecionamento é baseado no role do token (agora string)
     const token = getStoredToken();
     const decodedToken = parseJwt(token);
-    
+
     if (decodedToken && decodedToken.role) {
       // Usa o enum para comparação type-safe
       if (decodedToken.role === TipoUsuario.Profissional) {

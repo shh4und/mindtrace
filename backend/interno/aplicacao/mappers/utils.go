@@ -410,3 +410,11 @@ func RespostaDetalhadaDTOOut(resp *dominio.Resposta, dadosBrutos []map[string]an
 		Detalhes:       dadosProcessados.Detalhes,
 	}
 }
+
+func DadosConviteParaDTOOut(conv *dominio.Convite, valido bool) *dtos.DadosConviteDTOOut {
+	return &dtos.DadosConviteDTOOut{
+		NomeProfissional: conv.Profissional.Usuario.Nome,
+		Especialidade:    conv.Profissional.Especialidade,
+		Valido:           valido,
+	}
+}

@@ -84,7 +84,7 @@ type VincularPacienteDTOIn struct {
 }
 
 type CriarConviteDTOIn struct {
-	Email string `json:"email" binding:"required,min=10"`
+	Email string `json:"email,omitempty"`
 }
 
 type RegistroRespostaDTOIn struct {
@@ -257,4 +257,10 @@ type ProfissionalResumidoDTOOut struct {
 	Nome          string `json:"nome"`
 	Email         string `json:"email"`
 	Especialidade string `json:"especialidade"`
+}
+
+type DadosConviteDTOOut struct {
+	NomeProfissional string `json:"nome_profissional"`
+	Especialidade    string `json:"especialidade"`
+	Valido           bool   `json:"valido"`
 }

@@ -72,3 +72,15 @@ func (cc *ConviteControlador) VincularPaciente(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"mensagem": "Paciente vinculado com sucesso"})
 }
+
+func (cc *ConviteControlador) ObterInfo(c *gin.Context) {
+	tokenVinculo := c.Query("token")
+
+	dadosConvite, err := cc.conviteServico.ObterInfoPorToken(tokenVinculo)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "Token inválido ou expirado"})
+		return
+	}
+
+	c.JSON(http.StatusOK, dadosConvite)
+}

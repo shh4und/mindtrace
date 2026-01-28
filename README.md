@@ -13,6 +13,7 @@ MindTrace é uma aplicação web full-stack completa projetada para rastreamento
 - **Gestão de Usuários**: Registro e autenticação para pacientes e profissionais de saúde
 - **Rastreamento de Humor**: Pacientes podem registrar entradas diárias de humor com timestamps e notas
 - **Questionários Padronizados**: Sistema completo de escalas psicométricas (PHQ-9, GAD-7, WHOQOL-BREF, WHO-5)
+- **Monitoramento Ativo**: Análise automática de padrões de risco com alertas por e-mail para profissionais
 - **Atribuição de Instrumentos**: Profissionais podem atribuir questionários a pacientes
 - **Analytics Avançados**: Análise histórica com classificação de status (REGULAR, ATENÇÃO, PREOCUPANTE)
 - **Relatórios e Análises**: Profissionais podem gerar relatórios de tendências de humor para seus pacientes
@@ -29,6 +30,7 @@ MindTrace é uma aplicação web full-stack completa projetada para rastreamento
 - **Tipos de Dados**: GORM Datatypes (JSONB)
 - **Banco de Dados**: PostgreSQL 17 (produção) / SQLite (desenvolvimento)
 - **Autenticação**: JWT (golang-jwt/jwt/v5)
+- **Emails**: net/smtp (Standard Lib) com Templates HTML Embutidos
 - **Testes**: Testify v1.10.0 - **281 testes unitários**
 - **Arquitetura**: Clean Architecture (Domain-Driven Design)
 
@@ -224,9 +226,15 @@ mindtrace/
 │   │   │   │   ├── convite_servico.go
 │   │   │   │   ├── resumo_servico.go
 │   │   │   │   ├── alerta_servico.go          # ✨ Sistema de alertas
-│   │   │   │   ├── analise_servico.go         # ✨ Analytics avançados
+│   │   │   │   ├── analise_servico.go         # ✨ Analytics avançados (Monitoramento)
 │   │   │   │   ├── notificacao_servico.go
+│   │   │   │   ├── email_servico.go           # ✨ Envio de emails (SMTP)
 │   │   │   │   ├── instrumento_servico.go     # ✨ Lógica de questionários
+│   │   │   │   ├── templates/                 # 📧 Templates HTML (embed)
+│   │   │   │   │   ├── ativacao.html
+│   │   │   │   │   ├── atribuicao.html
+│   │   │   │   │   ├── convite_profissional.html
+│   │   │   │   │   └── monitoramento.html
 │   │   │   │   └── tests/            # ✅ Testes de serviços (74 testes)
 │   │   │   ├── dtos/                 # Data Transfer Objects
 │   │   │   │   └── tipos.go

@@ -3,7 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Convite de Vínculo</title>
+    <title>Alerta de Monitoramento</title>
   </head>
   <body style="margin: 0; padding: 0; background-color: #f4f4f4">
     <table
@@ -29,8 +29,8 @@
           >
             <tr>
               <td style="padding: 40px 30px">
-                <h2 style="margin: 0 0 20px 0; color: #333333; font-size: 24px">
-                  Convite de Vínculo
+                <h2 style="margin: 0 0 20px 0; color: #D32F2F; font-size: 24px">
+                  Alerta de Monitoramento
                 </h2>
 
                 <p
@@ -41,7 +41,7 @@
                     line-height: 1.5;
                   "
                 >
-                  Olá,
+                  Olá, Dr(a). {{.NomeProfissional}}
                 </p>
                 <p
                   style="
@@ -51,8 +51,19 @@
                     line-height: 1.5;
                   "
                 >
-                  Clique no botão abaixo para vincular sua conta ao
-                  Profissional:
+                  O sistema de monitoramento detectou um padrão <strong>{{.Status}}</strong> para o paciente: <br/>
+                  <strong>{{.NomePaciente}}</strong>
+                </p>
+
+                <p
+                  style="
+                    margin: 0 0 30px 0;
+                    color: #555555;
+                    font-size: 16px;
+                    line-height: 1.5;
+                  "
+                >
+                  Recomendamos analisar os registros recentes.
                 </p>
 
                 <table
@@ -64,7 +75,7 @@
                   <tr>
                     <td
                       align="center"
-                      bgcolor="#4caf50"
+                      bgcolor="#D32F2F"
                       style="border-radius: 5px"
                     >
                       <a
@@ -72,7 +83,7 @@
                         target="_blank"
                         style="
                           padding: 12px 25px;
-                          border: 1px solid #4caf50;
+                          border: 1px solid #D32F2F;
                           border-radius: 5px;
                           font-family: Arial, sans-serif;
                           font-size: 16px;
@@ -82,25 +93,11 @@
                           font-weight: bold;
                         "
                       >
-                        Aceitar Convite
+                        Verificar Paciente
                       </a>
                     </td>
                   </tr>
                 </table>
-                <p
-                  style="
-                    margin: 30px 0 30px 0;
-                    color: #555555;
-                    font-size: 16px;
-                    line-height: 1.5;
-                  "
-                >
-                  Caso o botão acima não funcione, você pode copiar o código de
-                  convite e colar manualmente na seção "Convite" da barra
-                  lateral. <br />
-                  <strong>Código de Convite:</strong> <br />
-                  {{.TokenVinculo}}
-                </p>
                 <p
                   style="
                     margin: 30px 0 0 0;
@@ -109,8 +106,7 @@
                     text-align: center;
                   "
                 >
-                  Se você não solicitou este convite, por favor ignore este
-                  email.
+                  MindTrace Services - Monitoramento Automático
                 </p>
               </td>
             </tr>

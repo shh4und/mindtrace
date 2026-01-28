@@ -19,7 +19,7 @@ func (r *gormConviteRepositorio) CriarConvite(tx *gorm.DB, convite *dominio.Conv
 
 func (r *gormConviteRepositorio) BuscarConvitePorToken(tx *gorm.DB, token string) (*dominio.Convite, error) {
 	var convite dominio.Convite
-	if err := tx.Where("token = ? AND usado = ?", token, false).First(&convite).Error; err != nil {
+	if err := tx.Preload("Profissional").Preload("Profissional.Usuario").Where("token = ? AND usado = ?", token, false).First(&convite).Error; err != nil {
 		return nil, err
 	}
 	return &convite, nil

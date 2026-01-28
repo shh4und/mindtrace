@@ -1,0 +1,58 @@
+@startuml Arquitetura
+!theme plain
+title Arquitetura de Serviços e Injeção de Dependência
+
+interface "EmailServico" as IEmail {
+    +EnviarEmailAtivacao(to, token)
+    +EnviarEmailConvite(to, token)
+    +EnviarNotificacaoAtribuicao(to, nomeProfissional, instrumento)
+    +EnviarAlertaRisco(to, nomePaciente, dadosRisco)
+}
+
+class "emailServico" as ImplEmail {
+    -db: *gorm.DB
+    -usuarioRepo: UsuarioRepositorio
+    +EnviarEmail(...)
+}
+
+class "instrumentoServico" as InstSvc {
+    -db: *gorm.DB
+    -repo: InstrumentoRepositorio
+    -emailSvc: EmailServico
+    +AtribuirInstrumento()
+}
+
+class "registroHumorServico" as HumorSvc {
+    -db: *gorm.DB
+    -repo: RegistroHumorRepositorio
+    -analiseSvc: AnaliseServico
+    +Criar()
+}
+
+class "analiseServico" as AnaliseSvc {
+    -db: *gorm.DB
+    -repo: RegistroHumorRepositorio
+    -usuarioRepo: UsuarioRepositorio
+    -emailSvc: EmailServico
+    +VerificarPadroesDeRisco()
+}
+
+class "conviteServico" as ConviteSvc {
+    -emailSvc: EmailServico
+    +GerarConvite()
+}
+
+' Relacionamentos
+IEmail <|.. ImplEmail : implementa
+InstSvc o-- IEmail : injeta
+AnaliseSvc o-- IEmail : injeta
+ConviteSvc o-- IEmail : injeta
+HumorSvc --> AnaliseSvc : usa
+
+note bottom of AnaliseSvc
+    O serviço de análise usa o EmailServico
+    para alertar o profissional se
+    o humor estiver crítico.
+end note
+
+@enduml
