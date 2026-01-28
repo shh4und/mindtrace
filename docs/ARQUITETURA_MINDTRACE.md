@@ -384,9 +384,14 @@ mindtrace/
 │   │   │   │   ├── convite_servico.go
 │   │   │   │   ├── resumo_servico.go
 │   │   │   │   ├── alerta_servico.go           # ✨ Sistema de alertas
-│   │   │   │   ├── analise_servico.go          # ✨ Analytics avançados
+│   │   │   │   ├── analise_servico.go          # ✨ Analytics avançados (Monitoramento)
 │   │   │   │   ├── notificacao_servico.go
+│   │   │   │   ├── email_servico.go            # ✨ NEW - Serviço de Email (SMTP)
 │   │   │   │   ├── instrumento_servico.go      # ✨ Lógica de questionários
+│   │   │   │   ├── templates/                  # ✨ NEW - Templates HTML Embed
+│   │   │   │   │   ├── ativacao.html
+│   │   │   │   │   ├── monitoramento.html
+│   │   │   │   │   └── ...
 │   │   │   │   └── tests/             # ✅ TESTES DE SERVIÇOS
 │   │   │   │       ├── usuario_servico_test.go         (28 testes)
 │   │   │   │       ├── relatorio_servico_test.go       (17 testes)
@@ -750,6 +755,7 @@ go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/apl
 | Débito | Impacto | Prioridade | Resolução Planejada |
 |--------|---------|------------|---------------------|
 | ~~Falta de testes automatizados~~ | ~~Alto~~ | ~~Alta~~ | ✅ **CONCLUÍDO** - 281 testes implementados |
+| Testes unitários para EmailServico ausentes | Médio | Média | Criar mocks de SMTP e testar renderização de templates |
 | Log de auditoria não implementado | Médio | Média | Criar tabela `audit_log` e middleware |
 | Backup não automatizado | Alto | Alta | Script cron para backup PostgreSQL |
 | Swagger/OpenAPI incompleto | Baixo | Baixa | Completar anotações Swagger |
@@ -767,6 +773,7 @@ go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/apl
 | 28/10/2025 | 1.1 | ✅ Adição da seção de Infraestrutura de Testes (281 testes unitários)<br>✅ Atualização de Débitos Técnicos (testes concluídos)<br>✅ Atualização de Atributos de Qualidade (testabilidade comprovada)<br>✅ Expansão da estrutura de código com diretórios /tests<br>✅ Atualização de Boas Práticas (testes automatizados) |
 | 09/12/2025 | 1.2 | ✅ **Sistema de Questionários/Escalas Psicométricas** (5 novas entidades)<br>✅ Adição de `Instrumento`, `Pergunta`, `OpcaoEscala`, `Atribuicao`, `Resposta`<br>✅ Decisão Arquitetural D6: Armazenamento Híbrido (Relacional + JSONB)<br>✅ Novo serviço: `AnaliseServico` (analytics avançados)<br>✅ Novo controlador: `InstrumentoControlador` (6 endpoints)<br>✅ Stack tecnológico: ApexCharts, GORM Datatypes (JSONB)<br>✅ Atualização de diagramas ASCII (Visão Lógica, Database Layer)<br>✅ Estrutura de código: novos arquivos domínio/serviços/controladores<br>✅ Frontend: 4 novas views (AtribuirQuestionario, ResponderQuestionario, etc)<br>✅ Strategy Pattern para algoritmos de pontuação (PHQ-9, GAD-7, WHOQOL-BREF, WHO-5)<br>✅ 5 novas tabelas: instrumentos, perguntas, opcoes_escala, atribuicoes, respostas |
 | 09/12/2025 | 1.3 | ✅ **Revisão e Atualização Completa da Documentação**<br>✅ Estrutura de código detalhada refletindo organização atual<br>✅ Frontend: adição de diretórios `composables/`, `utils/`, `types/`, `constants/`<br>✅ Componentes organizados em `layout/` e `ui/`<br>✅ Backend: adição de `helpers/pdf.go` e `alerta_servico.go`<br>✅ Seção de seeders documentada (`seeders/` directory)<br>✅ Views detalhadas por tipo de usuário (paciente/profissional/shared)<br>✅ Confirmação de conformidade com Clean Architecture<br>✅ Atualização de marcadores "✨ NEW" para descrições funcionais |
+| 28/01/2026 | 1.4 | ✅ **Sistema de Notificações por Email e Monitoramento Ativo**<br>✅ Implementação do `EmailServico` com `net/smtp`<br>✅ Integração de templates HTML via `embed`<br>✅ Implementação lógica do `AnaliseServico` para detecção de riscos<br>✅ Alertas automáticos para profissionais (Status PREOCUPANTE)<br>✅ 4 novos templates de email: Ativação, Convite, Atribuição e Alerta<br>✅ Fluxo de análise histórica para gráficos (substituindo relatórios simples) |
 
 ---
 
@@ -774,4 +781,4 @@ go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/apl
 **Orientadora:** Profa. Dra. Adicinéia A. de Oliveira  
 **Disciplina:** ESII/2025-2  
 **Primeira versão:** 26/10/2025  
-**Última atualização:** 09/12/2025 (v1.3 - Revisão Completa da Documentação)
+**Última atualização:** 28/01/2026 (v1.4 - Monitoramento e Emails)
