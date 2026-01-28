@@ -107,6 +107,23 @@ func (uc *UsuarioControlador) ListarPacientesDoProfissional(c *gin.Context) {
 	c.JSON(http.StatusOK, pacientesOut)
 }
 
+// Extrai o ID do usuario e chama o servico para listar os profissionais
+func (uc *UsuarioControlador) ListarProfissionaisDoPaciente(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
+		return
+	}
+
+	profissionaisOut, err := uc.usuarioServico.ListarProfissionaisDoPaciente(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, profissionaisOut)
+}
+
 // DeletarPerfil deleta o perfil do usuario autenticado
 // Extrai o ID do usuario e chama o servico para deletar a conta
 func (uc *UsuarioControlador) DeletarPerfil(c *gin.Context) {

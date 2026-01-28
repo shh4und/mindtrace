@@ -87,6 +87,15 @@ func (r *gormUsuarioRepositorio) BuscarPacientesDoProfissional(tx *gorm.DB, prof
 	return profissional.Pacientes, nil
 }
 
+func (r *gormUsuarioRepositorio) BuscarProfissionaisDoPaciente(tx *gorm.DB, pacienteID uint) (*dominio.Paciente, error) {
+	var paciente dominio.Paciente
+	err := tx.Preload("Profissionais").Preload("Profissionais.Usuario").Where("id = ?", pacienteID).First(&paciente).Error
+	if err != nil {
+		return nil, err
+	}
+	return &paciente, nil
+}
+
 func (r *gormUsuarioRepositorio) Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error {
 	return tx.Save(usuario).Error
 }

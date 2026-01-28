@@ -25,13 +25,15 @@ type instrumentoServico struct {
 	db              *gorm.DB
 	instrumentoRepo repositorios.InstrumentoRepositorio
 	usuarioRepo     repositorios.UsuarioRepositorio
+	emailServico    EmailServico
 }
 
-func NovoInstrumentoServico(db *gorm.DB, instrumentoRepo repositorios.InstrumentoRepositorio, usuarioRepo repositorios.UsuarioRepositorio) InstrumentoServico {
+func NovoInstrumentoServico(db *gorm.DB, instrumentoRepo repositorios.InstrumentoRepositorio, usuarioRepo repositorios.UsuarioRepositorio, es EmailServico) InstrumentoServico {
 	return &instrumentoServico{
 		db:              db,
 		instrumentoRepo: instrumentoRepo,
 		usuarioRepo:     usuarioRepo,
+		emailServico:    es,
 	}
 }
 
@@ -115,6 +117,39 @@ func (is *instrumentoServico) CriarAtribuicao(userID, pacienteID, instrumentoID 
 		return nil
 
 	})
+
+	if err == nil {
+		go func() {
+			var pacEmail, pacNome, profNome, instNome string
+			
+			// Re-fetch para garantir dados frescos/carregados se necessário, 
+			// mas aqui podemos pegar direto das repositories se tivermos os IDs.
+			// Como o transaction já fechou, podemos usar is.db
+			
+			// Busca paciente para pegar email e nome
+			pac, e := is.usuarioRepo.BuscarPacientePorID(is.db, pacienteID)
+			if e == nil {
+				pacNome = pac.Usuario.Nome
+				pacEmail = pac.Usuario.Email
+			}
+
+			// Busca profissional para pegar nome
+			prof, e := is.usuarioRepo.BuscarProfissionalPorUsuarioID(is.db, userID)
+			if e == nil {
+				profNome = prof.Usuario.Nome
+			}
+
+			// Busca instrumento para pegar nome
+			inst, e := is.instrumentoRepo.BuscarInstrumentoPorID(is.db, instrumentoID)
+			if e == nil {
+				instNome = inst.Nome
+			}
+
+			if pacEmail != "" {
+				is.emailServico.EnviarEmailAtribuicao(pacEmail, pacNome, profNome, instNome)
+			}
+		}()
+	}
 
 	return err
 }

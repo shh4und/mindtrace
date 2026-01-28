@@ -101,7 +101,12 @@ const fetchProfissionais = async () => {
   isLoading.value = true;
   try {
     const response = await api.listarProfissionaisDoPaciente();
-    profissionais.value = response.data || [];
+    profissionais.value = (response.data || []).map(prof => ({
+      id: prof.id,
+      nome: prof.usuario?.nome || 'Profissional',
+      especialidade: prof.especialidade || 'Especialidade não informada',
+      email: prof.usuario?.email
+    }));
   } catch (error) {
     console.error('Erro ao buscar profissionais:', error);
     // Se o endpoint não existir, usa mock

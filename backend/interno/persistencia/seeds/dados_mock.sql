@@ -14,7 +14,7 @@ BEGIN;
 -- -----------------------------------------------------------------------------
 
 -- Profissional (tipo_usuario = 2)
-INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, created_at, updated_at)
+INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, esta_ativo, created_at, updated_at)
 VALUES (
     2,
     'Dr. João Silva',
@@ -23,13 +23,14 @@ VALUES (
     '11999990001',
     'Psicólogo clínico com 10 anos de experiência em saúde mental.',
     '12345678901',
+    TRUE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 )
 ON CONFLICT (email) DO NOTHING;
 
 -- Paciente 1 (tipo_usuario = 3) - Adulto independente
-INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, created_at, updated_at)
+INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, esta_ativo, created_at, updated_at)
 VALUES (
     3,
     'Ana Costa',
@@ -38,13 +39,14 @@ VALUES (
     '11888880001',
     'Paciente em acompanhamento para ansiedade.',
     '98765432101',
+    TRUE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 )
 ON CONFLICT (email) DO NOTHING;
 
 -- Paciente 2 (tipo_usuario = 3) - Menor dependente
-INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, created_at, updated_at)
+INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, esta_ativo, created_at, updated_at)
 VALUES (
     3,
     'Bruno Lima',
@@ -53,6 +55,7 @@ VALUES (
     '11777770001',
     'Paciente adolescente em acompanhamento.',
     '11122233344',
+    TRUE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 )

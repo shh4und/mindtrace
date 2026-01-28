@@ -75,11 +75,11 @@ func main() {
 	emailSvc := servicos.NovoEmailServico(db, usuarioRepo)
 	// Inicializa servicos
 	usuarioSvc := servicos.NovoUsuarioServico(db, usuarioRepo, emailSvc)
-	analiseSvc := servicos.NovoAnaliseServico(db, registroHumorRepo, usuarioRepo)
+	analiseSvc := servicos.NovoAnaliseServico(db, registroHumorRepo, usuarioRepo, emailSvc)
 	registroHumorSvc := servicos.NovoRegistroHumorServico(db, registroHumorRepo, usuarioRepo, analiseSvc)
 	resumoSvc := servicos.NovoResumoServico(db, registroHumorRepo, usuarioRepo)
 	conviteSvc := servicos.NovoConviteServico(db, conviteRepo, usuarioRepo, emailSvc)
-	instrumentoSvc := servicos.NovoInstrumentoServico(db, instrumentoRepo, usuarioRepo)
+	instrumentoSvc := servicos.NovoInstrumentoServico(db, instrumentoRepo, usuarioRepo, emailSvc)
 
 	// Inicializa controladores
 	profissionalCtrl := controladores.NovoProfissionalControlador(usuarioSvc)
@@ -138,6 +138,7 @@ func main() {
 				usuarios.GET("/paciente", pacienteCtrl.ProprioPerfilPaciente)
 				usuarios.GET("/profissional", profissionalCtrl.ProprioPerfilProfissional)
 				usuarios.GET("/profissional/pacientes", usuarioCtrl.ListarPacientesDoProfissional)
+				usuarios.GET("/paciente/profissionais", usuarioCtrl.ListarProfissionaisDoPaciente)
 				usuarios.PUT("/perfil", usuarioCtrl.AtualizarPerfil)
 				usuarios.PUT("/perfil/alterar-senha", usuarioCtrl.AlterarSenha)
 				usuarios.DELETE("/perfil/apagar-conta", usuarioCtrl.DeletarPerfil)

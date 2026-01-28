@@ -29,14 +29,16 @@ type analiseServico struct {
 	db           *gorm.DB
 	registroRepo repositorios.RegistroHumorRepositorio
 	usuarioRepo  repositorios.UsuarioRepositorio
+	emailServico EmailServico
 	// alertaRepo  repositorios.AlertaRepositorio // Futuro: para persistir o alerta
 }
 
-func NovoAnaliseServico(db *gorm.DB, regRepo repositorios.RegistroHumorRepositorio, userRepo repositorios.UsuarioRepositorio) AnaliseServico {
+func NovoAnaliseServico(db *gorm.DB, regRepo repositorios.RegistroHumorRepositorio, userRepo repositorios.UsuarioRepositorio, es EmailServico) AnaliseServico {
 	return &analiseServico{
 		db:           db,
 		registroRepo: regRepo,
 		usuarioRepo:  userRepo,
+		emailServico: es,
 	}
 }
 
@@ -129,10 +131,19 @@ func (s *analiseServico) ExecutarMonitoramento(pacienteID uint) error {
 	status := s.calcularStatus(mediaSono, mediaHumor, mediaStress, mediaEnergia) // Simplificado para exemplo
 
 	if status == StatusPreocupante {
-		// TODO: PERSISTE O ALERTA
-		// s.alertaRepo.Criar(dominio.Alerta{PacienteID: pacienteID, Tipo: status, Mensagem: "Padrão preocupante detectado"})
-
-		// TODO: ENVIA EMAIL/NOTIFICAÇÃO
+		// Busca paciente e seus profissionais para notificar
+		var paciente *dominio.Paciente
+		paciente, err := s.usuarioRepo.BuscarProfissionaisDoPaciente(s.db, pacienteID)
+		if err == nil && paciente != nil {
+			for _, prof := range paciente.Profissionais {
+				if prof.Usuario.Email != "" {
+					// Envia email de alerta (assincrono/goroutine opcional, mas aqui vou chamar direto para simplicidade ou dentro de go func)
+					go func(emailProf, nomeProf, nomePac, st string) {
+						s.emailServico.EnviarEmailAlertaMonitoramento(emailProf, nomeProf, nomePac, st)
+					}(prof.Usuario.Email, prof.Usuario.Nome, paciente.Usuario.Nome, status)
+				}
+			}
+		}
 	}
 	log.Printf(
 		"Monitoramento realizado as: %v\nPaciente ID: %d\nDados:\n mediaHumor: %.2f, mediaStress: %.2f, mediaSono: %.2f, mediaEnergia: %.2f\nStatus: %s",

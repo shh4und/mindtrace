@@ -29,6 +29,7 @@ type UsuarioServico interface {
 	AlterarSenha(userID uint, dtoIn *dtos.AlterarSenhaDTOIn) error
 	DeletarPerfil(userID uint) error
 	ReenviarEmailAtivacao(email string) error
+	ListarProfissionaisDoPaciente(userID uint) ([]dtos.ProfissionalDTOOut, error)
 }
 
 // usuarioServico implementa a interface UsuarioServico
@@ -442,6 +443,24 @@ func (s *usuarioServico) ListarPacientesDoProfissional(userID uint) ([]dtos.Paci
 	})
 
 	return mappers.PacientesParaDTOOut(pacientes), err
+}
+
+func (s *usuarioServico) ListarProfissionaisDoPaciente(userID uint) ([]dtos.ProfissionalDTOOut, error) {
+	var profissionais []dominio.Profissional
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		profissional, err := s.repositorio.BuscarPacientePorUsuarioID(tx, userID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return dominio.ErrUsuarioNaoEncontrado
+			}
+			return err
+		}
+		paciente, err := s.repositorio.BuscarProfissionaisDoPaciente(tx, profissional.ID)
+		profissionais = paciente.Profissionais
+		return err
+	})
+
+	return mappers.ProfissionaisParaDTOOut(profissionais), err
 }
 
 // DeletarPerfil deleta o perfil do usuario
