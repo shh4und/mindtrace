@@ -8,7 +8,7 @@ import {
   SELF_CARE_ACTIVITIES,
   generateSteps,
   formatSleepLabel,
-  clampValue
+  clampValue,
 } from '@/constants/mood.js';
 
 /**
@@ -42,14 +42,12 @@ export function useMoodForm() {
 
   // Computed
   const sleepLabel = computed(() => formatSleepLabel(sleepHours.value, sleepConfig.max));
-  
+
   const today = new Date();
-  const currentDate = computed(() => 
+  const currentDate = computed(() =>
     today.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' })
   );
-  const currentDay = computed(() => 
-    today.toLocaleDateString('pt-BR', { weekday: 'long' })
-  );
+  const currentDay = computed(() => today.toLocaleDateString('pt-BR', { weekday: 'long' }));
 
   const isValid = computed(() => !!selectedMood.value);
 
@@ -59,16 +57,16 @@ export function useMoodForm() {
    */
   function getProcessedActivities() {
     let activities = [...selectedActivities.value];
-    
+
     if (otherActivity.value.trim()) {
       activities.push(otherActivity.value.trim());
     }
-    
+
     // Se "Nenhuma Atividade" foi selecionada, retorna apenas ela
     if (activities.includes('Nenhuma Atividade')) {
       return [];
     }
-    
+
     return activities;
   }
 
@@ -84,7 +82,7 @@ export function useMoodForm() {
       nivel_stress: clampValue(stressLevel.value, stressConfig.min, stressConfig.max),
       auto_cuidado: getProcessedActivities(),
       observacoes: notes.value,
-      data_hora_registro: new Date().toISOString()
+      data_hora_registro: new Date().toISOString(),
     };
   }
 
@@ -96,7 +94,7 @@ export function useMoodForm() {
     if (!selectedMood.value) {
       return {
         valid: false,
-        message: 'Por favor, selecione seu humor principal antes de registrar.'
+        message: 'Por favor, selecione seu humor principal antes de registrar.',
       };
     }
     return { valid: true };
@@ -108,7 +106,7 @@ export function useMoodForm() {
    */
   async function submit() {
     const validation = validate();
-    
+
     if (!validation.valid) {
       toast.warning(validation.message);
       return false;
@@ -123,7 +121,7 @@ export function useMoodForm() {
       reset();
       return true;
     } catch (error) {
-      const errorMsg = error.response?.data?.message || 'Houve um erro ao registrar seu humor.';
+      const errorMsg = error.response?.data?.erro || 'Houve um erro ao registrar seu humor.';
       toast.error(errorMsg);
       console.error('Erro ao registrar humor:', error);
       return false;
@@ -175,6 +173,6 @@ export function useMoodForm() {
     // Métodos
     validate,
     submit,
-    reset
+    reset,
   };
 }

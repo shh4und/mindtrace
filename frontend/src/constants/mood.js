@@ -7,11 +7,11 @@
  * Opções de humor com emoji e label
  */
 export const MOOD_OPTIONS = [
-  { value: 'very_bad', label: 'Muito Mal', emoji: '😖' },
-  { value: 'bad', label: 'Aborrecido', emoji: '😕' },
-  { value: 'neutral', label: 'Neutro', emoji: '😐' },
-  { value: 'cheerful', label: 'Animado', emoji: '😊' },
-  { value: 'very_good', label: 'Muito Bem', emoji: '😁' },
+  { value: 'very_bad', label: 'Muito Mal', emoji: 'confounded' },
+  { value: 'bad', label: 'Aborrecido', emoji: 'confused' },
+  { value: 'neutral', label: 'Neutro', emoji: 'neutral_face' },
+  { value: 'cheerful', label: 'Animado', emoji: 'blush' },
+  { value: 'very_good', label: 'Muito Bem', emoji: 'grin' },
 ];
 
 /**
@@ -44,21 +44,21 @@ export const SLIDER_CONFIG = {
     min: 0,
     max: 12,
     default: 0,
-    emoji: '🌜',
+    emoji: 'last_quarter_moon_with_face',
     labels: ['0h', '4h', '8h', '12h+']
   },
   energy: {
     min: 1,
     max: 10,
     default: 6,
-    emoji: '🔋',
+    emoji: 'battery',
     labels: ['Baixa', 'Moderada', 'Alta']
   },
   stress: {
     min: 1,
     max: 10,
     default: 6,
-    emoji: '😤',
+    emoji: 'triumph',
     labels: ['Calmo', 'Moderado', 'Alto']
   }
 };
