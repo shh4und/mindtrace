@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"mindtrace/backend/interno/aplicacao/controladores"
 	"mindtrace/backend/interno/aplicacao/middlewares"
@@ -182,7 +183,7 @@ func main() {
 			}
 		}
 	}
-	log.Printf("\n%s\n"+`Acesso com dados mockados:
+	fmt.Printf("\n%s\n"+`Acesso com dados mockados:
 - Profissional: 
 	joao.silva@mindtrace.dev
 - Pacientes:

@@ -2,12 +2,16 @@
   <div>
     <header class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900">Resumo</h1>
-      <p class="text-gray-600 mt-1">Bem-vindo(a) de volta! Aqui está um resumo do seu bem-estar.</p>
+      <p class="text-gray-600 mt-1">
+        Bem-vindo(a) de volta! Aqui está um resumo do seu bem-estar.
+      </p>
     </header>
 
     <!-- Loading state -->
     <div v-if="isLoading" class="flex justify-center items-center py-16">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      <div
+        class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"
+      ></div>
     </div>
 
     <template v-else>
@@ -16,12 +20,22 @@
         <div
           class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
         >
-          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <font-awesome-icon :icon="faFaceSmile" class="w-5 h-5 mr-2 text-emerald-600" />
+          <h2
+            class="text-lg font-semibold text-gray-900 mb-4 flex items-center"
+          >
+            <font-awesome-icon
+              :icon="faFaceSmile"
+              class="w-8 h-8 p-2 m-2 rounded-full bg-emerald-100 text-emerald-600"
+            />
             Último Registro de Humor
           </h2>
           <div v-if="userLastData.humor" class="flex items-center space-x-4">
-            <Emoji :data="emojiIndex" :emoji="userLastData.emoji" :size="48" set="facebook" />
+            <Emoji
+              :data="emojiIndex"
+              :emoji="userLastData.emoji"
+              :size="48"
+              set="facebook"
+            />
             <div>
               <p class="text-2xl font-bold text-emerald-600">
                 {{ userLastData.label }}
@@ -30,7 +44,7 @@
                 {{ formatDate(userLastData.data) }}
               </p>
               <p class="text-gray-600 text-sm mt-1">
-                {{ userLastData.anotacao || 'Nenhuma anotação.' }}
+                {{ userLastData.anotacao || "Nenhuma anotação." }}
               </p>
             </div>
           </div>
@@ -49,12 +63,20 @@
         <div
           class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
         >
-          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <font-awesome-icon :icon="faBell" class="w-5 h-5 mr-2 text-amber-500" />
+          <h2
+            class="text-lg font-semibold text-gray-900 mb-4 flex items-center"
+          >
+            <font-awesome-icon
+              :icon="faBell"
+              class="w-8 h-8 p-2 m-2 bg-amber-100 rounded-full text-amber-600"
+            />
             Últimas Notificações
           </h2>
           <div class="text-center py-6">
-            <font-awesome-icon :icon="faBellSlash" class="w-12 h-12 text-gray-300 mb-3" />
+            <font-awesome-icon
+              :icon="faBellSlash"
+              class="w-12 h-12 text-gray-300 mb-3"
+            />
             <p class="text-gray-500 text-sm">Nenhuma notificação no momento.</p>
             <p class="text-gray-400 text-xs mt-1">
               Em breve você receberá alertas e lembretes aqui.
@@ -66,12 +88,18 @@
       <!-- Card: Atividades Recentes -->
       <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <font-awesome-icon :icon="faClock" class="w-5 h-5 mr-2 text-emerald-600" />
+          <font-awesome-icon
+            :icon="faClock"
+            class="w-8 h-8 p-2 m-2 rounded-full bg-emerald-100 text-emerald-600"
+          />
           Atividades Recentes
         </h2>
 
         <div v-if="atividadesRecentes.length === 0" class="text-center py-8">
-          <font-awesome-icon :icon="faListCheck" class="w-12 h-12 text-gray-300 mb-3" />
+          <font-awesome-icon
+            :icon="faListCheck"
+            class="w-12 h-12 text-gray-300 mb-3"
+          />
           <p class="text-gray-500">Nenhuma atividade recente.</p>
           <p class="text-gray-400 text-sm mt-1">
             Registre seu humor ou responda um questionário para começar.
@@ -86,21 +114,25 @@
           >
             <div
               :class="[
-                'shrink-0 w-10 h-10 rounded-full flex items-center justify-center',
+                'shrink-0 flex items-center justify-center w-8 h-8 p-2 rounded-full',
                 atividade.tipo === 'humor'
                   ? 'bg-emerald-100 text-emerald-600'
                   : 'bg-blue-100 text-blue-600',
               ]"
             >
               <font-awesome-icon
-                :icon="atividade.tipo === 'humor' ? faFaceSmile : faClipboardList"
-                class="w-5 h-5"
+                :icon="
+                  atividade.tipo === 'humor' ? faFaceSmile : faClipboardList
+                "
+                class="w-8 h-8 p-2"
               />
             </div>
             <div class="flex-1 min-w-0">
               <p class="font-medium text-gray-900">{{ atividade.titulo }}</p>
               <p class="text-sm text-gray-500">{{ atividade.descricao }}</p>
-              <p class="text-xs text-gray-400 mt-1">{{ atividade.dataFormatada }}</p>
+              <p class="text-xs text-gray-400 mt-1">
+                {{ atividade.dataFormatada }}
+              </p>
             </div>
             <Emoji
               v-if="atividade.tipo === 'humor'"
@@ -117,10 +149,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import api from '@/services/api';
-import { useToast } from 'vue-toastification';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { ref, onMounted, computed } from "vue";
+import api from "@/services/api";
+import { useToast } from "vue-toastification";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
   faFaceSmile,
   faBell,
@@ -128,11 +160,11 @@ import {
   faClock,
   faClipboardList,
   faListCheck,
-} from '@fortawesome/free-solid-svg-icons';
+} from "@fortawesome/free-solid-svg-icons";
 
-import data from 'emoji-mart-vue-fast/data/all.json';
-import { EmojiIndex, Emoji } from 'emoji-mart-vue-fast/src';
-import 'emoji-mart-vue-fast/css/emoji-mart.css';
+import data from "emoji-mart-vue-fast/data/all.json";
+import { EmojiIndex, Emoji } from "emoji-mart-vue-fast/src";
+import "emoji-mart-vue-fast/css/emoji-mart.css";
 
 const emojiIndex = new EmojiIndex(data);
 
@@ -144,30 +176,30 @@ const userLastData = ref({});
 const atividadesRecentes = ref([]);
 
 const moodOptions = [
-  { label: 'Muito Mal', emoji: 'confounded' },
-  { label: 'Aborrecido', emoji: 'confused' },
-  { label: 'Neutro', emoji: 'neutral_face' },
-  { label: 'Animado', emoji: 'blush' },
-  { label: 'Muito Bem', emoji: 'grin' },
+  { label: "Muito Mal", emoji: "confounded" },
+  { label: "Aborrecido", emoji: "confused" },
+  { label: "Neutro", emoji: "neutral_face" },
+  { label: "Animado", emoji: "blush" },
+  { label: "Muito Bem", emoji: "grin" },
 ];
 
 // --- FUNÇÕES AUXILIARES ---
 const formatDate = (dateString) => {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   });
 };
 
 const formatDateShort = (dateString) => {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('pt-BR', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("pt-BR", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
@@ -180,15 +212,15 @@ const fetchSummaryData = async () => {
     const summary = summaryResponse.data;
 
     if (summary && summary.humor) {
-      summary.emoji = moodOptions[summary.humor - 1]?.emoji || 'neutral_face';
-      summary.label = moodOptions[summary.humor - 1]?.label || 'Neutro';
+      summary.emoji = moodOptions[summary.humor - 1]?.emoji || "neutral_face";
+      summary.label = moodOptions[summary.humor - 1]?.label || "Neutro";
       userLastData.value = summary;
     }
 
     // Buscar atividades recentes (mock + dados reais combinados)
     await fetchAtividadesRecentes(summary);
   } catch (error) {
-    toast.error('Não foi possível carregar os dados do resumo.');
+    toast.error("Não foi possível carregar os dados do resumo.");
     console.error(error);
   } finally {
     isLoading.value = false;
@@ -201,12 +233,14 @@ const fetchAtividadesRecentes = async (summaryData) => {
   // Adicionar último registro de humor como atividade
   if (summaryData && summaryData.humor) {
     atividades.push({
-      tipo: 'humor',
-      titulo: 'Registro de Humor',
-      descricao: `Você registrou: ${moodOptions[summaryData.humor - 1]?.label || 'Humor'}`,
+      tipo: "humor",
+      titulo: "Registro de Humor",
+      descricao: `Você registrou: ${
+        moodOptions[summaryData.humor - 1]?.label || "Humor"
+      }`,
       data: summaryData.data,
       dataFormatada: formatDateShort(summaryData.data),
-      emoji: moodOptions[summaryData.humor - 1]?.emoji || 'neutral_face',
+      emoji: moodOptions[summaryData.humor - 1]?.emoji || "neutral_face",
     });
   }
 
@@ -223,15 +257,17 @@ const fetchAtividadesRecentes = async (summaryData) => {
 
     respondidos.forEach((q) => {
       atividades.push({
-        tipo: 'questionario',
-        titulo: `Questionário "${q.instrumento?.nome || 'Avaliação'}" respondido`,
-        descricao: q.instrumento?.descricao || 'Questionário completado',
+        tipo: "questionario",
+        titulo: `Questionário "${
+          q.instrumento?.nome || "Avaliação"
+        }" respondido`,
+        descricao: q.instrumento?.descricao || "Questionário completado",
         data: q.respondido_em,
         dataFormatada: formatDateShort(q.respondido_em),
       });
     });
   } catch (error) {
-    console.log('Questionários não disponíveis:', error);
+    console.log("Questionários não disponíveis:", error);
   }
 
   // Ordenar por data e limitar a 3
