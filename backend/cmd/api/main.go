@@ -10,6 +10,7 @@ import (
 	"mindtrace/backend/interno/persistencia/repositorios"
 	"mindtrace/backend/interno/persistencia/seeds"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -181,7 +182,16 @@ func main() {
 			}
 		}
 	}
-
+	log.Printf("\n%s\n"+`Acesso com dados mockados:
+- Profissional: 
+	joao.silva@mindtrace.dev
+- Pacientes:
+	ana.costa@mindtrace.dev
+	bruno.lima@mindtrace.dev
+ano.costo@mindtrace.dev <- precisa ativar conta
+- Senha:
+	Password123!`+"\n%s\n", strings.Repeat("#", 50), strings.Repeat("#", 50))
 	log.Println("servidor iniciado na porta 9090")
 	roteador.Run(":9090")
+
 }

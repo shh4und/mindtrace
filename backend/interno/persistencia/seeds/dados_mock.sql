@@ -27,7 +27,7 @@ VALUES (
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 )
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE SET esta_ativo = TRUE;
 
 -- Paciente 1 (tipo_usuario = 3) - Adulto independente
 INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, esta_ativo, created_at, updated_at)
@@ -43,7 +43,7 @@ VALUES (
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 )
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE SET esta_ativo = TRUE;
 
 -- Paciente 2 (tipo_usuario = 3) - Menor dependente
 INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, esta_ativo, created_at, updated_at)
@@ -59,10 +59,10 @@ VALUES (
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 )
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE SET esta_ativo = TRUE;
 
 -- Paciente 3 (tipo_usuario = 3) - Adulto independente
-INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, created_at, updated_at)
+INSERT INTO usuarios (tipo_usuario, nome, email, senha, contato, bio, cpf, esta_ativo, created_at, updated_at)
 VALUES (
     3,
     'Ano Costo',
@@ -71,10 +71,11 @@ VALUES (
     '11666660001',
     'Paciente em acompanhamento para ansiedade.',
     '98765432102',
+    FALSE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 )
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE SET esta_ativo = FALSE;
 
 -- -----------------------------------------------------------------------------
 -- 2. Inserção de Profissional
@@ -98,7 +99,7 @@ ON CONFLICT (usuario_id) DO NOTHING;
 -- -----------------------------------------------------------------------------
 
 -- Paciente 1 - Ana (adulta, independente)
-INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, esta_ativo, created_at, updated_at)
+INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, created_at, updated_at)
 SELECT 
     id,
     '1995-03-20'::timestamp with time zone,
@@ -106,7 +107,6 @@ SELECT
     NULL,
     NULL,
     '2025-10-01'::timestamp with time zone,
-    TRUE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 FROM usuarios 
@@ -114,7 +114,7 @@ WHERE email = 'ana.costa@mindtrace.dev'
 ON CONFLICT (usuario_id) DO NOTHING;
 
 -- Paciente 2 - Bruno (menor, dependente)
-INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, esta_ativo, created_at, updated_at)
+INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, created_at, updated_at)
 SELECT 
     id,
     '2010-07-22'::timestamp with time zone,
@@ -122,7 +122,6 @@ SELECT
     'Maria Lima',
     '11666660001',
     '2025-10-15'::timestamp with time zone,
-    TRUE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 FROM usuarios 
@@ -130,7 +129,7 @@ WHERE email = 'bruno.lima@mindtrace.dev'
 ON CONFLICT (usuario_id) DO NOTHING;
 
 -- Paciente 3 - Ano (adulto, independente)
-INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, esta_ativo, created_at, updated_at)
+INSERT INTO pacientes (usuario_id, data_nascimento, dependente, nome_responsavel, contato_responsavel, data_inicio_tratamento, created_at, updated_at)
 SELECT 
     id,
     '1995-03-20'::timestamp with time zone,
@@ -138,12 +137,12 @@ SELECT
     NULL,
     NULL,
     '2025-10-01'::timestamp with time zone,
-    TRUE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 FROM usuarios 
 WHERE email = 'ano.costo@mindtrace.dev'
 ON CONFLICT (usuario_id) DO NOTHING;
+
 -- -----------------------------------------------------------------------------
 -- 4. Vinculação Profissional-Paciente (Many-to-Many)
 -- -----------------------------------------------------------------------------
@@ -234,8 +233,7 @@ CROSS JOIN (
         (4, 8, 8, 2, '["Skincare"]', 'Me sentindo bem', (CURRENT_TIMESTAMP - INTERVAL '1 day')),
         (5, 8, 7, 2, '["Academia"]', 'Excelente dia!', CURRENT_TIMESTAMP)
 ) AS vals(nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro)
-WHERE u.email = 'ana.costa@mindtrace.dev'
-ON CONFLICT (paciente_id, nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes) DO NOTHING;
+WHERE u.email = 'ana.costa@mindtrace.dev';
 
 -- Registros de Humor - Bruno Lima (15 dias)
 INSERT INTO registros_humor (paciente_id, nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro, created_at)
@@ -269,18 +267,7 @@ CROSS JOIN (
         (4, 8, 9, 2, '["Descansar"]', 'Bem disposto', (CURRENT_TIMESTAMP - INTERVAL '1 day')),
         (5, 9, 8, 2, '["Esporte"]', 'Ótimo dia!', CURRENT_TIMESTAMP)
 ) AS vals(nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes, data_hora_registro)
-WHERE u.email = 'bruno.lima@mindtrace.dev'
-ON CONFLICT (paciente_id, nivel_humor, horas_sono, nivel_energia, nivel_stress, auto_cuidado, observacoes) DO NOTHING;
+WHERE u.email = 'bruno.lima@mindtrace.dev';
 
 
 COMMIT;
-
--- =============================================================================
--- Resumo dos dados mockados:
--- - 1 Profissional: Dr. João Silva (joao.silva@mindtrace.dev)
--- - 2 Pacientes: Ana Costa e Bruno Lima
--- - Senha padrão para todos: Password123!
--- - Vínculo profissional-paciente estabelecido
--- - 2 Convites: 1 usado (Ana), 1 ativo
--- - 30 Registros de humor (15 por paciente, últimos 15 dias)
--- =============================================================================
