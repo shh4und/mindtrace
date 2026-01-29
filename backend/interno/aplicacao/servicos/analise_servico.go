@@ -3,6 +3,7 @@ package servicos
 import (
 	"errors"
 	"log"
+	"math"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
@@ -15,6 +16,13 @@ const (
 	StatusPreocupante = "PREOCUPANTE"
 	StatusAtencao     = "ATENCAO"
 	StatusRegular     = "REGULAR"
+)
+
+const (
+	PesoSono    = 0.4
+	PesoHumor   = 0.2
+	PesoStress  = 0.2
+	PesoEnergia = 0.2
 )
 
 type AnaliseServico interface {
@@ -97,7 +105,8 @@ func (s *analiseServico) GerarAnaliseHistorica(usuarioID, pacienteID uint, tipoU
 		analise.MediaHumor = float64(somaHumor) / count
 
 		// Recalcula o status baseado nos dados carregados
-		analise.StatusAtual = s.calcularStatus(analise.MediaSono, analise.MediaHumor, analise.MediaStress, analise.MediaEnergia)
+		analise.ValorIBG = s.calcularIBG(analise.MediaSono, analise.MediaHumor, analise.MediaStress, analise.MediaEnergia)
+		analise.StatusAtual = s.calcularStatus(analise.ValorIBG)
 	}
 
 	return analise, nil
@@ -128,8 +137,8 @@ func (s *analiseServico) ExecutarMonitoramento(pacienteID uint) error {
 	mediaEnergia := float64(somaEnergia) / float64(len(registros))
 
 	// 3. Verifica Padrão
-	status := s.calcularStatus(mediaSono, mediaHumor, mediaStress, mediaEnergia) // Simplificado para exemplo
-
+	ibg := s.calcularIBG(mediaSono, mediaHumor, mediaStress, mediaEnergia) // Simplificado para exemplo
+	status := s.calcularStatus(ibg)
 	if status == StatusPreocupante {
 		// Busca paciente e seus profissionais para notificar
 		var paciente *dominio.Paciente
@@ -151,12 +160,47 @@ func (s *analiseServico) ExecutarMonitoramento(pacienteID uint) error {
 	return nil
 }
 
-func (s *analiseServico) calcularStatus(sono, humor, stress, energia float64) string {
-	if humor < 2.5 || stress > 8.0 || (sono < 4.0 || sono > 11.0) || energia < 2.5 {
-		return StatusPreocupante
+func (s *analiseServico) calcularStatus(ibg float64) string {
+	switch {
+	case ibg >= 0.70:
+		return StatusRegular // Verde (> 70%)
+	case ibg >= 0.40:
+		return StatusAtencao // Amarelo (40% - 69%)
+	default:
+		return StatusPreocupante // Vermelho (< 40%)
 	}
-	if humor < 3.5 || stress > 6.0 || (sono < 5.0 || sono > 10.0) || energia < 4.0 {
-		return StatusAtencao
+}
+
+func (s *analiseServico) calcularIBG(sono, humor, stress, energia float64) float64 {
+	// 1. Normalizar Humor (Escala 1-5, Maior é melhor)
+	// (Valor - 1) / (5 - 1)
+	normHumor := (humor - 1.0) / 4.0
+	if normHumor < 0 {
+		normHumor = 0
 	}
-	return StatusRegular
+
+	// 2. Normalizar Energia (Escala 1-10, Maior é melhor)
+	// (Valor - 1) / (10 - 1)
+	normEnergia := (energia - 1.0) / 9.0
+
+	// 3. Normalizar Stress (Escala 1-10, MENOR é melhor - Inverso)
+	// 1 - ((Valor - 1) / 9)
+	normStress := 1.0 - ((stress - 1.0) / 9.0)
+
+	// 4. Normalizar Sono (Ideal ~8h. Distância do ideal).
+	// Consideramos 8h o ideal. Se afastar mais que 4h (ou seja <4 ou >12), zera.
+	distancia := math.Abs(sono - 8.0)
+	normSono := 1.0 - (distancia / 4.0) // Penalidade de 0.25 por hora de desvio
+	if normSono < 0 {
+		normSono = 0
+	}
+
+	// Calculo do Índice Ponderado
+	ibg := (normHumor * PesoHumor) +
+		(normStress * PesoStress) +
+		(normSono * PesoSono) +
+		(normEnergia * PesoEnergia)
+
+	// Definição de Status baseada no Índice (0 a 1)
+	return ibg
 }

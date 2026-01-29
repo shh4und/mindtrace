@@ -117,7 +117,7 @@ type AnalisePacienteDTOOut struct {
 	MediaEnergia float64 `json:"media_energia"`
 	MediaStress  float64 `json:"media_stress"`
 	MediaHumor   float64 `json:"media_humor"`
-
+	ValorIBG     float64 `json:"valor_ibg"`
 	// Dados de Inteligência (Antigo Monitoramento)
 	StatusAtual   string    `json:"status_atual"` // REGULAR, ATENCAO, PREOCUPANTE
 	UltimaAnalise time.Time `json:"ultima_analise"`
