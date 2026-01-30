@@ -108,3 +108,42 @@ Fase 3: Conformidade LGPD
    - Adicionar campos TermosAceitosEm e TermosVersao na tabela usuarios.
 2. Endpoint de Exclusão:
    - Implementar lógica de "Anonimização" no UsuarioServico (sobrescrever nome/email com hash e deletar soft).
+
+---
+
+🛡️ Resumo das Alterações Realizadas
+
+1. Confiabilidade e Estabilidade (Fase 1)
+
+- Envio de E-mail Seguro: Implementei um timeout de 10 segundos no envio SMTP para evitar bloqueio de threads.
+- Proteção contra Crashes: Adicionei defer recover() na goroutine de alertas de monitoramento. Se o serviço de e-mail falhar, a API não
+  cai mais.
+- Logs Limpos: Removi logs que expunham dados sensíveis de saúde e o corpo de e-mails com tokens no console.
+
+2. Segurança de Acesso (Fase 2)
+
+- Rate Limiting: Implementei um middleware de proteção contra força bruta.
+  - Rotas críticas (/entrar, /registrar) agora têm limite de 1 requisição a cada 2 segundos (burst de 5).
+- Autenticação Reforçada (JWT + Refresh Token):
+  - Criei a tabela refresh_tokens.
+  - O endpoint de login agora retorna um par de chaves: access_token (15 min) e refresh_token (7 dias).
+  - Criei a rota POST /api/v1/entrar/refresh para renovação segura de sessão.
+
+3. Conformidade LGPD (Fase 3)
+
+- Consentimento Explícito:
+  - Adicionei campos TermosAceitosEm e TermosVersao no banco.
+  - O cadastro agora exige o envio de termos_aceitos: true para prosseguir.
+- Direito ao Esquecimento (Anonimização):
+  - Implementei a rota DELETE /api/v1/usuarios/perfil/anonimizar.
+  - Diferente do "apagar conta" (que destrói tudo), a anonimização substitui Nome, Email e CPF por dados fictícios e desativa o acesso,
+    mas mantém os dados de saúde (registros_humor) no banco para fins estatísticos, respeitando a privacidade.
+
+⚠️ Próximos Passos
+
+1.  Atualizar o Frontend:
+    - O Login agora retorna { access_token, refresh_token }. Você precisará ajustar o armazenamento no localStorage e criar um interceptor
+      no axios para chamar o /refresh quando der erro 401.
+    - No cadastro, você precisa enviar o campo "termos_aceitos": true no JSON.
+2.  Rodar Migrações:
+    - Na próxima vez que subir o backend, o GORM criará automaticamente a tabela refresh_tokens e adicionará as novas colunas em usuarios.
