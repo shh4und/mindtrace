@@ -142,6 +142,23 @@ func (uc *UsuarioControlador) DeletarPerfil(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"mensagem": "Conta deletada com sucesso"})
 }
 
+// AnonimizarPerfil anonimiza os dados do usuario (Direito ao Esquecimento - LGPD)
+func (uc *UsuarioControlador) AnonimizarPerfil(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": "ID do usuário não encontrado no token"})
+		return
+	}
+
+	err := uc.usuarioServico.AnonimizarPerfil(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"erro": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"mensagem": "Conta anonimizada com sucesso. Seus dados pessoais foram removidos."})
+}
+
 func (uc *UsuarioControlador) AtivarConta(c *gin.Context) {
 	tokenAtivacao := c.Query("token")
 	if tokenAtivacao == "" {

@@ -152,6 +152,7 @@ func main() {
 				usuarios.PUT("/perfil", usuarioCtrl.AtualizarPerfil)
 				usuarios.PUT("/perfil/alterar-senha", usuarioCtrl.AlterarSenha)
 				usuarios.DELETE("/perfil/apagar-conta", usuarioCtrl.DeletarPerfil)
+				usuarios.DELETE("/perfil/anonimizar", usuarioCtrl.AnonimizarPerfil)
 			}
 
 			registroHumor := protegido.Group("/registro-humor")

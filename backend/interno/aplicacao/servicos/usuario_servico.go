@@ -2,6 +2,7 @@ package servicos
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/mappers"
@@ -29,6 +30,7 @@ type UsuarioServico interface {
 	AtualizarPerfil(userID uint, dtoIn *dtos.AtualizarPerfilDTOIn) error
 	AlterarSenha(userID uint, dtoIn *dtos.AlterarSenhaDTOIn) error
 	DeletarPerfil(userID uint) error
+	AnonimizarPerfil(userID uint) error
 	ReenviarEmailAtivacao(email string) error
 	ListarProfissionaisDoPaciente(userID uint) ([]dtos.ProfissionalDTOOut, error)
 }
@@ -72,6 +74,15 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 
 		// Usa o mapper para criar as entidades a partir do DTOIn
 		novoUsuario, novoProfissional := mappers.RegistrarProfissionalDTOInParaEntidade(dtoIn)
+
+		// LGPD: Valida termos
+		if !dtoIn.TermosAceitos {
+			return errors.New("é necessário aceitar os termos de uso e política de privacidade")
+		}
+		termosVersao := "v1.0"
+		agora := time.Now()
+		novoUsuario.TermosAceitosEm = &agora
+		novoUsuario.TermosVersao = &termosVersao
 
 		// Validar usuario
 		if err := novoUsuario.Validar(); err != nil {
@@ -163,6 +174,15 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 		}
 		// Usa o mapper para criar as entidades a partir do DTOIn
 		novoUsuario, novoPaciente := mappers.RegistrarPacienteDTOInParaEntidade(dtoIn)
+
+		// LGPD: Valida termos
+		if !dtoIn.TermosAceitos {
+			return errors.New("é necessário aceitar os termos de uso e política de privacidade")
+		}
+		termosVersao := "v1.0"
+		agora := time.Now()
+		novoUsuario.TermosAceitosEm = &agora
+		novoUsuario.TermosVersao = &termosVersao
 
 		// Validar usuario
 		if err := novoUsuario.Validar(); err != nil {
@@ -555,6 +575,41 @@ func (s *usuarioServico) DeletarPerfil(userID uint) error {
 			return err
 		}
 		return s.repositorio.DeletarUsuario(tx, userID)
+	})
+}
+
+func (s *usuarioServico) AnonimizarPerfil(userID uint) error {
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return dominio.ErrUsuarioNaoEncontrado
+			}
+			return err
+		}
+
+		// Anonimizar Dados PII
+		randomSuffix, _ := GenerateSecureToken() // 64 chars hex
+		if len(randomSuffix) > 10 {
+			randomSuffix = randomSuffix[:10]
+		}
+
+		usuario.Nome = "Usuário Anônimo"
+		usuario.Email = fmt.Sprintf("deleted_%d_%s@mindtrace.anon", usuario.ID, randomSuffix)
+		usuario.CPF = fmt.Sprintf("000%s", randomSuffix) // Mock CPF unico
+		usuario.Contato = ""
+		usuario.Bio = "Perfil anonimizado a pedido do usuário."
+		usuario.EstaAtivo = false
+
+		// Invalidar Senha
+		usuario.Senha = "DISABLED_ACCOUNT"
+
+		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
+			return err
+		}
+
+		// Soft Delete (mantendo dados estatisticos no banco, mas inacessíveis via API normal)
+		return tx.Delete(usuario).Error
 	})
 }
 
