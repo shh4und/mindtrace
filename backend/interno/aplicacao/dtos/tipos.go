@@ -97,6 +97,15 @@ type ReenvioAtivacaoDTOIn struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
+type RefreshTokenDTOIn struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+type TokenDTOOut struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 // PontoDeDadosDTOOut representa um ponto de dados para graficos
 type PontoDeDadosDTOOut struct {
 	Data  time.Time `json:"data"`

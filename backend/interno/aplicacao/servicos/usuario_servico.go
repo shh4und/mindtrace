@@ -20,7 +20,8 @@ import (
 type UsuarioServico interface {
 	RegistrarProfissional(dtoIn *dtos.RegistrarProfissionalDTOIn) (*dtos.ProfissionalDTOOut, error)
 	RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (*dtos.PacienteDTOOut, error)
-	Login(email, senha string) (string, error)
+	Login(email, senha string) (string, string, error)
+	RefreshAccessToken(refreshToken string) (string, string, error)
 	BuscarUsuarioPorID(userID uint) (*dtos.UsuarioDTOOut, error)
 	ProprioPerfilPaciente(pacID uint) (*dtos.PacienteDTOOut, error)
 	ProprioPerfilProfissional(profID uint) (*dtos.ProfissionalDTOOut, error)
@@ -227,43 +228,123 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 	return mappers.PacienteParaDTOOut(pacienteCompleto), err
 }
 
-// Login autentica o usuario e retorna um token JWT
-func (s *usuarioServico) Login(email, senha string) (string, error) {
+// Login autentica o usuario e retorna um token JWT e um Refresh Token
+func (s *usuarioServico) Login(email, senha string) (string, string, error) {
 	// Busca usuario pelo e-mail
 	usuario, err := s.repositorio.BuscarPorEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", dominio.ErrUsuarioNaoEncontrado
+			return "", "", dominio.ErrUsuarioNaoEncontrado
 		}
-		return "", err
+		return "", "", err
 	}
 
 	if !usuario.EstaAtivo {
-		return "", dominio.ErrUsuarioNaoAtivo
+		return "", "", dominio.ErrUsuarioNaoAtivo
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(senha))
 	if err != nil {
-		return "", dominio.ErrCrendenciaisInvalidas
+		return "", "", dominio.ErrCrendenciaisInvalidas
 	}
 
-	// Gera o token JWT
+	// Gera o token JWT (Access Token - 15 min)
+	accessToken, err := s.gerarJWT(usuario)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Gera Refresh Token (7 dias)
+	refreshToken, err := GenerateSecureToken()
+	if err != nil {
+		return "", "", err
+	}
+
+	rt := &dominio.RefreshToken{
+		UsuarioID: usuario.ID,
+		Hash:      refreshToken,
+		ExpiraEm:  time.Now().Add(7 * 24 * time.Hour),
+		Revogado:  false,
+	}
+
+	if err := s.db.Transaction(func(tx *gorm.DB) error {
+		return s.repositorio.SalvarRefreshToken(tx, rt)
+	}); err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+
+// RefreshAccessToken renova o par de chaves access e refresh
+func (s *usuarioServico) RefreshAccessToken(refreshToken string) (string, string, error) {
+	var novoAccess, novoRefresh string
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		// Busca token antigo
+		rt, err := s.repositorio.BuscarRefreshTokenPorHash(tx, refreshToken)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return dominio.ErrTokenInvalido
+			}
+			return err
+		}
+
+		// Validações
+		if rt.Revogado {
+			// ROTACAO DE TOKEN DETECTADA: Possivel roubo. Revogar TODOS os tokens do usuario?
+			// Por enquanto, apenas falha.
+			return dominio.ErrTokenInvalido
+		}
+		if time.Now().After(rt.ExpiraEm) {
+			return dominio.ErrTokenInvalido
+		}
+
+		// Revoga o usado (Rotação)
+		rt.Revogado = true
+		if err := s.repositorio.SalvarRefreshToken(tx, rt); err != nil { // Salvar atualiza se ja tem ID
+			return err
+		}
+
+		usuario, err := s.repositorio.BuscarUsuarioPorID(rt.UsuarioID)
+		if err != nil {
+			return err
+		}
+
+		// Gera novos tokens
+		novoAccess, err = s.gerarJWT(usuario)
+		if err != nil {
+			return err
+		}
+
+		novoRefresh, err = GenerateSecureToken()
+		if err != nil {
+			return err
+		}
+
+		novoRt := &dominio.RefreshToken{
+			UsuarioID: usuario.ID,
+			Hash:      novoRefresh,
+			ExpiraEm:  time.Now().Add(7 * 24 * time.Hour),
+		}
+
+		return s.repositorio.SalvarRefreshToken(tx, novoRt)
+	})
+
+	return novoAccess, novoRefresh, err
+}
+
+func (s *usuarioServico) gerarJWT(usuario *dominio.Usuario) (string, error) {
 	claims := jwt.MapClaims{
-		"sub":  usuario.ID,                                         // Subject com o ID do usuario
-		"role": dominio.TipoUsuarioParaString(usuario.TipoUsuario), // Adiciona o tipo de usuario como role (string)
-		"iat":  time.Now().Unix(),                                  // Issued At indica quando o token foi criado
-		"exp":  time.Now().Add(time.Hour * 1).Unix(),               // Define expiracao do token em uma hora
+		"sub":  usuario.ID,
+		"role": dominio.TipoUsuarioParaString(usuario.TipoUsuario),
+		"iat":  time.Now().Unix(),
+		"exp":  time.Now().Add(time.Minute * 15).Unix(), // 15 minutos
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := token.SignedString([]byte(jwtSecret))
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
+	return token.SignedString([]byte(jwtSecret))
 }
 
 // BuscarUsuarioPorID busca um usuario pelo ID
