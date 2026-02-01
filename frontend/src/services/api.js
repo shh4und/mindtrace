@@ -29,7 +29,7 @@ apiClient.interceptors.request.use(
       return config;
     }
 
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -45,6 +45,9 @@ const api = {
   // autenticacao e sessao
   login(credentials) {
     return apiClient.post("/entrar/login", credentials);
+  },
+  refreshTokenRotation(refreshToken) {
+    return apiClient.post("/entrar/refresh", refreshToken);
   },
   registrarPaciente(data) {
     return apiClient.post("/pacientes/registrar", data);

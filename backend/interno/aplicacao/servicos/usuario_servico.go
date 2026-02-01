@@ -320,8 +320,7 @@ func (s *usuarioServico) RefreshAccessToken(refreshToken string) (string, string
 		}
 
 		// Revoga o usado (Rotação)
-		rt.Revogado = true
-		if err := s.repositorio.SalvarRefreshToken(tx, rt); err != nil { // Salvar atualiza se ja tem ID
+		if err := s.repositorio.RevogarRefreshToken(tx, rt.ID); err != nil { // Salvar atualiza se ja tem ID
 			return err
 		}
 
@@ -344,7 +343,7 @@ func (s *usuarioServico) RefreshAccessToken(refreshToken string) (string, string
 		novoRt := &dominio.RefreshToken{
 			UsuarioID: usuario.ID,
 			Hash:      novoRefresh,
-			ExpiraEm:  time.Now().Add(7 * 24 * time.Hour),
+			ExpiraEm:  time.Now().Add(24 * time.Hour),
 		}
 
 		return s.repositorio.SalvarRefreshToken(tx, novoRt)
@@ -358,7 +357,7 @@ func (s *usuarioServico) gerarJWT(usuario *dominio.Usuario) (string, error) {
 		"sub":  usuario.ID,
 		"role": dominio.TipoUsuarioParaString(usuario.TipoUsuario),
 		"iat":  time.Now().Unix(),
-		"exp":  time.Now().Add(time.Minute * 15).Unix(), // 15 minutos
+		"exp":  time.Now().Add(time.Minute * 1).Unix(), // 1 minutos
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")

@@ -1,11 +1,18 @@
-import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-import api from '@/services/api';
-import router from '@/router';
-import { TipoUsuario, isProfissional, isPaciente } from '@/types/usuario.js';
-import { parseJwt, getStoredToken, setToken, clearToken } from '@/utils/jwt.js';
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import api from "@/services/api";
+import router from "@/router";
+import { TipoUsuario, isProfissional, isPaciente } from "@/types/usuario.js";
+import {
+  parseJwt,
+  getStoredToken,
+  setAccessToken,
+  clearToken,
+  setRefreshToken,
+  getRefreshToken,
+} from "@/utils/jwt.js";
 
-export const useUserStore = defineStore('user', () => {
+export const useUserStore = defineStore("user", () => {
   // estado centralizado do usuario autenticado
   // --- STATE ---
   const user = ref(null);
@@ -14,8 +21,12 @@ export const useUserStore = defineStore('user', () => {
   // --- GETTERS (como computed properties) ---
   const isLoggedIn = computed(() => isAuthenticated.value);
   const userType = computed(() => user.value?.tipo_usuario || null);
-  const isProfissionalUser = computed(() => user.value ? isProfissional(user.value) : false);
-  const isPacienteUser = computed(() => user.value ? isPaciente(user.value) : false);
+  const isProfissionalUser = computed(() =>
+    user.value ? isProfissional(user.value) : false
+  );
+  const isPacienteUser = computed(() =>
+    user.value ? isPaciente(user.value) : false
+  );
 
   // --- ACTIONS (como funcoes) ---
 
@@ -28,7 +39,7 @@ export const useUserStore = defineStore('user', () => {
     if (isAuthenticated.value && !user.value) {
       try {
         let response;
-        
+
         // Usa o enum para comparação type-safe
         if (userType === TipoUsuario.Paciente) {
           response = await api.proprioPerfilPaciente();
@@ -37,10 +48,10 @@ export const useUserStore = defineStore('user', () => {
         } else {
           throw new Error(`Tipo de usuário inválido: ${userType}`);
         }
-        
+
         user.value = response.data;
       } catch (error) {
-        console.error('Erro ao buscar dados do usuário:', error);
+        console.error("Erro ao buscar dados do usuário:", error);
         logout();
       }
     }
@@ -51,7 +62,7 @@ export const useUserStore = defineStore('user', () => {
       await api.deletarConta();
       logout();
     } catch (error) {
-      console.error('Erro ao deletar conta:', error);
+      console.error("Erro ao deletar conta:", error);
       throw error;
     }
   }
@@ -64,7 +75,7 @@ export const useUserStore = defineStore('user', () => {
   async function register(data, userType) {
     try {
       let response;
-      
+
       // Usa o enum para comparação type-safe
       if (userType === TipoUsuario.Paciente) {
         response = await api.registrarPaciente(data);
@@ -74,15 +85,9 @@ export const useUserStore = defineStore('user', () => {
         throw new Error(`Tipo de usuário inválido: ${userType}`);
       }
 
-      // Armazena o token retornado no localStorage
-      if (response.data.token) {
-        setToken(response.data.token);
-        isAuthenticated.value = true;
-      }
-
       return response;
     } catch (error) {
-      console.error('Erro ao registrar usuário:', error);
+      console.error("Erro ao registrar usuário:", error);
       throw error;
     }
   }
@@ -93,16 +98,18 @@ export const useUserStore = defineStore('user', () => {
    */
   async function login(credentials) {
     try {
+      clearToken();
       const response = await api.login(credentials);
-      
+
       // Armazena o token retornado no localStorage
-      if (response.data.token) {
-        setToken(response.data.token);
+      if (response.data.access_token && response.data.refresh_token) {
+        setAccessToken(response.data.access_token);
+        setRefreshToken(response.data.refresh_token);
         isAuthenticated.value = true;
 
         // Decodifica o token para obter o tipo de usuário
-        const payload = parseJwt(response.data.token);
-        
+        const payload = parseJwt(response.data.access_token);
+
         // Agora o role vem como string: "profissional" ou "paciente"
         const role = payload?.role;
 
@@ -114,7 +121,41 @@ export const useUserStore = defineStore('user', () => {
 
       return response;
     } catch (error) {
-      console.error('Erro ao fazer login:', error);
+      console.error("Erro ao fazer login:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Realiza o refreshToken do usuario
+   * @param {Object} credentials - credenciais de refreshToken email e senha
+   */
+  async function refreshToken() {
+    try {
+      const token = { refresh_token: getRefreshToken() };
+      clearToken();
+      const response = await api.refreshTokenRotation(token);
+      // Armazena o token retornado no localStorage
+      if (response.data.access_token && response.data.refresh_token) {
+        setAccessToken(response.data.access_token);
+        setRefreshToken(response.data.refresh_token);
+        isAuthenticated.value = true;
+
+        // Decodifica o token para obter o tipo de usuário
+        const payload = parseJwt(response.data.access_token);
+
+        // Agora o role vem como string: "profissional" ou "paciente"
+        const role = payload?.role;
+
+        // Busca os dados completos do usuário
+        if (role) {
+          await fetchUser(role);
+        }
+      }
+
+      return response;
+    } catch (error) {
+      console.error("Erro ao fazer rotacao de tokens:", error);
       throw error;
     }
   }
@@ -126,7 +167,7 @@ export const useUserStore = defineStore('user', () => {
     clearToken();
     user.value = null;
     isAuthenticated.value = false;
-    router.push('/login');
+    router.push("/login");
   }
 
   // disponibiliza estado e acoes para os componentes
@@ -142,5 +183,6 @@ export const useUserStore = defineStore('user', () => {
     register,
     logout,
     deleteAccount,
+    refreshToken,
   };
 });

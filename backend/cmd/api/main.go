@@ -198,7 +198,7 @@ func main() {
 - Pacientes:
 	ana.costa@mindtrace.dev
 	bruno.lima@mindtrace.dev
-ano.costo@mindtrace.dev <- precisa ativar conta
+	ano.costo@mindtrace.dev <- precisa ativar conta
 - Senha:
 	Password123!`+"\n%s\n", strings.Repeat("#", 50), strings.Repeat("#", 50))
 	log.Println("servidor iniciado na porta 9090")

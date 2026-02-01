@@ -1,6 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { TipoUsuario } from "@/types/usuario.js";
-import { getUserRoleFromToken, isAuthenticated } from "@/utils/jwt.js";
+import {
+  clearToken,
+  getUserRoleFromToken,
+  isAuthenticated,
+} from "@/utils/jwt.js";
+import { useAuth } from "@/composables";
 
 // Lazy loading dos componentes para code-splitting
 const Landpage = () => import("@/views/Landpage.vue");
@@ -201,7 +206,7 @@ const router = createRouter({
 });
 
 // Guarda de navegação global
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const role = getUserRoleFromToken();
   const autenticado = isAuthenticated();
 
@@ -215,7 +220,6 @@ router.beforeEach((to, from, next) => {
     "reenvio-ativacao",
   ];
 
-  // Verifica se é rota pública (incluindo rotas filhas de dashboards)
   const isPublicRoute = rotasPublicas.includes(to.name);
   const isPacienteRoute = to.matched.some(
     (record) => record.meta.role === TipoUsuario.Paciente
@@ -225,7 +229,6 @@ router.beforeEach((to, from, next) => {
   );
 
   if (isPublicRoute) {
-    // Se já está logado e tenta acessar página pública, redireciona para dashboard
     if (autenticado && role) {
       if (role === TipoUsuario.Profissional) {
         next({ name: "profissional-resumo" });
@@ -240,7 +243,17 @@ router.beforeEach((to, from, next) => {
   } else {
     // Rotas protegidas precisam de autenticação
     if (!autenticado) {
-      next({ name: "login" });
+      console.log("Token expirado, tentando refresh...");
+      try {
+        // ✅ AGUARDA o refresh completar
+        await useAuth().refresh();
+        console.log("Refresh bem-sucedido!");
+        next();
+      } catch (error) {
+        console.log("Refresh falhou:", error);
+        clearToken();
+        next({ name: "login" });
+      }
     } else {
       // Verifica se o usuário tem permissão para acessar a rota
       if (isProfissionalRoute && role !== TipoUsuario.Profissional) {
