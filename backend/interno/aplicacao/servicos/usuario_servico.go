@@ -590,7 +590,7 @@ func (s *usuarioServico) AnonimizarPerfil(userID uint) error {
 		// Anonimizar Dados PII
 		randomSuffix, _ := GenerateSecureToken() // 64 chars hex
 		if len(randomSuffix) > 10 {
-			randomSuffix = randomSuffix[:10]
+			randomSuffix = randomSuffix[:8]
 		}
 
 		usuario.Nome = "Usuário Anônimo"

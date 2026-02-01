@@ -84,7 +84,7 @@ const api = {
     return apiClient.put("/usuarios/perfil/alterar-senha", passwords);
   },
   deletarConta() {
-    return apiClient.delete("/usuarios/perfil/apagar-conta");
+    return apiClient.delete("/usuarios/perfil/anonimizar");
   },
 
   // --- Registro de Humor ---
