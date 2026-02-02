@@ -606,6 +606,29 @@ func (s *usuarioServico) AnonimizarPerfil(userID uint) error {
 		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
 			return err
 		}
+		if dominio.TipoUsuarioParaString(usuario.TipoUsuario) == "profissional" {
+			profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, userID)
+			if err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return dominio.ErrUsuarioNaoEncontrado
+				}
+				return err
+			}
+			if err = tx.Delete(profissional).Error; err != nil {
+				return err
+			}
+		} else if dominio.TipoUsuarioParaString(usuario.TipoUsuario) == "paciente" {
+			paciente, err := s.repositorio.BuscarPacientePorUsuarioID(tx, userID)
+			if err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return dominio.ErrUsuarioNaoEncontrado
+				}
+				return err
+			}
+			if err = tx.Delete(paciente).Error; err != nil {
+				return err
+			}
+		}
 
 		// Soft Delete (mantendo dados estatisticos no banco, mas inacessíveis via API normal)
 		return tx.Delete(usuario).Error
