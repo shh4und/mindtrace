@@ -4,7 +4,7 @@
       'fixed md:static inset-y-0 left-0 transform transition-transform duration-300 ease-in-out z-50',
       isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
       isCollapsed ? 'md:w-20' : 'md:w-64',
-      'w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg md:shadow-none relative',
+      'w-64 bg-white border-r border-gray-200 flex flex-col shadow-lg md:shadow-none md:relative',
     ]"
     role="navigation"
     :aria-label="`Menu de navegação do ${variantLabel}`"
@@ -13,7 +13,9 @@
       @click="toggleCollapse"
       :class="[
         'absolute -right-6 top-10 z-40 w-6 h-12 hidden md:flex items-center justify-center border border-l-0 border-gray-200 rounded-r-xl shadow-sm transition-all',
-        variant === 'paciente' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-700',
+        variant === 'paciente'
+          ? 'bg-emerald-50 text-emerald-600'
+          : 'bg-rose-50 text-rose-700',
       ]"
       :aria-label="isCollapsed ? 'Expandir menu' : 'Recolher menu'"
     >
@@ -31,7 +33,9 @@
             role="menuitem"
             :class="[
               'w-full flex items-center px-3 py-3 rounded-lg font-medium transition-all duration-200',
-              activeView === item.view ? activeItemClasses : 'text-gray-600 hover:bg-gray-50',
+              activeView === item.view
+                ? activeItemClasses
+                : 'text-gray-600 hover:bg-gray-50',
             ]"
             :title="isCollapsed ? item.label : ''"
           >
@@ -67,18 +71,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faChevronLeft, faChevronRight, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { ref, computed } from "vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import {
+  faChevronLeft,
+  faChevronRight,
+  faCheck,
+} from "@fortawesome/free-solid-svg-icons";
 
 const props = defineProps({
   menuItems: { type: Array, required: true },
-  activeView: { type: String, default: '' },
-  variant: { type: String, default: 'paciente' },
+  activeView: { type: String, default: "" },
+  variant: { type: String, default: "paciente" },
   isOpen: { type: Boolean, default: false }, // Controla o estado de abertura no mobile
 });
 
-const emit = defineEmits(['navigate', 'close']);
+const emit = defineEmits(["navigate", "close"]);
 
 const isCollapsed = ref(false); // Controla o estado de recolhimento no desktop
 
@@ -91,17 +99,21 @@ const toggleCollapse = () => {
 };
 
 const closeSidebar = () => {
-  emit('close');
+  emit("close");
 };
 
 const handleNavigate = (view) => {
-  emit('navigate', view);
+  emit("navigate", view);
   closeSidebar();
 };
 
 const activeItemClasses = computed(() =>
-  props.variant === 'paciente' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+  props.variant === "paciente"
+    ? "bg-emerald-50 text-emerald-700"
+    : "bg-rose-50 text-rose-700"
 );
 
-const variantLabel = computed(() => (props.variant === 'paciente' ? 'Paciente' : 'Profissional'));
+const variantLabel = computed(() =>
+  props.variant === "paciente" ? "Paciente" : "Profissional"
+);
 </script>

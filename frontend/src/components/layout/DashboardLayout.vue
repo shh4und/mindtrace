@@ -1,10 +1,11 @@
 <template>
-  <div class="min-h-screen bg-gray-50 font-sans antialiased flex flex-col">
+  <div class="h-screen bg-gray-50 font-sans antialiased flex flex-col">
     <!-- Navbar superior -->
     <TopNavbar
       :user-type="userType"
       @edit-profile="$emit('edit-profile')"
       @logout="$emit('logout')"
+      @toggle-sidebar="toggleSidebar"
     />
 
     <!-- Conteudo principal com sidebar -->
@@ -14,7 +15,9 @@
         :menu-items="menuItems"
         :active-view="activeView"
         :variant="variant"
+        :is-open="isSidebarOpen"
         @navigate="(view) => $emit('navigate', view)"
+        @close="closeSidebar"
       />
 
       <!-- Area de conteudo principal -->
@@ -31,6 +34,7 @@
  * Encapsula TopNavbar + Sidebar com slots para conteúdo
  * Usado por PacienteDashboard e ProfissionalDashboard
  */
+import { ref } from 'vue';
 import TopNavbar from './TopNavbar.vue';
 import Sidebar from './Sidebar.vue';
 
@@ -67,4 +71,14 @@ defineProps({
 });
 
 defineEmits(['edit-profile', 'logout', 'navigate']);
+
+const isSidebarOpen = ref(false);
+
+const toggleSidebar = () => {
+  isSidebarOpen.value = !isSidebarOpen.value;
+};
+
+const closeSidebar = () => {
+  isSidebarOpen.value = false;
+};
 </script>
