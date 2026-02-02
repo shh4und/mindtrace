@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-50 font-sans antialiased flex flex-col">
     <!-- Navbar superior -->
-    <TopNavbar 
-      :user-type="userType" 
+    <TopNavbar
+      :user-type="userType"
       @edit-profile="$emit('edit-profile')"
       @logout="$emit('logout')"
     />
@@ -10,11 +10,11 @@
     <!-- Conteudo principal com sidebar -->
     <div class="flex flex-1 overflow-hidden">
       <!-- Barra lateral unificada -->
-      <Sidebar 
+      <Sidebar
         :menu-items="menuItems"
         :active-view="activeView"
         :variant="variant"
-        @navigate="(view) => $emit('navigate', view)" 
+        @navigate="(view) => $emit('navigate', view)"
       />
 
       <!-- Area de conteudo principal -->
@@ -40,7 +40,7 @@ defineProps({
    */
   userType: {
     type: String,
-    required: true
+    required: true,
   },
   /**
    * Variante visual: 'paciente' ou 'profissional'
@@ -48,22 +48,22 @@ defineProps({
   variant: {
     type: String,
     required: true,
-    validator: (v) => ['paciente', 'profissional'].includes(v)
+    validator: (v) => ['paciente', 'profissional'].includes(v),
   },
   /**
    * Items do menu para sidebar
    */
   menuItems: {
     type: Array,
-    required: true
+    required: true,
   },
   /**
    * View atualmente ativa
    */
   activeView: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 });
 
 defineEmits(['edit-profile', 'logout', 'navigate']);
