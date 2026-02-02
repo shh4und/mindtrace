@@ -121,11 +121,11 @@ func (is *instrumentoServico) CriarAtribuicao(userID, pacienteID, instrumentoID 
 	if err == nil {
 		go func() {
 			var pacEmail, pacNome, profNome, instNome string
-			
-			// Re-fetch para garantir dados frescos/carregados se necessário, 
+
+			// Re-fetch para garantir dados frescos/carregados se necessário,
 			// mas aqui podemos pegar direto das repositories se tivermos os IDs.
 			// Como o transaction já fechou, podemos usar is.db
-			
+
 			// Busca paciente para pegar email e nome
 			pac, e := is.usuarioRepo.BuscarPacientePorID(is.db, pacienteID)
 			if e == nil {
@@ -251,6 +251,7 @@ func (is *instrumentoServico) CriarRespostasAtribuicao(dto *dtos.RegistroRespost
 func (is *instrumentoServico) VisualizarRespostaAtribuicao(atribuicaoId uint) (*dtos.RespostaDetalhadaDTOOut, error) {
 
 	var resposta *dominio.Resposta
+	var respostaOut *dtos.RespostaDetalhadaDTOOut
 	var dadosBrutos []map[string]any
 	var dadosProcessados *dominio.ResultadoClinico
 	err := is.db.Transaction(func(tx *gorm.DB) error {
@@ -275,5 +276,17 @@ func (is *instrumentoServico) VisualizarRespostaAtribuicao(atribuicaoId uint) (*
 		return nil
 	})
 
-	return mappers.RespostaDetalhadaDTOOut(resposta, dadosBrutos, dadosProcessados), err
+	err = is.db.Transaction(func(tx *gorm.DB) error {
+		var err error
+		respostaOut = mappers.RespostaDetalhadaDTOOut(resposta, dadosBrutos, dadosProcessados)
+		resposta.PontuacaoTotal = respostaOut.PontuacaoTotal
+
+		if err = tx.Save(resposta).Error; err != nil {
+			respostaOut = nil
+			return err
+		}
+		return nil
+	})
+
+	return respostaOut, err
 }

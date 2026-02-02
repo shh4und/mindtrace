@@ -178,7 +178,7 @@ func CriarRegistroRespostasDTOInParaEntidade(dto *dtos.RegistroRespostaDTOIn, at
 	if err != nil {
 		return nil, err
 	}
-	
+
 	agora := time.Now()
 
 	resposta := &dominio.Resposta{
