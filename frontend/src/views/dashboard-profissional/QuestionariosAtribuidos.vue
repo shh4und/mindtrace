@@ -5,51 +5,61 @@
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Questionários Atribuídos</h1>
         <p class="text-gray-500">Acompanhe os questionários atribuídos aos seus pacientes</p>
       </div>
-      <button 
-        @click="irParaAtribuir" 
-        class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center"
-      >
-        <font-awesome-icon :icon="faPlus" class="w-4 h-4 mr-2" />
-        Atribuir Questionário
-      </button>
     </div>
 
     <!-- Filtros -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-      <div class="flex flex-wrap gap-4">
-        <div class="flex-1 min-w-[200px]">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por status</label>
-          <select 
-            v-model="filtroStatus" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          >
-            <option value="">Todos os status</option>
-            <option value="PENDENTE">Pendente</option>
-            <option value="RESPONDIDO">Respondido</option>
-            <option value="EXPIRADO">Expirado</option>
-          </select>
+    <div class="bg-gray-50 rounded-xl p-6 mb-8 border border-gray-100">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Status</label>
+          <div class="relative">
+            <select 
+              v-model="filtroStatus" 
+              class="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none transition-all shadow-sm text-gray-700"
+            >
+              <option value="">Todos os status</option>
+              <option value="PENDENTE">Pendente</option>
+              <option value="RESPONDIDO">Respondido</option>
+              <option value="EXPIRADO">Expirado</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+              <font-awesome-icon :icon="faChevronDown" class="w-3 h-3" />
+            </div>
+          </div>
         </div>
-        <div class="flex-1 min-w-[200px]">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por paciente</label>
-          <input 
-            v-model="filtroPaciente" 
-            type="text" 
-            placeholder="Nome do paciente..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          />
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Paciente</label>
+          <div class="relative">
+             <input 
+              v-model="filtroPaciente" 
+              type="text" 
+              placeholder="Buscar por nome..."
+              class="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm text-gray-700 placeholder-gray-400"
+            />
+             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+              <font-awesome-icon :icon="faSearch" class="w-3 h-3" />
+            </div>
+          </div>
         </div>
-        <div class="flex-1 min-w-[200px]">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por instrumento</label>
-          <select 
-            v-model="filtroInstrumento" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          >
-            <option value="">Todos os instrumentos</option>
-            <option value="phq_9">PHQ-9</option>
-            <option value="gad_7">GAD-7</option>
-            <option value="whoqol_bref">WHOQOL-BREF</option>
-            <option value="who_5">WHO-5</option>
-          </select>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Instrumento</label>
+          <div class="relative">
+            <select 
+              v-model="filtroInstrumento" 
+              class="w-full pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none transition-all shadow-sm text-gray-700"
+            >
+              <option value="">Todos os instrumentos</option>
+              <option value="phq_9">PHQ-9</option>
+              <option value="gad_7">GAD-7</option>
+              <option value="whoqol_bref">WHOQOL-BREF</option>
+              <option value="who_5">WHO-5</option>
+            </select>
+             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+              <font-awesome-icon :icon="faChevronDown" class="w-3 h-3" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -249,6 +259,8 @@ import {
   faListOl,
   faEye,
   faBell,
+  faChevronDown,
+  faSearch
 } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();

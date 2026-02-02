@@ -15,6 +15,30 @@
     </div>
 
     <template v-else>
+      <!-- Acesso Rápido -->
+      <section class="mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <font-awesome-icon :icon="faBolt" class="w-5 h-5 mr-2 text-amber-500" />
+            Ações Rápidas
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <button
+              v-for="action in acoesRapidas"
+              :key="action.id"
+              @click="navigateTo(action.route)"
+              :class="[
+                'flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed transition-all',
+                'hover:border-emerald-400 hover:bg-emerald-50 border-gray-200'
+              ]"
+            >
+              <font-awesome-icon :icon="action.icon" class="w-6 h-6 text-emerald-500 mb-2" />
+              <span class="text-sm font-medium text-gray-700">{{ action.label }}</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <!-- Card: Último Registro de Humor -->
         <div
@@ -151,6 +175,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import api from "@/services/api";
+import { useRouter } from "vue-router";
 import { useToast } from "vue-toastification";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
@@ -160,6 +185,8 @@ import {
   faClock,
   faClipboardList,
   faListCheck,
+  faBolt,
+  faUserDoctor,
 } from "@fortawesome/free-solid-svg-icons";
 
 import data from "emoji-mart-vue-fast/data/all.json";
@@ -167,7 +194,7 @@ import { EmojiIndex, Emoji } from "emoji-mart-vue-fast/src";
 import "emoji-mart-vue-fast/css/emoji-mart.css";
 
 const emojiIndex = new EmojiIndex(data);
-
+const router = useRouter();
 const toast = useToast();
 
 // --- ESTADO DO COMPONENTE ---
@@ -182,6 +209,17 @@ const moodOptions = [
   { label: "Animado", emoji: "blush" },
   { label: "Muito Bem", emoji: "grin" },
 ];
+
+// Ações rápidas
+const acoesRapidas = [
+  { id: 'humor', label: 'Registrar Humor', icon: faFaceSmile, route: 'paciente-humor' },
+  { id: 'questionario', label: 'Responder Questionário', icon: faClipboardList, route: 'paciente-questionarios' },
+  { id: 'profissionais', label: 'Meus Profissionais', icon: faUserDoctor, route: 'paciente-profissionais' },
+];
+
+const navigateTo = (routeName) => {
+  router.push({ name: routeName });
+};
 
 // --- FUNÇÕES AUXILIARES ---
 const formatDate = (dateString) => {

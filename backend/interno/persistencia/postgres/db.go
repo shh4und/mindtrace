@@ -14,7 +14,7 @@ func NewDB() (*gorm.DB, error) {
 	db_NAME := os.Getenv("DB_DB")
 
 	DSN := fmt.Sprintf(
-		"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable",
+		"host=db user=%s password=%s dbname=%s port=5432 sslmode=disable TimeZone=America/Sao_Paulo",
 		db_USER,
 		db_PASS,
 		db_NAME,

@@ -3,7 +3,12 @@
     <header class="mb-8 flex items-center justify-between">
       <div>
         <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-2">
-          <Emoji :data="emojiIndex" emoji="bar_chart" :size="32" set="facebook" />
+          <Emoji
+            :data="emojiIndex"
+            emoji="bar_chart"
+            :size="32"
+            set="facebook"
+          />
           Relatórios
         </h1>
         <p class="text-gray-600 mt-1">
@@ -14,13 +19,17 @@
 
     <!-- Loading state -->
     <div v-if="isLoading" class="flex justify-center items-center py-16">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500"></div>
+      <div
+        class="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500"
+      ></div>
     </div>
 
     <!-- Empty state -->
     <div v-else-if="patients.length === 0" class="text-center py-16">
       <font-awesome-icon :icon="faUsers" class="w-16 h-16 text-gray-300 mb-4" />
-      <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhum paciente vinculado</h3>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">
+        Nenhum paciente vinculado
+      </h3>
       <p class="text-gray-500 mb-6">
         Você precisa ter pacientes vinculados para visualizar relatórios.
       </p>
@@ -53,61 +62,57 @@
 
       <!-- Grid de pacientes -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
+        <CardListaUsuario
           v-for="(patient, index) in filteredPatients"
           :key="patient.id"
-          @click="viewPatientReport(patient.id)"
-          class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-lg hover:border-rose-400 transition-all duration-200"
-          role="button"
+          :title="patient.name"
+          :subtitle="patient.age"
+          variant="profissional"
+          :avatar-color="getAvatarColor(index)"
+          :actions="[
+            { id: 'report', label: 'Ver Relatório', icon: faChartLine },
+          ]"
           :aria-label="`Ver relatório de ${patient.name}`"
-          tabindex="0"
-          @keydown.enter="viewPatientReport(patient.id)"
-          @keydown.space.prevent="viewPatientReport(patient.id)"
-        >
-          <div class="flex items-center space-x-4">
-            <div
-              :class="[
-                getAvatarColor(index),
-                'w-14 h-14 rounded-full flex items-center justify-center shrink-0',
-              ]"
-            >
-              <font-awesome-icon :icon="faUser" class="w-7 h-7 text-white" aria-hidden="true" />
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-gray-900 text-lg truncate">{{ patient.name }}</h3>
-              <p class="text-sm text-gray-500">{{ patient.age }}</p>
-            </div>
-            <Emoji :data="emojiIndex" emoji="chart_with_upwards_trend" :size="24" set="facebook" />
-          </div>
-        </div>
+          @click="viewPatientReport(patient.id)"
+          @action="viewPatientReport(patient.id)"
+        />
       </div>
 
       <!-- Sem resultados da busca -->
-      <div v-if="filteredPatients.length === 0 && searchQuery" class="text-center py-12">
-        <font-awesome-icon :icon="faSearch" class="w-12 h-12 text-gray-300 mb-3" />
-        <p class="text-gray-500">Nenhum paciente encontrado para "{{ searchQuery }}"</p>
+      <div
+        v-if="filteredPatients.length === 0 && searchQuery"
+        class="text-center py-12"
+      >
+        <font-awesome-icon
+          :icon="faSearch"
+          class="w-12 h-12 text-gray-300 mb-3"
+        />
+        <p class="text-gray-500">
+          Nenhum paciente encontrado para "{{ searchQuery }}"
+        </p>
       </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useToast } from 'vue-toastification';
-import api from '@/services/api';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useToast } from "vue-toastification";
+import api from "@/services/api";
+import { CardListaUsuario } from "@/components/ui";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
   faUsers,
   faUser,
   faEnvelope,
   faChartLine,
   faSearch,
-} from '@fortawesome/free-solid-svg-icons';
+} from "@fortawesome/free-solid-svg-icons";
 
-import data from 'emoji-mart-vue-fast/data/all.json';
-import { EmojiIndex, Emoji } from 'emoji-mart-vue-fast/src';
-import 'emoji-mart-vue-fast/css/emoji-mart.css';
+import data from "emoji-mart-vue-fast/data/all.json";
+import { EmojiIndex, Emoji } from "emoji-mart-vue-fast/src";
+import "emoji-mart-vue-fast/css/emoji-mart.css";
 
 const emojiIndex = new EmojiIndex(data);
 
@@ -116,18 +121,18 @@ const toast = useToast();
 
 const patients = ref([]);
 const isLoading = ref(true);
-const searchQuery = ref('');
+const searchQuery = ref("");
 
 // Cores para avatares
 const avatarColors = [
-  'bg-blue-500',
-  'bg-green-500',
-  'bg-purple-500',
-  'bg-red-500',
-  'bg-yellow-500',
-  'bg-indigo-500',
-  'bg-pink-500',
-  'bg-teal-500',
+  "bg-blue-100 text-blue-600",
+  "bg-green-100 text-green-600",
+  "bg-purple-100 text-purple-600",
+  "bg-red-100 text-red-600",
+  "bg-yellow-100 text-yellow-600",
+  "bg-indigo-100 text-indigo-600",
+  "bg-pink-100 text-pink-600",
+  "bg-teal-100 text-teal-600",
 ];
 
 const getAvatarColor = (index) => avatarColors[index % avatarColors.length];
@@ -141,7 +146,7 @@ const filteredPatients = computed(() => {
 
 // Calcular idade
 const calculateAge = (birthdate) => {
-  if (!birthdate) return '';
+  if (!birthdate) return "";
   const birthDate = new Date(birthdate);
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
@@ -155,7 +160,7 @@ const calculateAge = (birthdate) => {
 // Navegar para relatório do paciente
 const viewPatientReport = (patientId) => {
   router.push({
-    name: 'profissional-paciente-relatorio',
+    name: "profissional-paciente-relatorio",
     params: { patientId },
   });
 };
@@ -167,12 +172,12 @@ const fetchPatients = async () => {
     const response = await api.listarPacientesDoProfissional();
     patients.value = (response.data || []).map((paciente) => ({
       id: paciente.id,
-      name: paciente.usuario?.nome || 'Paciente',
+      name: paciente.usuario?.nome || "Paciente",
       age: `${calculateAge(paciente.data_nascimento)} anos`,
     }));
   } catch (error) {
-    console.error('Erro ao buscar pacientes:', error);
-    toast.error('Erro ao carregar lista de pacientes.');
+    console.error("Erro ao buscar pacientes:", error);
+    toast.error("Erro ao carregar lista de pacientes.");
   } finally {
     isLoading.value = false;
   }
