@@ -227,13 +227,15 @@ type InstrumentoCompletoDTOOut struct {
 
 // AtribuicaoDTOOut representa uma atribuição de instrumento para saída
 type AtribuicaoDTOOut struct {
-	ID             uint                        `json:"id"`
-	Status         string                      `json:"status"`
-	DataAtribuicao time.Time                   `json:"data_atribuicao"`
-	DataResposta   *time.Time                  `json:"data_resposta,omitempty"`
-	Instrumento    InstrumentoCompletoDTOOut   `json:"instrumento"`
-	Paciente       *PacienteResumidoDTOOut     `json:"paciente,omitempty"`     // Apenas para profissional
-	Profissional   *ProfissionalResumidoDTOOut `json:"profissional,omitempty"` // Apenas para paciente
+	ID              uint                        `json:"id"`
+	Status          string                      `json:"status"`
+	DataAtribuicao  time.Time                   `json:"data_atribuicao"`
+	DataResposta    *time.Time                  `json:"data_resposta,omitempty"`
+	Pontuacao       *float64                    `json:"pontuacao,omitempty"`
+	PontuacaoMaxima *float64                    `json:"pontuacao_maxima,omitempty"`
+	Instrumento     InstrumentoCompletoDTOOut   `json:"instrumento"`
+	Paciente        *PacienteResumidoDTOOut     `json:"paciente,omitempty"`     // Apenas para profissional
+	Profissional    *ProfissionalResumidoDTOOut `json:"profissional,omitempty"` // Apenas para paciente
 }
 
 type RespostaDetalhadaDTOOut struct {

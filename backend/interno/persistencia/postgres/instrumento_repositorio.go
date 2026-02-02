@@ -54,6 +54,7 @@ func (r *gormInstrumentoRepositorio) BuscarAtribuicoesPaciente(tx *gorm.DB, pacI
 		Preload("Instrumento.Perguntas").
 		Preload("Profissional.Usuario").
 		Preload("Paciente.Usuario").
+		Preload("Resposta").
 		Where("paciente_id = ?", pacId).
 		Find(&atribuicoes).Error; err != nil {
 		return nil, err
@@ -68,6 +69,7 @@ func (r *gormInstrumentoRepositorio) BuscarAtribuicoesProfissional(tx *gorm.DB, 
 		Preload("Instrumento.Perguntas").
 		Preload("Profissional.Usuario").
 		Preload("Paciente.Usuario").
+		Preload("Resposta").
 		Where("profissional_id = ?", profId).
 		Find(&atribuicoes).Error; err != nil {
 		return nil, err
