@@ -283,18 +283,18 @@ const fetchResumoData = async () => {
       const questionariosResponse = await api.listarAtribuicoesProfissional();
       const questionarios = questionariosResponse.data || [];
       totalQuestionarios = questionarios.length;
-      pendentes = questionarios.filter(q => !q.respondido_em).length;
+      pendentes = questionarios.filter(q => !q.data_resposta).length;
 
       // Pegar últimos 5 questionários
       questionariosRecentes.value = questionarios
-        .sort((a, b) => new Date(b.atribuido_em) - new Date(a.atribuido_em))
+        .sort((a, b) => new Date(b.data_atribuicao) - new Date(a.data_atribuicao))
         .slice(0, 5)
         .map(q => ({
           id: q.id,
-          pacienteNome: q.paciente?.usuario?.nome || 'Paciente',
+          pacienteNome: q.paciente?.nome || 'Paciente',
           questionarioNome: q.instrumento?.nome || 'Questionário',
-          respondido: !!q.respondido_em,
-          dataFormatada: formatDate(q.atribuido_em)
+          respondido: !!q.data_resposta,
+          dataFormatada: formatDate(q.data_atribuicao)
         }));
     } catch (e) {
       console.log('Erro ao buscar questionários:', e);

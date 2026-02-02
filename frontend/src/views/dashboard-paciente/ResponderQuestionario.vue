@@ -2,9 +2,7 @@
   <!-- Loading state -->
   <div v-if="carregando" class="max-w-3xl mx-auto pb-8 pt-8">
     <div class="flex flex-col items-center justify-center min-h-[60vh]">
-      <div
-        class="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mb-4"
-      />
+      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mb-4" />
       <p class="text-gray-600">Carregando questionário...</p>
     </div>
   </div>
@@ -12,13 +10,8 @@
   <!-- Error state -->
   <div v-else-if="erro" class="max-w-3xl mx-auto pb-8 pt-8">
     <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-      <font-awesome-icon
-        :icon="faExclamationTriangle"
-        class="w-12 h-12 text-red-500 mb-4"
-      />
-      <h2 class="text-xl font-semibold text-red-800 mb-2">
-        Erro ao carregar questionário
-      </h2>
+      <font-awesome-icon :icon="faExclamationTriangle" class="w-12 h-12 text-red-500 mb-4" />
+      <h2 class="text-xl font-semibold text-red-800 mb-2">Erro ao carregar questionário</h2>
       <p class="text-red-600 mb-4">
         {{ erro }}
       </p>
@@ -34,24 +27,23 @@
   <!-- Content -->
   <div v-else class="max-w-3xl mx-auto pb-8">
     <!-- Header fixo -->
-    <div class="sticky top-0 bg-white z-10 pb-4 mb-6 border-b border-gray-200">
+    <div
+      class="sticky top-0 bg-white rounded-xl z-10 p-4 mb-6 border-b shadow-sm border border-gray-200"
+    >
       <div class="flex items-center mb-4 pt-4">
         <button
           class="mr-4 p-2 rounded-lg hover:bg-gray-100 transition-colors"
           aria-label="Voltar para questionários"
           @click="confirmarSaida"
         >
-          <font-awesome-icon
-            :icon="faArrowLeft"
-            class="w-5 h-5 text-gray-600"
-          />
+          <font-awesome-icon :icon="faArrowLeft" class="w-5 h-5 text-gray-600" />
         </button>
         <div class="flex-1">
           <span
             class="inline-block px-2 py-1 text-xs font-mono font-medium rounded-md mb-1"
             :class="getCodigoBadgeClass(instrumento.codigo)"
           >
-            {{ instrumento.codigo?.toUpperCase().replace("_", "-") || "N/A" }}
+            {{ instrumento.codigo?.toUpperCase().replace('_', '-') || 'N/A' }}
           </span>
           <h1 class="text-2xl font-bold text-gray-900">
             {{ instrumento.nome }}
@@ -67,8 +59,8 @@
         />
       </div>
       <p class="text-sm text-gray-500 mt-2 text-center">
-        {{ Object.keys(respostas).length }} de
-        {{ instrumento.perguntas?.length || 0 }} perguntas respondidas
+        {{ Object.keys(respostas).length }} de {{ instrumento.perguntas?.length || 0 }} perguntas
+        respondidas
       </p>
     </div>
 
@@ -80,16 +72,12 @@
         :key="pergunta.pergunta_id"
         class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 transition-all"
         :class="
-          respostas[pergunta.pergunta_id] !== undefined
-            ? 'border-emerald-200 bg-emerald-50/30'
-            : ''
+          respostas[pergunta.pergunta_id] !== undefined ? 'border-emerald-200 bg-emerald-50/30' : ''
         "
       >
         <div class="mb-4">
           <div class="flex items-center gap-2 mb-2">
-            <span
-              class="text-xs font-medium text-gray-400 uppercase tracking-wide"
-            >
+            <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">
               Pergunta {{ index + 1 }}
             </span>
             <span
@@ -112,7 +100,7 @@
             :key="`${pergunta.pergunta_id}-${opcao.valor}`"
             class="flex items-center p-3 border rounded-lg cursor-pointer transition-all"
             :class="
-              respostas[pergunta.pergunta_id] === opcao.valor
+              respostas[pergunta.pergunta_id]?.[0] === opcao.valor
                 ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500'
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
             "
@@ -121,7 +109,7 @@
             <span
               class="w-8 h-8 rounded-full border-2 flex items-center justify-center mr-3 transition-all shrink-0 text-sm font-semibold"
               :class="
-                respostas[pergunta.pergunta_id] === opcao.valor
+                respostas[pergunta.pergunta_id]?.[0] === opcao.valor
                   ? 'border-indigo-500 bg-indigo-500 text-white'
                   : 'border-gray-300 text-gray-500'
               "
@@ -130,7 +118,7 @@
             </span>
             <span class="flex-1 text-sm text-gray-700">{{ opcao.rotulo }}</span>
             <font-awesome-icon
-              v-if="respostas[pergunta.pergunta_id] === opcao.valor"
+              v-if="respostas[pergunta.pergunta_id]?.[0] === opcao.valor"
               :icon="faCheckCircle"
               class="w-5 h-5 text-indigo-500 shrink-0"
             />
@@ -151,9 +139,7 @@
         <span v-else>Responda todas as perguntas para enviar</span>
       </button>
       <p class="text-xs text-gray-500 text-center mt-2">
-        {{ Object.keys(respostas).length }}/{{
-          instrumento.perguntas?.length || 0
-        }}
+        {{ Object.keys(respostas).length }}/{{ instrumento.perguntas?.length || 0 }}
         perguntas respondidas
       </p>
     </div>
@@ -161,18 +147,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { api } from "@/services/api";
-import { useRouter, useRoute } from "vue-router";
-import { useToast } from "vue-toastification";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { ref, computed, onMounted } from 'vue';
+import { api } from '@/services/api';
+import { useRouter, useRoute } from 'vue-router';
+import { useToast } from 'vue-toastification';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import {
   faArrowLeft,
   faInfoCircle,
   faCheckCircle,
   faPaperPlane,
   faExclamationTriangle,
-} from "@fortawesome/free-solid-svg-icons";
+} from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
 const route = useRoute();
@@ -185,8 +171,8 @@ const erro = ref(null);
 
 // Dados do instrumento
 const instrumento = ref({
-  codigo: "",
-  nome: "",
+  codigo: '',
+  nome: '',
   perguntas: [],
   opcoes_escala: [],
 });
@@ -197,25 +183,23 @@ const progresso = computed(() => {
 });
 
 const todasRespondidas = computed(() => {
-  return instrumento.value.perguntas.every(
-    (p) => respostas.value[p.pergunta_id] !== undefined
-  );
+  return instrumento.value.perguntas.every((p) => respostas.value[p.pergunta_id] !== undefined);
 });
 
 const getCodigoBadgeClass = (codigo) => {
   const classes = {
-    phq_9: "bg-blue-100 text-blue-700",
-    gad_7: "bg-amber-100 text-amber-700",
-    whoqol_bref: "bg-emerald-100 text-emerald-700",
-    who_5: "bg-purple-100 text-purple-700",
+    phq_9: 'bg-blue-100 text-blue-700',
+    gad_7: 'bg-amber-100 text-amber-700',
+    whoqol_bref: 'bg-emerald-100 text-emerald-700',
+    who_5: 'bg-purple-100 text-purple-700',
   };
-  return classes[codigo] || "bg-gray-100 text-gray-700";
+  return classes[codigo] || 'bg-gray-100 text-gray-700';
 };
 
 const selecionarResposta = (perguntaId, valor, perguntaDominio) => {
   respostas.value = {
     ...respostas.value,
-    [perguntaId]: [valor,perguntaDominio]
+    [perguntaId]: [valor, perguntaDominio],
   };
 };
 
@@ -226,28 +210,28 @@ const enviarRespostas = async () => {
     respostas: Object.entries(respostas.value).map(([perguntaId, dadosResposta]) => ({
       pergunta_id: parseInt(perguntaId),
       valor: dadosResposta[0],
-      dominio: dadosResposta[1]
+      dominio: dadosResposta[1],
     })),
   };
 
   await api.enviarResposta(payload);
 
   console.log(payload);
-  toast.success("Questionário enviado com sucesso! Obrigado por responder.");
+  toast.success('Questionário enviado com sucesso! Obrigado por responder.');
 
   setTimeout(() => {
-    router.push({ name: "paciente-questionarios" });
+    router.push({ name: 'paciente-questionarios' });
   }, 1500);
 };
 
 const confirmarSaida = () => {
   const respondidas = Object.keys(respostas.value).length;
   if (respondidas > 0) {
-    if (confirm("Você tem respostas não salvas. Deseja realmente sair?")) {
-      router.push({ name: "paciente-questionarios" });
+    if (confirm('Você tem respostas não salvas. Deseja realmente sair?')) {
+      router.push({ name: 'paciente-questionarios' });
     }
   } else {
-    router.push({ name: "paciente-questionarios" });
+    router.push({ name: 'paciente-questionarios' });
   }
 };
 
@@ -257,15 +241,14 @@ onMounted(async () => {
     const response = await api.buscarAtribuicao(atribuicaoId.value);
 
     if (!response.data || !response.data.instrumento) {
-      throw new Error("Dados do questionário inválidos");
+      throw new Error('Dados do questionário inválidos');
     }
 
     instrumento.value = response.data.instrumento;
     // toast.success("Questionário carregado com sucesso!");
   } catch (error) {
-    console.error("Erro ao carregar questionário:", error);
-    erro.value =
-      error.response?.data?.erro || "Não foi possível carregar o questionário";
+    console.error('Erro ao carregar questionário:', error);
+    erro.value = error.response?.data?.erro || 'Não foi possível carregar o questionário';
     toast.error(erro.value);
   } finally {
     carregando.value = false;

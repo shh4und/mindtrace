@@ -225,13 +225,7 @@
               <font-awesome-icon :icon="faBell" class="w-4 h-4 mr-2" />
               Enviar Lembrete
             </button>
-            <button 
-              @click="confirmarExclusao(atribuicao.id)"
-              class="px-4 py-2 bg-red-50 text-red-600 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center whitespace-nowrap"
-            >
-              <font-awesome-icon :icon="faTrash" class="w-4 h-4 mr-2" />
-              Excluir
-            </button>
+
           </div>
         </div>
       </div>
@@ -255,7 +249,6 @@ import {
   faListOl,
   faEye,
   faBell,
-  faTrash
 } from '@fortawesome/free-solid-svg-icons';
 
 const router = useRouter();
@@ -374,23 +367,7 @@ const enviarLembrete = async (atribuicaoId) => {
   }
 };
 
-const confirmarExclusao = (atribuicaoId) => {
-  if (confirm('Tem certeza que deseja excluir esta atribuição? Esta ação não pode ser desfeita.')) {
-    excluirAtribuicao(atribuicaoId);
-  }
-};
 
-const excluirAtribuicao = async (atribuicaoId) => {
-  try {
-    // TODO: Implementar endpoint de exclusão
-    // await api.excluirAtribuicao(atribuicaoId);
-    atribuicoes.value = atribuicoes.value.filter(a => a.id !== atribuicaoId);
-    toast.success('Atribuição excluída com sucesso!');
-  } catch (error) {
-    toast.error('Erro ao excluir atribuição.');
-    console.error(error);
-  }
-};
 
 onMounted(async () => {
   try {
