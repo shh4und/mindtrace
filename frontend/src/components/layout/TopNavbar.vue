@@ -14,8 +14,12 @@
 
       <!-- Logo da aplicacao -->
       <router-link to="/" class="hidden md:flex items-center space-x-2">
-        <font-awesome-icon :icon="faBrain" class="text-rose-300 text-xl sm:text-2xl" />
-        <span class="text-2xl sm:text-3xl font-bold text-emerald-600 whitespace-nowrap"
+        <font-awesome-icon
+          :icon="faBrain"
+          class="text-rose-300 text-xl sm:text-2xl"
+        />
+        <span
+          class="text-2xl sm:text-3xl font-bold text-emerald-600 whitespace-nowrap"
           >MindTrace</span
         >
       </router-link>
@@ -29,13 +33,21 @@
             class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <font-awesome-icon
-              :icon="userType === TipoUsuario.Profissional ? faUserDoctor : faUser"
+              :icon="
+                userType === TipoUsuario.Profissional ? faUserDoctor : faUser
+              "
               class="w-8 h-8 p-2 rounded-full bg-emerald-100 text-emerald-600"
             />
-            <div v-if="user" class="hidden sm:block text-left">
-              <p class="text-sm font-semibold text-gray-900 leading-tight">{{ userName }}</p>
+            <div v-if="user" class="sm:block text-left">
+              <p class="text-sm font-semibold text-gray-900 leading-tight">
+                {{ userName }}
+              </p>
               <p class="text-xs text-gray-500">
-                {{ userType === TipoUsuario.Profissional ? 'Profissional' : 'Paciente' }}
+                {{
+                  userType === TipoUsuario.Profissional
+                    ? "Profissional"
+                    : "Paciente"
+                }}
               </p>
             </div>
             <font-awesome-icon
@@ -62,11 +74,17 @@
               <div class="px-4 py-3 border-b border-gray-100">
                 <div class="flex items-center space-x-3">
                   <font-awesome-icon
-                    :icon="userType === TipoUsuario.Profissional ? faUserDoctor : faUser"
+                    :icon="
+                      userType === TipoUsuario.Profissional
+                        ? faUserDoctor
+                        : faUser
+                    "
                     class="w-10 h-10 p-2 rounded-full bg-emerald-100 text-emerald-600"
                   />
                   <div class="flex-1">
-                    <h3 class="font-bold text-base text-gray-900">{{ userName }}</h3>
+                    <h3 class="font-bold text-base text-gray-900">
+                      {{ userName }}
+                    </h3>
                     <p class="text-sm text-gray-600">{{ userEmail }}</p>
                   </div>
                 </div>
@@ -77,26 +95,36 @@
                 <template v-if="userType === TipoUsuario.Paciente">
                   <p>
                     <strong class="font-medium text-gray-700">Idade:</strong>
-                    <span class="text-gray-600">{{ calculateAge(user.data_nascimento) }}</span>
+                    <span class="text-gray-600">{{
+                      calculateAge(user.data_nascimento)
+                    }}</span>
                   </p>
                   <p>
                     <strong class="font-medium text-gray-700">Contato:</strong>
                     <span class="text-gray-600">{{ userContato }}</span>
                   </p>
                   <p v-if="user.dependente">
-                    <strong class="font-medium text-gray-700">Responsável:</strong>
-                    <span class="text-gray-600">{{ user.nome_responsavel }}</span>
+                    <strong class="font-medium text-gray-700"
+                      >Responsável:</strong
+                    >
+                    <span class="text-gray-600">{{
+                      user.nome_responsavel
+                    }}</span>
                   </p>
                 </template>
                 <template v-else>
                   <p>
-                    <strong class="font-medium text-gray-700">Especialidade:</strong>
-                    <span class="text-gray-600">{{ user.especialidade || 'Não informado' }}</span>
+                    <strong class="font-medium text-gray-700"
+                      >Especialidade:</strong
+                    >
+                    <span class="text-gray-600">{{
+                      user.especialidade || "Não informado"
+                    }}</span>
                   </p>
                   <p>
                     <strong class="font-medium text-gray-700">Registro:</strong>
                     <span class="text-gray-600">{{
-                      user.registro_profissional || 'Não informado'
+                      user.registro_profissional || "Não informado"
                     }}</span>
                   </p>
                   <p>
@@ -112,7 +140,10 @@
                   @click="handleEditProfile"
                   class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center transition-colors"
                 >
-                  <font-awesome-icon :icon="faPenToSquare" class="w-4 h-4 mr-3 text-gray-500" />
+                  <font-awesome-icon
+                    :icon="faPenToSquare"
+                    class="w-4 h-4 mr-3 text-gray-500"
+                  />
                   Editar Perfil
                 </button>
               </div>
@@ -134,8 +165,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
   faBrain,
   faBars,
@@ -144,21 +175,22 @@ import {
   faChevronDown,
   faPenToSquare,
   faRightFromBracket,
-} from '@fortawesome/free-solid-svg-icons';
-import { useUserStore } from '../../store/user';
-import { TipoUsuario } from '../../types/usuario.js';
+} from "@fortawesome/free-solid-svg-icons";
+import { useUserStore } from "../../store/user";
+import { TipoUsuario } from "../../types/usuario.js";
 
 // Propriedades esperadas pelo layout
 const props = defineProps({
   userType: {
     type: String,
     required: true,
-    validator: (value) => [TipoUsuario.Paciente, TipoUsuario.Profissional].includes(value),
+    validator: (value) =>
+      [TipoUsuario.Paciente, TipoUsuario.Profissional].includes(value),
   },
 });
 
 // Eventos de interacao emitidos para o container
-const emit = defineEmits(['edit-profile', 'logout', 'toggle-sidebar']);
+const emit = defineEmits(["edit-profile", "logout", "toggle-sidebar"]);
 
 // Estado global do usuario
 const userStore = useUserStore();
@@ -173,19 +205,19 @@ const user = computed(() => userStore.user);
 // Computed properties para acessar dados do usuário independente da estrutura
 // O backend retorna dados aninhados em 'usuario' para paciente/profissional
 const userName = computed(() => {
-  if (!user.value) return '';
+  if (!user.value) return "";
   // Verifica se existe estrutura aninhada (PacienteDTOOut/ProfissionalDTOOut)
-  return user.value.usuario?.nome || user.value.nome || '';
+  return user.value.usuario?.nome || user.value.nome || "";
 });
 
 const userEmail = computed(() => {
-  if (!user.value) return '';
-  return user.value.usuario?.email || user.value.email || '';
+  if (!user.value) return "";
+  return user.value.usuario?.email || user.value.email || "";
 });
 
 const userContato = computed(() => {
-  if (!user.value) return 'Não informado';
-  return user.value.usuario?.contato || user.value.contato || 'Não informado';
+  if (!user.value) return "Não informado";
+  return user.value.usuario?.contato || user.value.contato || "Não informado";
 });
 
 // Alterna exibicao do dropdown de perfil
@@ -201,18 +233,18 @@ const closeProfileDropdown = () => {
 // Dispara evento para edicao de perfil
 const handleEditProfile = () => {
   closeProfileDropdown();
-  emit('edit-profile');
+  emit("edit-profile");
 };
 
 // Dispara evento para encerrar sessao
 const handleLogout = () => {
   closeProfileDropdown();
-  emit('logout');
+  emit("logout");
 };
 
 // Calcula idade estimada a partir da data de nascimento
 const calculateAge = (birthDate) => {
-  if (!birthDate) return 'N/A';
+  if (!birthDate) return "N/A";
   const today = new Date();
   const birth = new Date(birthDate);
   let age = today.getFullYear() - birth.getFullYear();
@@ -225,13 +257,16 @@ const calculateAge = (birthDate) => {
 
 // Fecha dropdown quando clicar fora do container
 const handleClickOutside = (event) => {
-  if (profileDropdownContainer.value && !profileDropdownContainer.value.contains(event.target)) {
+  if (
+    profileDropdownContainer.value &&
+    !profileDropdownContainer.value.contains(event.target)
+  ) {
     closeProfileDropdown();
   }
 };
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
+  document.addEventListener("click", handleClickOutside);
   // Recupera dados do usuario caso estejam ausentes
   if (!user.value) {
     userStore.fetchUser(props.userType);
@@ -239,6 +274,6 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
