@@ -1,14 +1,35 @@
 <template>
-  <div>
-    <header class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Resumo</h1>
-      <p class="text-gray-600 mt-1">
-        Bem-vindo(a) de volta! Aqui está um resumo do seu bem-estar.
+  <div class="max-w-4xl mx-auto p-4 md:p-8">
+    <header class="mb-10 text-center md:text-left">
+      <div
+        class="inline-flex items-center justify-center space-x-2 bg-emerald-50 text-emerald-800 px-4 py-1.5 rounded-full text-sm font-medium mb-4 shadow-sm"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <span>{{ currentDay }}, {{ currentDate }}</span>
+      </div>
+      <h1
+        class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight"
+      >
+        Resumo do Bem-Estar
+      </h1>
+      <p class="text-gray-500 mt-2 text-lg">
+        Bem-vindo(a) de volta! Acompanhe seus progressos.
       </p>
     </header>
 
     <!-- Loading state -->
-    <div v-if="isLoading" class="flex justify-center items-center py-16">
+    <div v-if="isLoading" class="flex justify-center items-center py-20">
       <div
         class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"
       ></div>
@@ -17,9 +38,16 @@
     <template v-else>
       <!-- Acesso Rápido -->
       <section class="mb-8">
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <font-awesome-icon :icon="faBolt" class="w-5 h-5 mr-2 text-amber-500" />
+        <div
+          class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 relative overflow-hidden"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-amber-400 via-orange-400 to-red-400"
+          ></div>
+          <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="p-2 bg-amber-100 rounded-lg text-amber-600 mr-3">
+              <font-awesome-icon :icon="faBolt" class="w-5 h-5" />
+            </span>
             Ações Rápidas
           </h2>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -27,118 +55,143 @@
               v-for="action in acoesRapidas"
               :key="action.id"
               @click="navigateTo(action.route)"
-              :class="[
-                'flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed transition-all',
-                'hover:border-emerald-400 hover:bg-emerald-50 border-gray-200'
-              ]"
+              class="group flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-gray-200 hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-300"
             >
-              <font-awesome-icon :icon="action.icon" class="w-6 h-6 text-emerald-500 mb-2" />
-              <span class="text-sm font-medium text-gray-700">{{ action.label }}</span>
+              <div
+                class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"
+              >
+                <font-awesome-icon :icon="action.icon" class="w-6 h-6" />
+              </div>
+              <span
+                class="text-sm font-semibold text-gray-700 group-hover:text-emerald-700"
+                >{{ action.label }}</span
+              >
             </button>
           </div>
         </div>
       </section>
 
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <!-- Card: Último Registro de Humor -->
         <div
-          class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+          class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 hover:shadow-lg transition-all duration-300 group"
         >
-          <h2
-            class="text-lg font-semibold text-gray-900 mb-4 flex items-center"
-          >
-            <font-awesome-icon
-              :icon="faFaceSmile"
-              class="w-8 h-8 p-2 m-2 rounded-full bg-emerald-100 text-emerald-600"
-            />
-            Último Registro de Humor
-          </h2>
-          <div v-if="userLastData.humor" class="flex items-center space-x-4">
-            <Emoji
-              :data="emojiIndex"
-              :emoji="userLastData.emoji"
-              :size="48"
-              set="facebook"
-            />
-            <div>
-              <p class="text-2xl font-bold text-emerald-600">
-                {{ userLastData.label }}
-              </p>
-              <p class="text-gray-500 text-sm">
-                {{ formatDate(userLastData.data) }}
-              </p>
-              <p class="text-gray-600 text-sm mt-1">
-                {{ userLastData.anotacao || "Nenhuma anotação." }}
-              </p>
+          <header class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+              <span class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                <font-awesome-icon :icon="faFaceSmile" class="w-5 h-5" />
+              </span>
+              Último Registro
+            </h2>
+            <span
+              v-if="userLastData.humor"
+              class="text-xs font-semibold px-3 py-1 bg-gray-100 text-gray-500 rounded-full"
+            >
+              {{ formatDate(userLastData.data) }}
+            </span>
+          </header>
+
+          <div v-if="userLastData.humor" class="flex flex-col items-center">
+            <div
+              class="transform transition-transform duration-300 group-hover:scale-110 mb-4"
+            >
+              <Emoji
+                :data="emojiIndex"
+                :emoji="userLastData.emoji"
+                :size="64"
+                set="facebook"
+              />
+            </div>
+            <h3 class="text-2xl font-extrabold text-indigo-600 mb-2">
+              {{ userLastData.label }}
+            </h3>
+            <div
+              v-if="userLastData.anotacao"
+              class="w-full bg-gray-50 rounded-xl p-4 mt-2 text-gray-600 text-sm italic text-center border border-gray-100"
+            >
+              "{{ userLastData.anotacao }}"
             </div>
           </div>
-          <div v-else class="text-center py-4">
-            <p class="text-gray-500">Nenhum registro de humor ainda.</p>
+
+          <div v-else class="text-center py-8">
+            <div
+              class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400"
+            >
+              <font-awesome-icon :icon="faFaceSmile" class="w-8 h-8" />
+            </div>
+            <p class="text-gray-500 mb-4 font-medium">
+              Nenhum registro encontrado.
+            </p>
             <router-link
               to="/dashboard-paciente/humor"
-              class="text-emerald-600 hover:text-emerald-700 text-sm font-medium mt-2 inline-block"
+              class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg transition-all"
             >
-              Registrar agora →
+              Registrar Humor
             </router-link>
           </div>
         </div>
 
-        <!-- Card: Últimas Notificações (placeholder) -->
+        <!-- Card: Notificações -->
         <div
-          class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+          class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 hover:shadow-lg transition-all duration-300"
         >
-          <h2
-            class="text-lg font-semibold text-gray-900 mb-4 flex items-center"
-          >
-            <font-awesome-icon
-              :icon="faBell"
-              class="w-8 h-8 p-2 m-2 bg-amber-100 rounded-full text-amber-600"
-            />
-            Últimas Notificações
-          </h2>
-          <div class="text-center py-6">
-            <font-awesome-icon
-              :icon="faBellSlash"
-              class="w-12 h-12 text-gray-300 mb-3"
-            />
-            <p class="text-gray-500 text-sm">Nenhuma notificação no momento.</p>
-            <p class="text-gray-400 text-xs mt-1">
-              Em breve você receberá alertas e lembretes aqui.
+          <header class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+              <span class="p-2 bg-rose-100 rounded-lg text-rose-600">
+                <font-awesome-icon :icon="faBell" class="w-5 h-5" />
+              </span>
+              Notificações
+            </h2>
+          </header>
+
+          <div class="flex flex-col items-center justify-center h-48 text-center">
+            <div
+              class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mb-4 text-rose-300"
+            >
+              <font-awesome-icon :icon="faBellSlash" class="w-8 h-8" />
+            </div>
+            <p class="text-gray-900 font-medium">Tudo tranquilo por aqui!</p>
+            <p class="text-gray-500 text-sm mt-1 max-w-xs">
+              Você não tem novas notificações pendentes no momento.
             </p>
           </div>
         </div>
-      </section>
+      </div>
 
       <!-- Card: Atividades Recentes -->
-      <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <font-awesome-icon
-            :icon="faClock"
-            class="w-8 h-8 p-2 m-2 rounded-full bg-emerald-100 text-emerald-600"
-          />
-          Atividades Recentes
+      <section
+        class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 relative overflow-hidden"
+      >
+        <div
+          class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-emerald-400 to-teal-500"
+        ></div>
+        <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+          <span class="p-2 bg-emerald-100 rounded-lg text-emerald-600 mr-3">
+            <font-awesome-icon :icon="faClock" class="w-5 h-5" />
+          </span>
+          Linha do Tempo Recente
         </h2>
 
-        <div v-if="atividadesRecentes.length === 0" class="text-center py-8">
+        <div v-if="atividadesRecentes.length === 0" class="text-center py-10">
           <font-awesome-icon
             :icon="faListCheck"
-            class="w-12 h-12 text-gray-300 mb-3"
+            class="w-12 h-12 text-gray-200 mb-3"
           />
-          <p class="text-gray-500">Nenhuma atividade recente.</p>
+          <p class="text-gray-500 font-medium">Nenhuma atividade recente.</p>
           <p class="text-gray-400 text-sm mt-1">
-            Registre seu humor ou responda um questionário para começar.
+            Suas atividades aparecerão aqui.
           </p>
         </div>
 
-        <ul v-else class="space-y-4">
-          <li
+        <div v-else class="space-y-4">
+          <div
             v-for="(atividade, index) in atividadesRecentes"
             :key="index"
-            class="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+            class="flex items-center p-4 rounded-2xl border border-gray-100 hover:border-emerald-200 hover:shadow-md hover:bg-emerald-50/30 transition-all duration-300 cursor-default bg-gray-50/50"
           >
             <div
               :class="[
-                'shrink-0 flex items-center justify-center w-8 h-8 p-2 rounded-full',
+                'shrink-0 flex items-center justify-center w-12 h-12 rounded-xl mr-4 shadow-sm',
                 atividade.tipo === 'humor'
                   ? 'bg-emerald-100 text-emerald-600'
                   : 'bg-blue-100 text-blue-600',
@@ -148,25 +201,32 @@
                 :icon="
                   atividade.tipo === 'humor' ? faFaceSmile : faClipboardList
                 "
-                class="w-8 h-8 p-2"
+                class="w-5 h-5"
               />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="font-medium text-gray-900">{{ atividade.titulo }}</p>
-              <p class="text-sm text-gray-500">{{ atividade.descricao }}</p>
-              <p class="text-xs text-gray-400 mt-1">
-                {{ atividade.dataFormatada }}
+              <h4 class="font-bold text-gray-900 truncate">
+                {{ atividade.titulo }}
+              </h4>
+              <p class="text-sm text-gray-500 truncate">
+                {{ atividade.descricao }}
               </p>
             </div>
-            <Emoji
-              v-if="atividade.tipo === 'humor'"
-              :data="emojiIndex"
-              :emoji="atividade.emoji"
-              :size="24"
-              set="facebook"
-            />
-          </li>
-        </ul>
+            <div class="flex flex-col items-end ml-4">
+              <span class="text-xs font-semibold text-gray-400">{{
+                atividade.dataFormatada
+              }}</span>
+              <div v-if="atividade.tipo === 'humor'" class="mt-1">
+                <Emoji
+                  :data="emojiIndex"
+                  :emoji="atividade.emoji"
+                  :size="20"
+                  set="facebook"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </template>
   </div>
@@ -202,6 +262,18 @@ const isLoading = ref(true);
 const userLastData = ref({});
 const atividadesRecentes = ref([]);
 
+const today = new Date();
+const currentDate = computed(() =>
+  today.toLocaleDateString("pt-BR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+);
+const currentDay = computed(() =>
+  today.toLocaleDateString("pt-BR", { weekday: "long" })
+);
+
 const moodOptions = [
   { label: "Muito Mal", emoji: "confounded" },
   { label: "Aborrecido", emoji: "confused" },
@@ -212,9 +284,24 @@ const moodOptions = [
 
 // Ações rápidas
 const acoesRapidas = [
-  { id: 'humor', label: 'Registrar Humor', icon: faFaceSmile, route: 'paciente-humor' },
-  { id: 'questionario', label: 'Responder Questionário', icon: faClipboardList, route: 'paciente-questionarios' },
-  { id: 'profissionais', label: 'Meus Profissionais', icon: faUserDoctor, route: 'paciente-profissionais' },
+  {
+    id: "humor",
+    label: "Registrar Humor",
+    icon: faFaceSmile,
+    route: "paciente-humor",
+  },
+  {
+    id: "questionario",
+    label: "Questionários",
+    icon: faClipboardList,
+    route: "paciente-questionarios",
+  },
+  {
+    id: "profissionais",
+    label: "Profissionais",
+    icon: faUserDoctor,
+    route: "paciente-profissionais",
+  },
 ];
 
 const navigateTo = (routeName) => {
@@ -258,7 +345,7 @@ const fetchSummaryData = async () => {
     // Buscar atividades recentes (mock + dados reais combinados)
     await fetchAtividadesRecentes(summary);
   } catch (error) {
-    toast.error("Não foi possível carregar os dados do resumo.");
+    // Silently fail or minimal toast if critical
     console.error(error);
   } finally {
     isLoading.value = false;
@@ -273,8 +360,8 @@ const fetchAtividadesRecentes = async (summaryData) => {
     atividades.push({
       tipo: "humor",
       titulo: "Registro de Humor",
-      descricao: `Você registrou: ${
-        moodOptions[summaryData.humor - 1]?.label || "Humor"
+      descricao: `Você estava se sentindo ${
+        moodOptions[summaryData.humor - 1]?.label.toLowerCase() || "neutro"
       }`,
       data: summaryData.data,
       dataFormatada: formatDateShort(summaryData.data),
@@ -296,10 +383,8 @@ const fetchAtividadesRecentes = async (summaryData) => {
     respondidos.forEach((q) => {
       atividades.push({
         tipo: "questionario",
-        titulo: `Questionário "${
-          q.instrumento?.nome || "Avaliação"
-        }" respondido`,
-        descricao: q.instrumento?.descricao || "Questionário completado",
+        titulo: "Questionário Respondido",
+        descricao: q.instrumento?.nome || "Avaliação Concluída",
         data: q.respondido_em,
         dataFormatada: formatDateShort(q.respondido_em),
       });
@@ -316,3 +401,7 @@ const fetchAtividadesRecentes = async (summaryData) => {
 
 onMounted(fetchSummaryData);
 </script>
+
+<style scoped>
+/* Mantendo consistência com o estilo global se necessário */
+</style>
