@@ -12,9 +12,11 @@
     </button>
 
     <header class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Relatórios de Bem-Estar</h1>
+      <h1 class="text-3xl font-bold text-gray-900">
+        {{ patientName ? `Relatório de ${patientName}` : 'Relatórios de Bem-Estar' }}
+      </h1>
       <p class="text-gray-600 mt-1">
-        Analise suas tendências de humor, sono e energia ao longo do tempo.
+        {{ patientName ? `Acompanhamento detalhado do paciente.` : 'Analise suas tendências de humor, sono e energia ao longo do tempo.' }}
       </p>
     </header>
 
@@ -141,6 +143,7 @@ const isLoading = ref(true);
 const avgSleep = ref(0);
 const avgEnergy = ref(0);
 const avgStress = ref(0);
+const patientName = ref(""); // Nome do paciente
 
 const timeRanges = [
   { label: 'Últimos 7 dias', days: 7 },
@@ -186,6 +189,20 @@ const fetchReportData = async () => {
     if (props.userType === TipoUsuario.Paciente) {
       report = (await api.buscarRelatorio(selectedRange.value)).data;
     } else {
+      // Se for profissional, busca também o nome do paciente
+      if (!patientName.value) {
+          try {
+             // Otimização: Poderia vir como prop, mas buscamos aqui para garantir
+             const patients = (await api.listarPacientesDoProfissional()).data;
+             const patient = patients.find(p => p.id === Number(props.patientId));
+             if (patient) {
+                 patientName.value = patient.usuario?.nome || patient.nome;
+             }
+          } catch (e) {
+              console.error("Erro ao buscar nome do paciente", e);
+          }
+      }
+
       report = (
         await api.buscarRelatorioPacienteDoProfissional(selectedRange.value, props.patientId)
       ).data;
