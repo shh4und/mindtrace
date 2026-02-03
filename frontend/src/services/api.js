@@ -39,7 +39,53 @@ apiClient.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    // Check if error is 401, not a retry, and NOT the refresh endpoint itself (to avoid loops)
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes("/entrar/refresh")
+    ) {
+      originalRequest._retry = true;
+      try {
+        const refreshToken = localStorage.getItem("refresh_token");
+        
+        if (!refreshToken) {
+            return Promise.reject(error);
+        }
 
+        // Call refresh endpoint with object payload
+        const response = await api.refreshTokenRotation({ refresh_token: refreshToken });
+        const { access_token, refresh_token: new_refresh_token } = response.data;
+
+        // Update local storage
+        localStorage.setItem("access_token", access_token);
+        if (new_refresh_token) {
+            localStorage.setItem("refresh_token", new_refresh_token);
+        }
+
+        // Update Authorization header
+        apiClient.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
+        originalRequest.headers["Authorization"] = `Bearer ${access_token}`;
+
+        // Retry the original request using apiClient
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // If refresh fails, clear tokens and reject
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        // Optionally redirect to login here if not handled by router guards
+        // window.location.href = '/login'; 
+        return Promise.reject(refreshError);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 // Funções de API que nossos componentes irao usar
 const api = {
   // autenticacao e sessao
