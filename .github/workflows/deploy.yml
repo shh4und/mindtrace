@@ -52,6 +52,18 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy compose file to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "/home/${{ secrets.EC2_USER }}/mindtrace"
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -60,16 +72,16 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-            cd /home/ubuntu/mindtrace || exit 1
-            
-            # Atualiza código do repositório
-            git fetch origin main
-            git reset --hard origin/main
+            cd /home/${{ secrets.EC2_USER }}/mindtrace || mkdir -p /home/${{ secrets.EC2_USER }}/mindtrace && cd /home/${{ secrets.EC2_USER }}/mindtrace
             
             # Verifica se .env.prod existe
             if [ ! -f .env.prod ]; then
               echo "❌ Arquivo .env.prod ausente - crie manualmente no servidor."
-              echo "Exemplo:"
+              echo ""
+              echo "  mkdir -p /home/${{ secrets.EC2_USER }}/mindtrace"
+              echo "  nano /home/${{ secrets.EC2_USER }}/mindtrace/.env.prod"
+              echo ""
+              echo "Conteúdo:"
               echo "  POSTGRES_USER=admin"
               echo "  POSTGRES_PASSWORD=sua_senha_segura"
               echo "  POSTGRES_DB=mindtrace"
@@ -77,7 +89,6 @@ jobs:
               echo "  FRONTEND_ORIGINS=http://IP_PUBLICO_EC2"
               echo "  SKIP_DB_INIT=false"
               echo ""
-              echo "  # SMTP via Mailpit (embutido no docker-compose)"
               echo "  # Emails capturados em http://IP_PUBLICO_EC2:8025"
               exit 1
             fi
@@ -97,4 +108,4 @@ jobs:
             docker image prune -f
             
             echo "✅ Deploy concluído com sucesso!"
-            echo "🌐 Aplicação disponível em: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
+            echo "🌐 Aplicação disponível em: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo 'IP_INDISPONIVEL')"
