@@ -61,6 +61,80 @@
     </div>
 
     <template v-else>
+      <!-- Card IBG - Índice de Bem-Estar Geral -->
+      <section class="mb-8" aria-label="Índice de Bem-Estar Geral">
+        <div
+          class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 hover:shadow-md transition-shadow"
+        >
+          <div class="flex flex-col md:flex-row items-center gap-6">
+            <!-- Left: Info -->
+            <div class="flex-1 text-center md:text-left">
+              <div
+                class="flex items-center justify-center md:justify-start gap-3 mb-3"
+              >
+                <span :class="['p-2.5 rounded-xl', ibgConfig.bgClass]">
+                  <font-awesome-icon
+                    :icon="faLeaf"
+                    :class="['w-6 h-6', ibgConfig.iconClass]"
+                  />
+                </span>
+                <h2 class="text-lg font-bold text-gray-800">
+                  Índice de Bem-Estar Geral
+                </h2>
+              </div>
+              <template v-if="hasData">
+                <p
+                  class="text-5xl font-extrabold mb-2"
+                  :class="ibgConfig.textClass"
+                >
+                  {{ ibgPercentage }}<span class="text-2xl">%</span>
+                </p>
+                <span
+                  :class="[
+                    'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold',
+                    ibgConfig.badgeBg,
+                  ]"
+                >
+                  {{ ibgConfig.label }}
+                </span>
+                <p class="text-xs text-gray-400 mt-3">
+                  Baseado em sono (40%), humor (20%), stress (20%) e energia
+                  (20%)
+                </p>
+              </template>
+              <template v-else>
+                <p class="text-2xl font-bold text-gray-300 mb-1">Sem dados</p>
+                <p class="text-sm text-gray-400">
+                  Registre seu humor para gerar o índice de bem-estar.
+                </p>
+              </template>
+            </div>
+            <!-- Right: Radial Gauge -->
+            <div v-if="hasData" class="w-48 h-48 shrink-0">
+              <apexchart
+                type="radialBar"
+                height="200"
+                :options="ibgChartOptions"
+                :series="ibgSeries"
+              ></apexchart>
+            </div>
+            <div
+              v-else
+              class="w-48 h-48 shrink-0 flex items-center justify-center"
+            >
+              <div
+                class="w-32 h-32 rounded-full border-8 border-gray-100 flex items-center justify-center"
+              >
+                <font-awesome-icon
+                  :icon="faLeaf"
+                  class="w-10 h-10 text-gray-200"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Cards de Estatísticas -->
       <section
         class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
@@ -189,6 +263,7 @@ import {
   faBed,
   faBolt,
   faHeartPulse,
+  faLeaf,
 } from "@fortawesome/free-solid-svg-icons";
 
 import data from "emoji-mart-vue-fast/data/all.json";
@@ -221,6 +296,96 @@ const avgSleep = ref(0);
 const avgEnergy = ref(0);
 const avgStress = ref(0);
 const patientName = ref("");
+const valorIBG = ref(0);
+const statusAtual = ref("REGULAR");
+const hasData = ref(false);
+
+// --- IBG CONFIG & CHART ---
+const ibgPercentage = computed(() => Math.round(valorIBG.value * 100));
+
+const ibgConfig = computed(() => {
+  switch (statusAtual.value) {
+    case "PREOCUPANTE":
+      return {
+        label: "Preocupante",
+        color: "#DC2626",
+        textClass: "text-red-600",
+        bgClass: "bg-red-50",
+        badgeBg: "bg-red-100 text-red-700",
+        iconClass: "text-red-500",
+      };
+    case "ATENCAO":
+      return {
+        label: "Atenção",
+        color: "#D97706",
+        textClass: "text-amber-600",
+        bgClass: "bg-amber-50",
+        badgeBg: "bg-amber-100 text-amber-700",
+        iconClass: "text-amber-500",
+      };
+    default:
+      return {
+        label: "Regular",
+        color: "#16A34A",
+        textClass: "text-green-600",
+        bgClass: "bg-green-50",
+        badgeBg: "bg-green-100 text-green-700",
+        iconClass: "text-green-500",
+      };
+  }
+});
+
+const ibgChartOptions = computed(() => ({
+  chart: {
+    type: "radialBar",
+    height: 200,
+    sparkline: { enabled: true },
+  },
+  plotOptions: {
+    radialBar: {
+      startAngle: -135,
+      endAngle: 135,
+      hollow: {
+        size: "70%",
+      },
+      track: {
+        background: "#F3F4F6",
+        strokeWidth: "100%",
+      },
+      dataLabels: {
+        name: {
+          show: true,
+          fontSize: "13px",
+          fontWeight: 600,
+          color: "#6B7280",
+          offsetY: -10,
+        },
+        value: {
+          show: true,
+          fontSize: "28px",
+          fontWeight: 800,
+          color: ibgConfig.value.color,
+          offsetY: 4,
+          formatter: (val) => `${val}%`,
+        },
+      },
+    },
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shade: "dark",
+      type: "horizontal",
+      shadeIntensity: 0.5,
+      gradientToColors: [ibgConfig.value.color],
+      stops: [0, 100],
+    },
+  },
+  colors: [ibgConfig.value.color],
+  labels: ["IBG"],
+}));
+
+const ibgSeries = computed(() => [ibgPercentage.value]);
 
 const timeRanges = [
   { label: "Últimos 7 dias", days: 7 },
@@ -295,6 +460,9 @@ const fetchReportData = async () => {
     avgSleep.value = (report.media_sono || 0).toFixed(1);
     avgEnergy.value = (report.media_energia || 0).toFixed(1);
     avgStress.value = (report.media_stress || 0).toFixed(1);
+    valorIBG.value = report.valor_ibg || 0;
+    statusAtual.value = report.status_atual || "REGULAR";
+    hasData.value = (report.grafico_sono?.length || 0) > 0;
   } catch (error) {
     toast.error("Não foi possível carregar os dados do relatório.");
     console.error("Erro ao buscar relatório:", error);
