@@ -28,7 +28,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /app/main ./cmd/api/ma
 # DESCOMENTE PARA PRODUCAO / COMENTE PARA DESENVOLVIMENTO (CODE COMPLETIONS)
 FROM alpine:latest
 
-RUN apk add --no-cache wget
+RUN apk add --no-cache wget tzdata
 
 WORKDIR /app
 
