@@ -6,7 +6,9 @@
     <div class="flex items-center justify-center px-4 py-8">
       <div class="w-full max-w-2xl">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <h2 class="text-2xl font-semibold text-center text-gray-900 mb-6">Criar Conta</h2>
+          <h2 class="text-2xl font-semibold text-center text-gray-900 mb-6">
+            Criar Conta
+          </h2>
 
           <!-- Seletor tipo conta -->
           <fieldset class="mb-8">
@@ -45,11 +47,26 @@
             </div>
           </fieldset>
 
-          <form v-if="form.userType" @submit.prevent="handleRegister" class="space-y-6" novalidate>
+          <form
+            v-if="form.userType"
+            @submit.prevent="handleRegister"
+            class="space-y-6"
+            novalidate
+          >
             <!-- Campos comuns -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <BaseInput v-model="form.nome" label="Nome Completo" autocomplete="name" required />
-              <BaseInput v-model="form.cpf" label="CPF" inputmode="numeric" required />
+              <BaseInput
+                v-model="form.nome"
+                label="Nome Completo"
+                autocomplete="name"
+                required
+              />
+              <BaseInput
+                v-model="form.cpf"
+                label="CPF"
+                inputmode="numeric"
+                required
+              />
               <BaseInput
                 v-model="form.email"
                 type="email"
@@ -101,7 +118,11 @@
             >
               <legend class="sr-only">Informações profissionais</legend>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <BaseInput v-model="form.especialidade" label="Especialidade" required />
+                <BaseInput
+                  v-model="form.especialidade"
+                  label="Especialidade"
+                  required
+                />
                 <BaseInput
                   v-model="form.registro_profissional"
                   label="Nº Registro Profissional (CRP, etc)"
@@ -124,7 +145,9 @@
                     type="checkbox"
                     class="h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                   />
-                  <label for="dependente" class="text-base font-medium text-gray-700"
+                  <label
+                    for="dependente"
+                    class="text-base font-medium text-gray-700"
                     >É dependente?</label
                   >
                 </div>
@@ -145,15 +168,45 @@
               </div>
             </fieldset>
 
+            <!-- Aceite de termos (LGPD) -->
+            <div class="flex items-start gap-3 pt-2">
+              <input
+                id="termos_aceitos"
+                v-model="form.termos_aceitos"
+                type="checkbox"
+                class="mt-1 h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              <label
+                for="termos_aceitos"
+                class="text-sm text-gray-600 leading-relaxed"
+              >
+                Li e aceito os
+                <span class="font-medium text-gray-900 underline cursor-pointer"
+                  >Termos de Uso</span
+                >
+                e a
+                <span class="font-medium text-gray-900 underline cursor-pointer"
+                  >Política de Privacidade</span
+                >
+                do MindTrace.
+              </label>
+            </div>
+
             <BaseButton
               type="submit"
-              :variant="form.userType === TipoUsuario.Profissional ? 'rose' : 'emerald'"
+              :variant="
+                form.userType === TipoUsuario.Profissional ? 'rose' : 'emerald'
+              "
               size="md"
               full-width
               :disabled="isSubmitDisabled"
             >
               Criar Conta de
-              {{ form.userType === TipoUsuario.Paciente ? 'Paciente' : 'Profissional' }}
+              {{
+                form.userType === TipoUsuario.Paciente
+                  ? "Paciente"
+                  : "Profissional"
+              }}
             </BaseButton>
           </form>
 
@@ -172,37 +225,39 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useToast } from 'vue-toastification';
-import { useUserStore } from '@/store/user';
-import { TipoUsuario } from '@/types/usuario.js';
-import NavbarPublic from '@/components/layout/NavbarPublic.vue';
-import { BaseInput, BaseButton } from '@/components/ui';
+import { ref, reactive, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useToast } from "vue-toastification";
+import { useUserStore } from "@/store/user";
+import { TipoUsuario } from "@/types/usuario.js";
+import NavbarPublic from "@/components/layout/NavbarPublic.vue";
+import { BaseInput, BaseButton } from "@/components/ui";
 
 const router = useRouter();
 const toast = useToast();
 const userStore = useUserStore();
 
 const form = reactive({
-  userType: '', // Tipo selecionado paciente ou profissional
-  nome: '',
-  email: '',
-  senha: '',
-  confirm_password: '',
-  cpf: '',
-  contato: '',
+  userType: "", // Tipo selecionado paciente ou profissional
+  nome: "",
+  email: "",
+  senha: "",
+  confirm_password: "",
+  cpf: "",
+  contato: "",
   data_nascimento: new Date(),
   // Campos do profissional
-  especialidade: '',
-  registro_profissional: '',
+  especialidade: "",
+  registro_profissional: "",
   // Campos do paciente
   dependente: false,
-  nome_responsavel: '',
-  contato_responsavel: '',
+  nome_responsavel: "",
+  contato_responsavel: "",
+  // LGPD
+  termos_aceitos: false,
 });
 
-const passwordError = ref('');
+const passwordError = ref("");
 
 const isPasswordValid = computed(() => {
   if (!form.senha) return false;
@@ -211,29 +266,33 @@ const isPasswordValid = computed(() => {
 });
 
 const isSubmitDisabled = computed(() => {
-  return !isPasswordValid.value || form.senha !== form.confirm_password;
+  return (
+    !isPasswordValid.value ||
+    form.senha !== form.confirm_password ||
+    !form.termos_aceitos
+  );
 });
 
 const validatePassword = () => {
   if (!form.senha) {
-    passwordError.value = '';
+    passwordError.value = "";
     return;
   }
   const regex = /^[a-zA-Z0-9!@#$%^&*]{8,}$/;
   if (!regex.test(form.senha)) {
-    passwordError.value = 'A senha não atende aos critérios de segurança.';
+    passwordError.value = "A senha não atende aos critérios de segurança.";
   } else {
-    passwordError.value = '';
+    passwordError.value = "";
   }
 };
 
 const handleRegister = async () => {
   if (form.senha !== form.confirm_password) {
-    toast.error('As senhas não coincidem!');
+    toast.error("As senhas não coincidem!");
     return;
   }
   if (!isPasswordValid.value) {
-    toast.error('Por favor, use uma senha válida.');
+    toast.error("Por favor, use uma senha válida.");
     return;
   }
 
@@ -245,6 +304,7 @@ const handleRegister = async () => {
       cpf: form.cpf,
       contato: form.contato,
       data_nascimento: new Date(form.data_nascimento).toJSON(),
+      termos_aceitos: form.termos_aceitos,
     };
 
     let data;
@@ -266,13 +326,14 @@ const handleRegister = async () => {
     const response = await userStore.register(data, form.userType);
     toast.success(
       response.data.mensagem ||
-        'Cadastro realizado com sucesso! Verifique seu e-mail para ativar a conta.'
+        "Cadastro realizado com sucesso! Verifique seu e-mail para ativar a conta."
     );
-    router.push('/login');
+    router.push("/login");
   } catch (error) {
-    const errorMessage = error.response?.data?.erro || 'Erro desconhecido no cadastro.';
+    const errorMessage =
+      error.response?.data?.erro || "Erro desconhecido no cadastro.";
     toast.error(errorMessage);
-    console.error('Falha no cadastro:', error);
+    console.error("Falha no cadastro:", error);
   }
 };
 </script>
