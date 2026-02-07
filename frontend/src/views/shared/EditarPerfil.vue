@@ -1,118 +1,205 @@
 <template>
-  <div class="flex flex-col items-center justify-center p-4 md:p-8 w-full">
-    <h1 class="text-3xl font-bold text-gray-900 mb-6">Meu Perfil</h1>
+  <div class="max-w-4xl mx-auto p-4 md:p-8">
+    <!-- Header -->
+    <header class="mb-10">
+      <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+        Meu Perfil
+      </h1>
+      <p class="text-gray-500 mt-2 text-lg">
+        Gerencie suas informações pessoais e preferências de conta.
+      </p>
+    </header>
 
     <!-- Card de Informações do Perfil -->
-    <div class="w-full max-w-2xl bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8 mb-8">
-      <h2 class="text-xl font-semibold text-gray-900 mb-6">Informações Pessoais</h2>
+    <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 mb-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <span class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+          <font-awesome-icon :icon="faUser" class="w-5 h-5" />
+        </span>
+        Informações Pessoais
+      </h2>
       <form @submit.prevent="saveProfile">
-        <div class="space-y-6">
+        <div class="space-y-5">
           <!-- Nome -->
           <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">Nome</label>
-            <input type="text" id="name" v-model="profile.nome"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+            <label for="name" class="block text-sm font-bold text-gray-700 mb-1.5">Nome</label>
+            <input
+              type="text"
+              id="name"
+              v-model="profile.nome"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all text-gray-900 font-medium"
+            />
           </div>
 
-          <!-- Email -->
+          <!-- Email (readonly) -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" id="email" v-model="profile.email"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-100 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900"
-              readonly>
+            <label for="email" class="block text-sm font-bold text-gray-700 mb-1.5">Email</label>
+            <input
+              type="email"
+              id="email"
+              v-model="profile.email"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-gray-500 outline-none cursor-not-allowed font-medium"
+              readonly
+            />
           </div>
 
+          <!-- Data de Nascimento -->
           <div>
-            <label for="data_nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
-            <input type="date" id="data_nascimento" v-model="profile.data_nascimento"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+            <label for="data_nascimento" class="block text-sm font-bold text-gray-700 mb-1.5">Data de Nascimento</label>
+            <input
+              type="date"
+              id="data_nascimento"
+              v-model="profile.data_nascimento"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all text-gray-900 font-medium"
+            />
           </div>
 
-
-          <!-- (Apenas para Profissional) -->
+          <!-- Especialidade (Profissional) -->
           <div v-if="props.userType === TipoUsuario.Profissional">
-            <label for="especialidade" class="block text-sm font-medium text-gray-700">Especialidade</label>
-            <input type="text" id="especialidade" v-model="profile.especialidade"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
-          </div>
-          <div v-if="props.userType === TipoUsuario.Profissional">
-            <label for="registro_profissional" class="block text-sm font-medium text-gray-700">Registro
-              Profissional</label>
-            <input type="text" id="registro_profissional" v-model="profile.registro_profissional"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+            <label for="especialidade" class="block text-sm font-bold text-gray-700 mb-1.5">Especialidade</label>
+            <input
+              type="text"
+              id="especialidade"
+              v-model="profile.especialidade"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all text-gray-900 font-medium"
+            />
           </div>
 
-          <!-- (Apenas para Paciente) -->
-          <div v-if="props.userType === TipoUsuario.Paciente">
-            <label for="dependente" class="block text-sm font-medium text-gray-700">Dependente</label>
-            <input type="checkbox" id="dependente" v-model="profile.dependente"
-              class="w-5 h-5 mt-3 px-4 py-5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+          <!-- Registro Profissional (Profissional) -->
+          <div v-if="props.userType === TipoUsuario.Profissional">
+            <label for="registro_profissional" class="block text-sm font-bold text-gray-700 mb-1.5">Registro Profissional</label>
+            <input
+              type="text"
+              id="registro_profissional"
+              v-model="profile.registro_profissional"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all text-gray-900 font-medium"
+            />
           </div>
-          <div v-if="props.userType === TipoUsuario.Paciente">
-            <label for="nome_responsavel" class="block text-sm font-medium text-gray-700">Nome Responsável</label>
-            <input type="text" id="nome_responsavel" v-model="profile.nome_responsavel"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+
+          <!-- Dependente (Paciente) -->
+          <div v-if="props.userType === TipoUsuario.Paciente" class="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="dependente"
+              v-model="profile.dependente"
+              class="w-5 h-5 rounded-lg border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-colors"
+            />
+            <label for="dependente" class="text-sm font-bold text-gray-700">Dependente</label>
           </div>
+
+          <!-- Nome Responsável (Paciente) -->
           <div v-if="props.userType === TipoUsuario.Paciente">
-            <label for="contato_responsavel" class="block text-sm font-medium text-gray-700">Contato Responsável</label>
-            <input type="text" id="contato_responsavel" v-model="profile.contato_responsavel"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+            <label for="nome_responsavel" class="block text-sm font-bold text-gray-700 mb-1.5">Nome Responsável</label>
+            <input
+              type="text"
+              id="nome_responsavel"
+              v-model="profile.nome_responsavel"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 outline-none transition-all text-gray-900 font-medium"
+            />
+          </div>
+
+          <!-- Contato Responsável (Paciente) -->
+          <div v-if="props.userType === TipoUsuario.Paciente">
+            <label for="contato_responsavel" class="block text-sm font-bold text-gray-700 mb-1.5">Contato Responsável</label>
+            <input
+              type="text"
+              id="contato_responsavel"
+              v-model="profile.contato_responsavel"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 outline-none transition-all text-gray-900 font-medium"
+            />
           </div>
 
           <!-- Bio -->
           <div>
-            <label for="bio" class="block text-sm font-medium text-gray-700">Bio</label>
-            <textarea id="bio" v-model="profile.bio" rows="4"
-              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900"></textarea>
+            <label for="bio" class="block text-sm font-bold text-gray-700 mb-1.5">Bio</label>
+            <textarea
+              id="bio"
+              v-model="profile.bio"
+              rows="4"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all text-gray-900 font-medium resize-none"
+            ></textarea>
           </div>
         </div>
-        <div class="flex justify-end mt-6">
-          <button type="submit"
-            class="bg-emerald-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+
+        <div class="flex justify-end mt-8">
+          <button
+            type="submit"
+            class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-violet-700 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+          >
             Salvar Alterações
           </button>
         </div>
       </form>
-    </div>
+    </section>
 
     <!-- Card para Alterar Senha -->
-    <div class="w-full max-w-2xl bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
-      <h2 class="text-xl font-semibold text-gray-900 mb-6">Alterar Senha</h2>
-      <form @submit.prevent="changePassword" class="space-y-4">
+    <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 mb-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <span class="p-2 bg-amber-100 rounded-lg text-amber-600">
+          <font-awesome-icon :icon="faLock" class="w-5 h-5" />
+        </span>
+        Alterar Senha
+      </h2>
+      <form @submit.prevent="changePassword" class="space-y-5">
         <div>
-          <label for="current-password" class="block text-sm font-medium text-gray-700">Senha Atual</label>
-          <input type="password" id="current-password" v-model="password.senha_atual"
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+          <label for="current-password" class="block text-sm font-bold text-gray-700 mb-1.5">Senha Atual</label>
+          <input
+            type="password"
+            id="current-password"
+            v-model="password.senha_atual"
+            class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all text-gray-900 font-medium"
+          />
         </div>
         <div>
-          <label for="new-password" class="block text-sm font-medium text-gray-700">Nova Senha</label>
-          <input type="password" id="new-password" v-model="password.nova_senha"
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+          <label for="new-password" class="block text-sm font-bold text-gray-700 mb-1.5">Nova Senha</label>
+          <input
+            type="password"
+            id="new-password"
+            v-model="password.nova_senha"
+            class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all text-gray-900 font-medium"
+          />
         </div>
         <div>
-          <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirmar Nova Senha</label>
-          <input type="password" id="confirm-password" v-model="password.nova_senha_re"
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-gray-900">
+          <label for="confirm-password" class="block text-sm font-bold text-gray-700 mb-1.5">Confirmar Nova Senha</label>
+          <input
+            type="password"
+            id="confirm-password"
+            v-model="password.nova_senha_re"
+            class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all text-gray-900 font-medium"
+          />
         </div>
         <div class="flex justify-end pt-2">
-          <button type="submit"
-            class="bg-emerald-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+          <button
+            type="submit"
+            class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-violet-700 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+          >
             Alterar Senha
           </button>
         </div>
       </form>
-    </div>
-    <div class="w-full max-w-2xl bg-white rounded-xl shadow-sm border border-red-200 p-6 md:p-8 mt-8">
-      <h2 class="text-xl font-semibold text-red-900 mb-6">Apagar Conta</h2>
-      <p class="text-gray-700 mb-4">Esta ação é irreversível e removerá todos os seus dados.</p>
-      <button type="button" @click="deleteAccount"
-        class="bg-red-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+    </section>
+
+    <!-- Card para Apagar Conta -->
+    <section class="bg-white rounded-3xl shadow-sm border border-red-100 p-6 md:p-8">
+      <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <span class="p-2 bg-red-100 rounded-lg text-red-600">
+          <font-awesome-icon :icon="faTrash" class="w-5 h-5" />
+        </span>
+        Apagar Conta
+      </h2>
+      <p class="text-gray-500 mb-6 font-medium">
+        Esta ação é irreversível e removerá todos os seus dados permanentemente.
+      </p>
+      <button
+        type="button"
+        @click="deleteAccount"
+        class="px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all shadow-md hover:shadow-lg"
+      >
+        <font-awesome-icon :icon="faTrash" class="w-4 h-4 mr-2" />
         Apagar Conta
       </button>
-    </div>
+    </section>
   </div>
-  <!-- Card para Apagar Conta -->
-
 </template>
 
 <script setup>
@@ -121,6 +208,12 @@ import { useToast } from 'vue-toastification';
 import api from '../../services/api';
 import { useUserStore } from '../../store/user';
 import { TipoUsuario } from '../../types/usuario.js';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import {
+  faUser,
+  faLock,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons';
 
 const props = defineProps({
   userType: {
@@ -133,14 +226,12 @@ const props = defineProps({
 const toast = useToast();
 const userStore = useUserStore();
 
-// Padronizado para corresponder ao DTO do backend
 const profile = ref({
   nome: '',
-  email: '', // O email não é editável, mas será exibido
+  email: '',
   contato: '',
   bio: '',
   data_nascimento: '',
-  // Campo específico do profissional
   especialidade: ''
 });
 
@@ -175,8 +266,6 @@ onMounted(async () => {
       profile.value.nome_responsavel = pacResponse.data.nome_responsavel;
       profile.value.contato_responsavel = pacResponse.data.contato_responsavel;
     }
-
-    // toast.success('Perfil carregado com sucesso!');
   } catch (error) {
     toast.error('Erro ao carregar perfil.');
   }
@@ -230,10 +319,13 @@ const deleteAccount = async () => {
 
   try {
     await userStore.deleteAccount();
-    // No success toast here because of redirection after successful deletion
   } catch (error) {
     toast.error('Erro ao apagar a conta.');
     console.error("Erro ao apagar conta:", error);
   }
 };
 </script>
+
+<style scoped>
+/* Mantendo consistência com o estilo global */
+</style>
