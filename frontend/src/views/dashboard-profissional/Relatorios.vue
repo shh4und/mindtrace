@@ -36,15 +36,21 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="patients.length === 0" class="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-      <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
-         <font-awesome-icon :icon="faUsers" class="w-10 h-10" />
+    <div
+      v-else-if="patients.length === 0"
+      class="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200"
+    >
+      <div
+        class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300"
+      >
+        <font-awesome-icon :icon="faUsers" class="w-10 h-10" />
       </div>
       <h3 class="text-xl font-bold text-gray-900 mb-2">
         Nenhum paciente vinculado
       </h3>
       <p class="text-gray-500 mb-8 max-w-md mx-auto">
-        Você precisa vincular pacientes à sua conta para visualizar seus relatórios de acompanhamento.
+        Você precisa vincular pacientes à sua conta para visualizar seus
+        relatórios de acompanhamento.
       </p>
       <router-link
         to="/dashboard-profissional/convite"
@@ -80,24 +86,30 @@
           class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-100 hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col items-center text-center relative overflow-hidden"
         >
           <!-- Background decoration -->
-          <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-gray-50 to-white opacity-50"></div>
-          
+          <div
+            class="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-gray-50 to-white opacity-50"
+          ></div>
+
           <div
             :class="[
               getAvatarColor(index),
               'w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold mb-4 shadow-sm z-10 transition-transform group-hover:scale-110',
             ]"
           >
-             {{ patient.name.charAt(0).toUpperCase() }}
+            {{ patient.name.charAt(0).toUpperCase() }}
           </div>
-          
-          <h3 class="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors z-10">
+
+          <h3
+            class="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors z-10"
+          >
             {{ patient.name }}
           </h3>
-          <p class="text-sm text-gray-500 font-medium mb-6 z-10">{{ patient.age }}</p>
+          <p class="text-sm text-gray-500 font-medium mb-6 z-10">
+            {{ patient.age }}
+          </p>
 
           <button
-             class="mt-auto w-full py-2.5 px-4 rounded-xl bg-indigo-50 text-indigo-600 font-semibold text-sm hover:bg-indigo-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-md"
+            class="mt-auto w-full py-2.5 px-4 rounded-xl bg-indigo-50 text-indigo-600 font-bold text-sm hover:bg-indigo-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-md"
           >
             <font-awesome-icon :icon="faChartLine" />
             Ver Relatório
@@ -110,23 +122,22 @@
         v-if="filteredPatients.length === 0 && searchQuery"
         class="text-center py-20"
       >
-        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
-           <font-awesome-icon
-            :icon="faSearch"
-            class="w-6 h-6"
-          />
+        <div
+          class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400"
+        >
+          <font-awesome-icon :icon="faSearch" class="w-6 h-6" />
         </div>
-        <p class="text-gray-900 font-medium text-lg">
+        <p class="text-gray-900 font-bold text-lg">
           Nenhum paciente encontrado
         </p>
-         <p class="text-gray-500">
+        <p class="text-gray-500">
           Não encontramos resultados para "{{ searchQuery }}"
         </p>
-        <button 
-            @click="searchQuery = ''"
-            class="mt-4 text-indigo-600 font-bold hover:text-indigo-800"
+        <button
+          @click="searchQuery = ''"
+          class="mt-4 text-indigo-600 font-bold hover:text-indigo-800"
         >
-            Limpar busca
+          Limpar busca
         </button>
       </div>
     </template>
@@ -164,7 +175,6 @@ const currentDate = computed(() =>
 const currentDay = computed(() =>
   today.toLocaleDateString("pt-BR", { weekday: "long" })
 );
-
 
 // Cores para avatares (estilo moderno)
 const avatarColors = [

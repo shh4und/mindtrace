@@ -1,7 +1,15 @@
 <template>
-  <div>
+  <div class="max-w-6xl mx-auto p-4 md:p-8">
     <header class="mb-10 text-center md:text-left">
-      <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+      <div
+        class="inline-flex items-center justify-center space-x-2 bg-indigo-50 text-indigo-800 px-4 py-1.5 rounded-full text-sm font-medium mb-4 shadow-sm"
+      >
+        <font-awesome-icon :icon="faUsers" class="h-4 w-4" />
+        <span>Gestão</span>
+      </div>
+      <h1
+        class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight"
+      >
         Meus Pacientes
       </h1>
       <p class="text-gray-500 mt-2 text-lg">
@@ -10,18 +18,31 @@
     </header>
 
     <!-- Loading state -->
-    <div v-if="isLoading" class="flex justify-center items-center py-16">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500"></div>
+    <div v-if="isLoading" class="flex justify-center items-center py-20">
+      <div
+        class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"
+      ></div>
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="patients.length === 0" class="text-center py-16">
-      <font-awesome-icon :icon="faUsers" class="w-16 h-16 text-gray-300 mb-4" />
-      <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhum paciente vinculado</h3>
-      <p class="text-gray-500 mb-6">Gere um convite para vincular seu primeiro paciente.</p>
+    <div
+      v-else-if="patients.length === 0"
+      class="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200"
+    >
+      <div
+        class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300"
+      >
+        <font-awesome-icon :icon="faUsers" class="w-10 h-10" />
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">
+        Nenhum paciente vinculado
+      </h3>
+      <p class="text-gray-500 mb-8 max-w-md mx-auto">
+        Gere um convite para vincular seu primeiro paciente.
+      </p>
       <router-link
         to="/dashboard-profissional/convite"
-        class="inline-flex items-center px-4 py-2 bg-rose-500 text-white rounded-3xl hover:bg-rose-600 transition-colors"
+        class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
       >
         <font-awesome-icon :icon="faEnvelope" class="mr-2" />
         Gerar Convite
@@ -49,15 +70,11 @@
         <div
           v-for="(patient, index) in filteredPatients"
           :key="patient.id"
-          :title="patient.name"
-          :subtitle="patient.age"
-          variant="profissional"
-          :aria-label="`Ver detalhes de ${patient.name}`"
           class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-100 hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col items-center text-center relative overflow-hidden"
         >
           <!-- Background decoration -->
           <div
-            class="absolute top-0 left-0 w-full h-24 bg-linear-to-b from-gray-50 to-white opacity-50"
+            class="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-gray-50 to-white opacity-50"
           ></div>
 
           <div
@@ -74,73 +91,91 @@
           >
             {{ patient.name }}
           </h3>
-          <p class="text-sm text-gray-500 font-medium mb-6 z-10">{{ patient.age }}</p>
+          <p class="text-sm text-gray-500 font-medium mb-6 z-10">
+            {{ patient.age }}
+          </p>
 
-          <button
-            @click="viewPatientReport(patient.id)"
-            class="mb-1 mt-auto w-full py-2.5 px-4 rounded-xl bg-indigo-50 text-indigo-600 font-semibold text-sm hover:bg-indigo-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-md"
-          >
-            <font-awesome-icon :icon="faChartLine" />
-            Ver Relatório
-          </button>
-          <button
-            @click="viewQuestFormAssign({ patientId: patient.id, patientNome: patient.name })"
-            class="mb-1 mt-auto w-full py-2.5 px-4 rounded-xl bg-indigo-50 text-indigo-600 font-semibold text-sm hover:bg-indigo-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-md"
-          >
-            <font-awesome-icon :icon="faClipboardList" />
-            Atribuir Questionário
-          </button>
+          <div class="w-full space-y-2 z-10">
+            <button
+              @click="viewPatientReport(patient.id)"
+              class="w-full py-2.5 px-4 rounded-xl bg-indigo-50 text-indigo-600 font-semibold text-sm hover:bg-indigo-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-md"
+            >
+              <font-awesome-icon :icon="faChartLine" />
+              Ver Relatório
+            </button>
+            <button
+              @click="
+                viewQuestFormAssign({
+                  patientId: patient.id,
+                  patientNome: patient.name,
+                })
+              "
+              class="w-full py-2.5 px-4 rounded-xl bg-purple-50 text-purple-600 font-semibold text-sm hover:bg-purple-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <font-awesome-icon :icon="faClipboardList" />
+              Atribuir Questionário
+            </button>
+          </div>
         </div>
       </div>
+
       <!-- Sem resultados da busca -->
-      <div v-if="filteredPatients.length === 0 && searchQuery" class="text-center py-12">
-        <font-awesome-icon :icon="faSearch" class="w-12 h-12 text-gray-300 mb-3" />
-        <p class="text-gray-500">Nenhum paciente encontrado para "{{ searchQuery }}"</p>
+      <div
+        v-if="filteredPatients.length === 0 && searchQuery"
+        class="text-center py-20"
+      >
+        <div
+          class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400"
+        >
+          <font-awesome-icon :icon="faSearch" class="w-6 h-6" />
+        </div>
+        <p class="text-gray-900 font-bold text-lg">
+          Nenhum paciente encontrado
+        </p>
+        <p class="text-gray-500 mt-1">
+          Não encontramos resultados para "{{ searchQuery }}"
+        </p>
+        <button
+          @click="searchQuery = ''"
+          class="mt-4 text-indigo-600 font-bold hover:text-indigo-800"
+        >
+          Limpar busca
+        </button>
       </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import api from '@/services/api';
-import { useToast } from 'vue-toastification';
-import { CardListaUsuario } from '@/components/ui';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import api from "@/services/api";
+import { useToast } from "vue-toastification";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
   faUsers,
   faEnvelope,
   faChartLine,
   faClipboardList,
   faSearch,
-} from '@fortawesome/free-solid-svg-icons';
+} from "@fortawesome/free-solid-svg-icons";
 
 const router = useRouter();
 const patients = ref([]);
 const isLoading = ref(true);
-const searchQuery = ref('');
+const searchQuery = ref("");
 const toast = useToast();
 
-// Cores para avatares
+// Cores para avatares (consistente com Resumo.vue profissional)
 const avatarColors = [
-  'bg-blue-100 text-blue-600',
-  'bg-green-100 text-green-600',
-  'bg-purple-100 text-purple-600',
-  'bg-red-100 text-red-600',
-  'bg-yellow-100 text-yellow-600',
-  'bg-indigo-100 text-indigo-600',
-  'bg-pink-100 text-pink-600',
-  'bg-teal-100 text-teal-600',
+  "bg-blue-100 text-blue-600",
+  "bg-emerald-100 text-emerald-600",
+  "bg-violet-100 text-violet-600",
+  "bg-rose-100 text-rose-600",
+  "bg-amber-100 text-amber-600",
 ];
 
 const getAvatarColor = (index) => avatarColors[index % avatarColors.length];
-
-// Ações do card
-const cardActions = [
-  { id: 'report', label: 'Ver Relatório', icon: faChartLine },
-  { id: 'assign', label: 'Atribuir Questionário', icon: faClipboardList },
-];
 
 // Filtrar pacientes pela busca
 const filteredPatients = computed(() => {
@@ -150,7 +185,7 @@ const filteredPatients = computed(() => {
 });
 
 const calculateAge = (birthdate) => {
-  if (!birthdate) return '';
+  if (!birthdate) return "";
   const birthDate = new Date(birthdate);
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
@@ -163,24 +198,16 @@ const calculateAge = (birthdate) => {
 
 const viewPatientReport = (patientId) => {
   router.push({
-    name: 'profissional-paciente-relatorio',
+    name: "profissional-paciente-relatorio",
     params: { patientId },
   });
 };
 
 const viewQuestFormAssign = ({ patientId, patientNome }) => {
   router.push({
-    name: 'profissional-atribuir-questionario',
+    name: "profissional-atribuir-questionario",
     params: { patientId, patientNome },
   });
-};
-
-const handleAction = (actionId, patient) => {
-  if (actionId === 'report') {
-    viewPatientReport(patient.id);
-  } else if (actionId === 'assign') {
-    viewQuestFormAssign({ patientId: patient.id, patientNome: patient.name });
-  }
 };
 
 onMounted(async () => {
@@ -188,15 +215,19 @@ onMounted(async () => {
     const response = await api.listarPacientesDoProfissional();
     patients.value = (response.data || []).map((paciente) => ({
       id: paciente.id,
-      name: paciente.usuario?.nome || 'Paciente',
+      name: paciente.usuario?.nome || "Paciente",
       age: `${calculateAge(paciente.data_nascimento)} anos`,
-      focus: paciente.usuario?.bio || 'Tratamento em andamento.',
+      focus: paciente.usuario?.bio || "Tratamento em andamento.",
     }));
   } catch (error) {
-    console.error('Erro ao buscar pacientes:', error);
-    toast.error('Erro ao carregar lista de pacientes.');
+    console.error("Erro ao buscar pacientes:", error);
+    toast.error("Erro ao carregar lista de pacientes.");
   } finally {
     isLoading.value = false;
   }
 });
 </script>
+
+<style scoped>
+/* Mantendo consistência com o estilo global */
+</style>
