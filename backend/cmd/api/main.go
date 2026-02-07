@@ -103,14 +103,12 @@ func main() {
 	roteador.SetTrustedProxies([]string{"127.0.0.1", "172.16.0.0/12", "10.0.0.0/8", "192.168.0.0/16"})
 	// Inclui middleware cors padrao aceitando chamadas do frontend
 	roteador.Use(middlewares.CORSMiddleware())
-	/*
-	   TODO:
-	     - INSERIR USUARIO COM EMAIL HASH NO DB
-	     - USAR FLAG EstaAtivo PARA PERMITIR LOGIN
-	     - ADICIONAR TIMEOUT += 48H PARA INVALIDAR TOKEN
-	     - NOVO CONTROLADOR/ROTA PARA ATIVACAO DE EMAIL
-	     - testar.
-	*/
+
+	// Health check endpoint (sem auth, sem rate limit)
+	roteador.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
+
 	api := roteador.Group("/api/v1")
 	{
 		// --- ROTAS PUBLICAS ---

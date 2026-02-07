@@ -48,11 +48,11 @@ services:
       mailpit:
         condition: service_started
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/api/v1/entrar/login"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 15s
     restart: unless-stopped
     expose:
       - "8080"  # interno apenas, acessível via nginx proxy
