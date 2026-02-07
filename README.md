@@ -11,8 +11,13 @@ MindTrace é uma aplicação web full-stack completa projetada para rastreamento
 ## 🚀 Principais Funcionalidades
 
 - **Gestão de Usuários**: Registro e autenticação para pacientes e profissionais de saúde
+- **Autenticação Segura**: JWT com Refresh Token rotation e detecção de roubo de tokens
+- **Rate Limiting**: Proteção contra abuso em rotas públicas com Token Bucket por IP
+- **Conformidade LGPD**: Anonimização de perfil (direito ao esquecimento) e aceite de termos versionado
 - **Rastreamento de Humor**: Pacientes podem registrar entradas diárias de humor com timestamps e notas
+- **Índice de Bem-Estar Geral (IBG)**: Métrica composta (0–1) calculada automaticamente a cada registro de humor
 - **Questionários Padronizados**: Sistema completo de escalas psicométricas (PHQ-9, GAD-7, WHOQOL-BREF, WHO-5)
+- **Avaliadores Clínicos**: Pontuação e classificação automática via Strategy Pattern
 - **Monitoramento Ativo**: Análise automática de padrões de risco com alertas por e-mail para profissionais
 - **Atribuição de Instrumentos**: Profissionais podem atribuir questionários a pacientes
 - **Analytics Avançados**: Análise histórica com classificação de status (REGULAR, ATENÇÃO, PREOCUPANTE)
@@ -24,17 +29,21 @@ MindTrace é uma aplicação web full-stack completa projetada para rastreamento
 ## 🛠 Stack Tecnológico
 
 ### Backend
+
 - **Linguagem**: Go (Golang) 1.25.1
 - **Framework Web**: Gin v1.10.1
 - **ORM**: GORM v1.30.1
 - **Tipos de Dados**: GORM Datatypes (JSONB)
 - **Banco de Dados**: PostgreSQL 17 (produção) / SQLite (desenvolvimento)
-- **Autenticação**: JWT (golang-jwt/jwt/v5)
+- **Autenticação**: JWT + Refresh Tokens (golang-jwt/jwt/v5) com rotação e detecção de roubo
+- **Rate Limiting**: Token Bucket por IP (implementação customizada, sem dependências externas)
+- **Psicometria**: Avaliadores clínicos (PHQ-9, GAD-7, WHO-5, WHOQOL-BREF) + IBG
 - **Emails**: net/smtp (Standard Lib) com Templates HTML Embutidos
 - **Testes**: Testify v1.10.0 - **281 testes unitários**
 - **Arquitetura**: Clean Architecture (Domain-Driven Design)
 
 ### Frontend
+
 - **Linguagem**: JavaScript (ES6+)
 - **Framework**: Vue.js 3.5.18 (Composition API)
 - **Build Tool**: Vite v7.0.6
@@ -45,6 +54,7 @@ MindTrace é uma aplicação web full-stack completa projetada para rastreamento
 - **Ícones**: FontAwesome v7.0.0
 
 ### Infraestrutura & DevOps
+
 - **Containerização**: Docker
 - **Orquestração**: Docker Compose
 - **CI/CD**: GitHub Actions
@@ -94,6 +104,7 @@ MindTrace implementa os princípios de **Clean Architecture** com clara separaç
 ```
 
 ### Princípios Arquiteturais
+
 - **Inversão de Dependência**: Camadas internas não dependem de camadas externas
 - **Responsabilidade Única**: Cada camada tem um propósito distinto
 - **Segregação de Interface**: Interfaces de repositório definem contratos claros
@@ -102,6 +113,7 @@ MindTrace implementa os princípios de **Clean Architecture** com clara separaç
 ## 🚀 Começando
 
 ### Pré-requisitos
+
 - Docker e Docker Compose (para desenvolvimento local)
 - Node.js 22.17.1 (opcional, para desenvolvimento frontend local)
 - Go 1.25.1 (opcional, para desenvolvimento backend local)
@@ -109,6 +121,7 @@ MindTrace implementa os princípios de **Clean Architecture** com clara separaç
 ### Configuração para Desenvolvimento Local
 
 1. **Clone o repositório**:
+
    ```bash
    git clone https://github.com/shh4und/mindtrace.git
    cd mindtrace
@@ -116,6 +129,7 @@ MindTrace implementa os princípios de **Clean Architecture** com clara separaç
 
 2. **Crie o arquivo de ambiente**:
    Crie um arquivo `.env` no diretório raiz:
+
    ```env
    POSTGRES_USER=seu_usuario_db
    POSTGRES_PASSWORD=sua_senha_db
@@ -126,6 +140,7 @@ MindTrace implementa os princípios de **Clean Architecture** com clara separaç
    ```
 
 3. **Inicie a aplicação**:
+
    ```bash
    # Para desenvolvimento (com hot reload)
    docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build
@@ -142,6 +157,7 @@ MindTrace implementa os princípios de **Clean Architecture** com clara separaç
 ### Desenvolvimento Local (Sem Docker)
 
 #### Backend (Go)
+
 ```bash
 cd backend
 go mod download
@@ -149,6 +165,7 @@ go run cmd/api/main.go
 ```
 
 #### Frontend (Vue.js)
+
 ```bash
 cd frontend
 npm install
@@ -160,6 +177,7 @@ npm run dev
 MindTrace usa **CI/CD** com GitHub Actions para deploy automatizado na AWS:
 
 ### Processo de Deploy
+
 1. **Push para branch main** dispara workflow do GitHub Actions
 2. **Build** de imagens Docker para backend e frontend
 3. **Push** de imagens para Docker Hub
@@ -167,6 +185,7 @@ MindTrace usa **CI/CD** com GitHub Actions para deploy automatizado na AWS:
 5. **Atualização** de containers com zero-downtime
 
 ### Configuração de Ambiente de Produção
+
 - **Provedor Cloud**: AWS EC2
 - **Registro de Containers**: Docker Hub
 - **CI/CD**: GitHub Actions
@@ -174,7 +193,9 @@ MindTrace usa **CI/CD** com GitHub Actions para deploy automatizado na AWS:
 - **Proxy Reverso**: Nginx
 
 ### Configuração de Deploy
+
 O deploy em produção requer estes secrets no repositório GitHub:
+
 - `DOCKER_HUB_USERNAME`: Nome de usuário Docker Hub
 - `DOCKER_HUB_TOKEN`: Token de acesso Docker Hub
 - `EC2_HOST`: IP/hostname da instância AWS EC2
@@ -183,6 +204,7 @@ O deploy em produção requer estes secrets no repositório GitHub:
 - `FRONTEND_API_BASE_URL`: URL da API em produção (opcional, padrão localhost)
 
 ### Deploy Manual (se necessário)
+
 ```bash
 # No servidor de produção
 cd /home/ubuntu/mindtrace
@@ -200,19 +222,20 @@ mindtrace/
 │   │   └── main.go
 │   ├── interno/                      # Pacotes internos
 │   │   ├── dominio/                  # Camada de domínio (Entities)
-│   │   │   ├── usuario.go            # Usuário, Profissional, Paciente
-│   │   │   ├── registro_humor.go     # Registro de humor
+│   │   │   ├── usuario.go            # Usuário, Profissional, Paciente, RefreshToken
+│   │   │   ├── registro_humor.go     # Registro de humor + IBG (CalcularIBG)
 │   │   │   ├── convite.go            # Sistema de convites
 │   │   │   ├── relatorio.go          # DTOs de relatório
 │   │   │   ├── notificacao.go        # Sistema de notificações
-│   │   │   ├── instrumento.go        # ✨ Questionários padronizados
-│   │   │   ├── atribuicao.go         # ✨ Atribuições de questionários
-│   │   │   ├── resposta.go           # ✨ Respostas (JSONB)
+│   │   │   ├── instrumento.go        # Questionários padronizados
+│   │   │   ├── atribuicao.go         # Atribuições de questionários
+│   │   │   ├── resposta.go           # Respostas (JSONB)
+│   │   │   ├── psicometria.go        # ✨ Avaliadores Clínicos (PHQ-9, GAD-7, WHO-5, WHOQOL)
 │   │   │   └── tests/                # ✅ Testes de domínio (142 testes)
 │   │   ├── aplicacao/                # Camada de aplicação
 │   │   │   ├── controladores/        # HTTP Controllers
-│   │   │   │   ├── aut_controlador.go
-│   │   │   │   ├── usuario_controlador.go
+│   │   │   │   ├── aut_controlador.go         # Login + Refresh Token
+│   │   │   │   ├── usuario_controlador.go     # Perfil + Anonimização LGPD
 │   │   │   │   ├── paciente_controlador.go
 │   │   │   │   ├── profissional_controlador.go
 │   │   │   │   ├── registro_humor_controlador.go
@@ -245,7 +268,8 @@ mindtrace/
 │   │   │   │   └── tests/            # ✅ Testes de mappers (23 testes)
 │   │   │   └── middlewares/          # HTTP Middlewares
 │   │   │       ├── aut_middleware.go
-│   │   │       └── cors_middleware.go
+│   │   │       ├── cors_middleware.go
+│   │   │       └── rate_limit_middleware.go  # ✨ Rate limiting por IP (Token Bucket)
 │   │   └── persistencia/             # Camada de persistência
 │   │       ├── repositorios/         # Repository interfaces
 │   │       │   └── repositorios.go
@@ -348,6 +372,7 @@ mindtrace/
 ## 🔧 Fluxo de Desenvolvimento
 
 ### Estratégia de Branches
+
 - `main`: Código pronto para produção (branch protegida com CI/CD)
 - `feature/*`: Novas funcionalidades e melhorias
 - `docs/*`: Documentação nova ou atualizada
@@ -355,6 +380,7 @@ mindtrace/
 - `hotfix/*`: Correções críticas de produção
 
 ### Processo de Desenvolvimento
+
 1. **Criar Branch de Feature**: `git checkout -b feature/nova-funcionalidade`
 2. **Fazer Alterações**: Implementar features seguindo princípios de Clean Architecture
 3. **Executar Testes**: Executar suítes de teste para backend e frontend
@@ -363,6 +389,7 @@ mindtrace/
 6. **Auto-deploy**: GitHub Actions automaticamente faz build e deploy para produção
 
 ### Pipeline CI/CD
+
 - **Trigger**: Push para branch `main` ou dispatch manual
 - **Build**: Builds Docker multi-stage para imagens otimizadas
 - **Test**: Testes automatizados (testes unitários backend)
@@ -370,6 +397,7 @@ mindtrace/
 - **Monitoramento**: Health checks de containers e agregação de logs
 
 ### Ativando CI/CD
+
 O workflow de deploy está atualmente desabilitado (`.github/workflows/deploy.yml.disabled`). Para ativar:
 
 1. Renomeie `.github/workflows/deploy.yml.disabled` para `.github/workflows/deploy.yml`
@@ -382,6 +410,7 @@ O workflow de deploy está atualmente desabilitado (`.github/workflows/deploy.ym
    - `FRONTEND_API_BASE_URL` (opcional)
 
 ### Gerenciamento de Banco de Dados
+
 - **Migrações**: Automáticas via GORM AutoMigrate
 - **Seeding**: Use `seed.sh` para dados iniciais
 - **Backup**: Backups regulares do PostgreSQL em produção
@@ -389,12 +418,14 @@ O workflow de deploy está atualmente desabilitado (`.github/workflows/deploy.ym
 ## 📊 Monitoramento & Observabilidade
 
 ### Monitoramento em Produção
+
 - **Health Checks**: Endpoints de saúde dos containers
 - **Logs**: Logging centralizado com Docker Compose
 - **Métricas**: Monitoramento de performance da aplicação
 - **Alertas**: Notificações automatizadas para problemas do sistema
 
 ### Rastreamento de Erros
+
 - **Log de Erros**: Logging estruturado em produção
 - **Tratamento de Exceções**: Respostas de erro elegantes
 - **Informações de Debug**: Detalhes de erro específicos por ambiente
@@ -402,6 +433,7 @@ O workflow de deploy está atualmente desabilitado (`.github/workflows/deploy.ym
 ## 📋 Padrões de Código
 
 ### Padrões Backend Go
+
 - **Formatação**: `gofmt` e `goimports` para formatação consistente
 - **Nomenclatura**: PascalCase para exportados, camelCase para não exportados
 - **Tratamento de Erros**: Retornos de erro explícitos, sem panics em produção
@@ -409,6 +441,7 @@ O workflow de deploy está atualmente desabilitado (`.github/workflows/deploy.ym
 - **Testes**: Testes table-driven com asserções testify
 
 ### Padrões Frontend Vue.js
+
 - **Composition API**: Usar Vue 3 Composition API ao invés de Options API
 - **Nomenclatura de Componentes**: PascalCase para arquivos de componentes
 - **Gerenciamento de Estado**: Stores Pinia para estado global
@@ -416,9 +449,10 @@ O workflow de deploy está atualmente desabilitado (`.github/workflows/deploy.ym
 - **TypeScript**: Considerar migração para melhor type safety
 
 ### Padrões Gerais
+
 - **Commits**: Commits convencionais (`feat:`, `fix:`, `docs:`)
 - **Documentação**: Atualizar README e docs para mudanças significativas
-- **Segurança**: Validação de entrada, JWT para autenticação
+- **Segurança**: Validação de entrada, JWT + Refresh Tokens, rate limiting por IP, anonimização LGPD
 - **Performance**: Otimizar queries de banco, lazy loading para componentes
 
 ## 🧪 Testes
@@ -429,21 +463,22 @@ O MindTrace possui uma robusta infraestrutura de testes com **281 testes unitár
 
 #### Estatísticas de Testes
 
-| Camada | Módulo | Testes | Status |
-|--------|--------|--------|--------|
-| **Domínio** | Usuario | 62 | ✅ 100% |
-| **Domínio** | RegistroHumor | 45 | ✅ 100% |
-| **Domínio** | Convite | 35 | ✅ 100% |
-| **Serviços** | UsuarioServico | 28 | ✅ Completo |
-| **Serviços** | RelatorioServico | 17 | ✅ Completo |
-| **Serviços** | RegistroHumorServico | 13 | ✅ Completo |
-| **Serviços** | ConviteServico | 13 | ✅ Completo |
-| **Mappers** | Utils | 23 | ✅ Completo |
-| **TOTAL** | **8 módulos** | **281** | ✅ **Todos passando** |
+| Camada       | Módulo               | Testes  | Status                |
+| ------------ | -------------------- | ------- | --------------------- |
+| **Domínio**  | Usuario              | 62      | ✅ 100%               |
+| **Domínio**  | RegistroHumor        | 45      | ✅ 100%               |
+| **Domínio**  | Convite              | 35      | ✅ 100%               |
+| **Serviços** | UsuarioServico       | 28      | ✅ Completo           |
+| **Serviços** | RelatorioServico     | 17      | ✅ Completo           |
+| **Serviços** | RegistroHumorServico | 13      | ✅ Completo           |
+| **Serviços** | ConviteServico       | 13      | ✅ Completo           |
+| **Mappers**  | Utils                | 23      | ✅ Completo           |
+| **TOTAL**    | **8 módulos**        | **281** | ✅ **Todos passando** |
 
 #### Padrões de Teste
 
 **Table-Driven Tests:**
+
 ```go
 tests := []struct {
     name    string
@@ -456,6 +491,7 @@ tests := []struct {
 ```
 
 **Características:**
+
 - **Framework**: Testify para asserções e organização de testes
 - **Cobertura**: Testes unitários para serviços, repositórios e controladores
 - **Mocking**: Injeção de dependência baseada em interfaces facilita mocking
@@ -464,6 +500,7 @@ tests := []struct {
 - **Tempo de Execução**: < 1 segundo para toda a suíte
 
 ### Testes Frontend
+
 - **Framework**: Vue Test Utils (planejado)
 - **Cobertura**: Testes de componentes e serviços
 - **E2E**: Playwright ou Cypress para testes end-to-end (planejado)

@@ -1,7 +1,7 @@
-# Arquitetura de Software - MindTrace MVP v1.2
+# Arquitetura de Software - MindTrace MVP v1.5
 
 **Projeto:** P2410 - Aplicativo para Monitoramento de Saúde Mental  
-**Data:** 9 de Dezembro de 2025  
+**Data:** 7 de Fevereiro de 2026  
 **Autor:** Alexander Nunes Souza  
 **Orientadora:** Profa. Dra. Adicinéia A. de Oliveira
 
@@ -30,10 +30,12 @@
 O sistema MindTrace adota uma arquitetura híbrida que combina:
 
 1. **Cliente-Servidor (2-Tier):**
+
    - **Cliente:** SPA (Single Page Application) em Vue 3
    - **Servidor:** API REST em Go (Golang)
 
 2. **Clean Architecture (Backend):**
+
    - Separação em camadas concêntricas
    - Dependências apontando para o domínio
    - Domain-Driven Design (DDD)
@@ -46,6 +48,7 @@ O sistema MindTrace adota uma arquitetura híbrida que combina:
 ### 1.2 Stack Tecnológico
 
 #### Backend
+
 - **Linguagem:** Go 1.25+
 - **Framework Web:** Gin
 - **ORM:** GORM
@@ -55,6 +58,7 @@ O sistema MindTrace adota uma arquitetura híbrida que combina:
 - **Criptografia:** bcrypt (senhas)
 
 #### Frontend
+
 - **Framework:** Vue 3 (Composition API)
 - **Build Tool:** Vite
 - **CSS Framework:** Tailwind CSS
@@ -64,6 +68,7 @@ O sistema MindTrace adota uma arquitetura híbrida que combina:
 - **Gerenciamento de Estado:** Pinia
 
 #### Infraestrutura
+
 - **Containerização:** Docker & Docker Compose
 - **Proxy Reverso:** Nginx
 - **Controle de Versão:** Git/GitHub
@@ -77,12 +82,14 @@ O sistema MindTrace adota uma arquitetura híbrida que combina:
 **Decisão:** Implementar backend e frontend como aplicações separadas e independentes.
 
 **Justificativa:**
+
 - **Manutenibilidade:** Equipes podem trabalhar independentemente
 - **Escalabilidade:** Backend e frontend podem escalar separadamente
 - **Flexibilidade:** Permite múltiplos clientes (web, mobile futuro)
 - **Performance:** Go oferece alta performance para APIs REST
 
 **Trade-offs:**
+
 - ✅ Vantagens: Desacoplamento, escalabilidade, performance
 - ⚠️ Desvantagens: Maior complexidade de deployment, necessidade de CORS
 
@@ -91,12 +98,14 @@ O sistema MindTrace adota uma arquitetura híbrida que combina:
 **Decisão:** Estruturar backend em camadas (Domain → Application → Persistence).
 
 **Justificativa:**
+
 - **Testabilidade:** Regras de negócio isoladas e testáveis
 - **Independência de frameworks:** Domínio não depende de Gin ou GORM
 - **Manutenibilidade:** Mudanças em infraestrutura não afetam domínio
 - **Clareza:** Separação clara de responsabilidades
 
 **Camadas Implementadas:**
+
 ```
 cmd/api/              → Entry point (main)
 interno/
@@ -106,6 +115,7 @@ interno/
 ```
 
 **Trade-offs:**
+
 - ✅ Vantagens: Testável, manutenível, escalável
 - ⚠️ Desvantagens: Mais arquivos, curva de aprendizado
 
@@ -114,6 +124,7 @@ interno/
 **Decisão:** Utilizar PostgreSQL como SGBD relacional.
 
 **Justificativa:**
+
 - **ACID:** Transações garantidas (crítico para saúde mental)
 - **Constraints:** Validações no nível do banco (check constraints)
 - **Tipos de Dados:** Suporte a JSON, timestamps com timezone
@@ -121,63 +132,159 @@ interno/
 - **Maturidade:** Banco estável e confiável
 
 **Trade-offs:**
+
 - ✅ Vantagens: Confiável, features robustas, open source
 - ⚠️ Desvantagens: Requer mais setup que SQLite
 
-### D4: JWT para Autenticação
+### D4: JWT com Refresh Tokens para Autenticação
 
-**Decisão:** Autenticação stateless com JSON Web Tokens.
+**Decisão:** Autenticação stateless com JSON Web Tokens e suporte a Refresh Tokens com rotação.
 
 **Justificativa:**
+
 - **Stateless:** Sem necessidade de sessões no servidor
 - **Escalável:** Facilita load balancing
 - **Cross-domain:** Funciona bem com SPA
 - **Padrão:** Amplamente adotado e suportado
+- **Segurança reforçada:** Refresh tokens permitem access tokens de curta duração
 
 **Implementação:**
-- Token expira em 24h
-- Armazenado em localStorage no cliente
-- Middleware valida em todas as rotas protegidas
+
+- Access token com expiração curta (renovável via refresh)
+- Refresh token com expiração de 7 dias, armazenado no banco (`refresh_tokens`)
+- **Rotação de tokens:** A cada refresh, o token antigo é revogado e um novo par é emitido
+- **Detecção de roubo:** Reuso de refresh token revogado indica comprometimento
+- Endpoint dedicado `POST /entrar/refresh` para renovação
+- Middleware valida access token em todas as rotas protegidas
 
 **Trade-offs:**
-- ✅ Vantagens: Escalável, stateless, padrão
-- ⚠️ Desvantagens: Dificulta revogação, vulnerável a XSS se mal implementado
 
-### D5: Soft Delete para Conformidade LGPD
+- ✅ Vantagens: Escalável, stateless, revogação possível via refresh tokens, detecção de roubo
+- ⚠️ Desvantagens: Maior complexidade de implementação, necessidade de armazenar refresh tokens no banco
 
-**Decisão:** Implementar exclusão lógica (soft delete) com campo `deleted_at`.
+### D5: Soft Delete e Anonimização para Conformidade LGPD
+
+**Decisão:** Implementar exclusão lógica (soft delete) com campo `deleted_at` e endpoint de anonimização de perfil (direito ao esquecimento).
 
 **Justificativa:**
+
 - **Auditoria:** Manter histórico de dados
 - **Recuperação:** Possibilidade de desfazer exclusões
-- **LGPD:** Facilita portabilidade de dados
+- **LGPD:** Facilita portabilidade de dados e direito ao esquecimento
 - **Integridade:** Evita quebra de referências
+- **Conformidade legal:** Anonimização de PII (Personally Identifiable Information)
 
 **Implementação:**
+
 - Todas as entidades principais possuem `deleted_at`
 - Queries filtram automaticamente registros deletados (GORM)
 - Hard delete só em casos específicos
+- **Anonimização de perfil** (`DELETE /api/v1/usuarios/perfil/anonimizar`):
+  - Substitui nome → "Usuário Anônimo", email → `deleted_{id}_{random}@mindtrace.anon`
+  - Randomiza CRP/telefone, limpa descrição
+  - Desativa conta (`EstaAtivo = false`)
+  - Soft-delete de registros associados (Profissional/Paciente)
+  - Mantém dados estatísticos agregados no banco (sem PII)
+- **Termos de uso:** Registro de aceite com timestamp (`TermosAceitosEm`) e versão (`VersaoTermos`)
 
 **Trade-offs:**
-- ✅ Vantagens: Auditável, recuperável, compatível com LGPD
-- ⚠️ Desvantagens: Aumenta tamanho do BD, necessita limpeza periódica
+
+- ✅ Vantagens: Auditável, recuperável, compatível com LGPD, direito ao esquecimento implementado
+- ⚠️ Desvantagens: Aumenta tamanho do BD, necessita limpeza periódica, complexidade de anonimização
+
+### D7: Rate Limiting por IP
+
+**Decisão:** Implementar rate limiting baseado em IP com algoritmo Token Bucket para rotas públicas.
+
+**Justificativa:**
+
+- **Segurança:** Mitigar ataques de força bruta e DDoS
+- **Disponibilidade:** Proteger recursos do servidor
+- **Sem dependência externa:** Implementação customizada sem bibliotecas adicionais
+
+**Implementação:**
+
+- Algoritmo Token Bucket por IP (in-memory, thread-safe com mutex)
+- Configuração: 0.5 tokens/segundo, burst de 5 (1 request a cada 2s, com picos de até 5)
+- Aplicado apenas em rotas públicas (`/entrar`, `/registrar/*`, `/entrar/refresh`)
+- Goroutine de limpeza automática: remove IPs inativos por >3 minutos a cada 1 minuto
+- Retorna `429 Too Many Requests` com mensagem em português
+
+**Trade-offs:**
+
+- ✅ Vantagens: Zero dependências externas, baixa latência, configurável por rota
+- ⚠️ Desvantagens: Não distribuído (funciona apenas por instância), memória cresce com IPs únicos
+
+### D8: Índice de Bem-Estar Geral (IBG)
+
+**Decisão:** Calcular e persistir um índice composto (0.0–1.0) que agrega múltiplas dimensões de saúde mental em cada registro de humor.
+
+**Justificativa:**
+
+- **Objetividade:** Métrica única e normalizada para avaliação rápida
+- **Monitoramento:** Permite detecção automática de padrões de risco
+- **Alertas:** Base para classificação de status (REGULAR, ATENÇÃO, PREOCUPANTE)
+
+**Implementação:**
+
+- Fórmula ponderada com 4 dimensões:
+  - Sono (40%): Distância do ideal de 8h, desvio máximo de 4h
+  - Humor (20%): Linear 1–5 → 0–1
+  - Estresse (20%): Invertido linear 1–10 → 1–0
+  - Energia (20%): Linear 1–10 → 0–1
+- Campo persistido no `RegistroHumor` com check constraint (0 ≤ IBG ≤ 1)
+- Limiares de status: ≥0.70 = REGULAR, ≥0.40 = ATENÇÃO, <0.40 = PREOCUPANTE
+- Monitoramento automático: últimos 5 registros analisados; status PREOCUPANTE gera alerta por email
+
+**Trade-offs:**
+
+- ✅ Vantagens: Métrica objetiva, alertas automáticos, base para analytics
+- ⚠️ Desvantagens: Pesos fixos podem não refletir todos os perfis clínicos
+
+### D9: Avaliadores Clínicos (Strategy Pattern para Psicometria)
+
+**Decisão:** Implementar avaliadores clínicos via Strategy Pattern (`AvaliadorClinico` interface) para cálculo de pontuações de instrumentos psicométricos.
+
+**Justificativa:**
+
+- **Extensibilidade:** Novos instrumentos podem ser adicionados sem modificar código existente
+- **Padronização:** Cada avaliador segue o mesmo contrato (interface)
+- **Precisão clínica:** Algoritmos validados para cada escala
+
+**Implementação:**
+
+- Interface `AvaliadorClinico` com factory function `ObterAvaliador(codigo)`
+- 4 avaliadores implementados:
+  - `AvaliadorPHQ9` — Depressão (0–27, 5 classificações)
+  - `AvaliadorGAD7` — Ansiedade (0–21, 4 classificações)
+  - `AvaliadorWHO5` — Bem-estar (0–100, raw × 4, 3 classificações)
+  - `AvaliadorWHOQOL` — Qualidade de vida (domínios normalizados 0–100)
+- Pontuações calculadas automaticamente ao registrar respostas
+
+**Trade-offs:**
+
+- ✅ Vantagens: Extensível, desacoplado, clinicamente validado
+- ⚠️ Desvantagens: Necessita validação clínica para cada novo instrumento adicionado
 
 ### D6: Armazenamento Híbrido para Questionários (Relacional + JSONB)
 
 **Decisão:** Utilizar estrutura híbrida: relacional para instrumentos imutáveis, JSONB para respostas flexíveis.
 
 **Justificativa:**
+
 - **Imutabilidade:** Instrumentos padronizados (PHQ-9, GAD-7, WHOQOL-BREF) não devem ser editados
 - **Flexibilidade:** Respostas de pacientes armazenadas em JSONB permitem estruturas variadas
 - **Performance:** Queries relacionais para instrumentos, acesso rápido a respostas completas via JSON
 - **Integridade:** Constraints garantem consistência (unique composite indexes)
 
 **Implementação:**
+
 - Entidades `Instrumento`, `Pergunta`, `OpcaoEscala` → Tabelas relacionais (imutáveis)
 - Entidade `Resposta` → Campo `DadosBrutos` (JSONB) + campos calculados (pontuação, classificação)
 - Strategy Pattern: Algoritmos de pontuação (`phq_9`, `gad_7`, `whoqol_bref`, `who_5`)
 
 **Trade-offs:**
+
 - ✅ Vantagens: Flexibilidade, performance, validação de esquema
 - ⚠️ Desvantagens: Complexidade aumentada, validação JSONB menos rigorosa
 
@@ -224,9 +331,11 @@ interno/
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │                 Domain Entities                      │   │
 │  │  - Usuario, Profissional, Paciente                  │   │
-│  │  - RegistroHumor, Convite, Notificacao              │   │
-│  │  - Instrumento, Pergunta, OpcaoEscala (NEW)        │   │
-│  │  - Atribuicao, Resposta (NEW)                      │   │
+│  │  - RegistroHumor (+ IBG), Convite, Notificacao      │   │
+│  │  - RefreshToken (auth)                              │   │
+│  │  - Instrumento, Pergunta, OpcaoEscala               │   │
+│  │  - Atribuicao, Resposta                             │   │
+│  │  - Psicometria (AvaliadorClinico interface)          │   │
 │  │  - Validações de negócio                            │   │
 │  │  - Regras de domínio                                │   │
 │  └──────────────────────────────────────────────────────┘   │
@@ -251,12 +360,14 @@ interno/
 ┌─────────────────────────────────────────────────────────────┐
 │                   DATABASE LAYER                             │
 │              PostgreSQL 17 (Relational DB)                   │
-│  - 12 tabelas (usuarios, pacientes, profissionais, etc)     │
-│  - NEW: instrumentos, perguntas, opcoes_escala,             │
-│         atribuicoes, respostas (questionários)              │
+│  - 13+ tabelas (usuarios, pacientes, profissionais, etc)    │
+│  - Questionários: instrumentos, perguntas, opcoes_escala,   │
+│         atribuicoes, respostas                              │
+│  - Auth: refresh_tokens (rotação de tokens)                  │
 │  - Constraints (PK, FK, Unique, Check)                       │
 │  - Índices (deleted_at, foreign keys, composite)             │
 │  - JSONB: respostas.dados_brutos (armazenamento híbrido)    │
+│  - Check: indice_bem_estar_geral >= 0 AND <= 1              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -287,16 +398,18 @@ interno/
 │  │      Middleware Chain:               │  │
 │  │  1. CORS                             │  │
 │  │  2. Logger                           │  │
-│  │  3. JWT Auth (rotas protegidas)     │  │
-│  │  4. Error Handler                   │  │
+│  │  3. Rate Limit (rotas públicas)     │  │
+│  │  4. JWT Auth (rotas protegidas)     │  │
+│  │  5. Error Handler                   │  │
 │  └──────────────────────────────────────┘  │
 │  ┌──────────────────────────────────────┐  │
 │  │      Route Handlers (Controllers)    │  │
-│  │  - /api/login                        │  │
+│  │  - /api/entrar + /entrar/refresh     │  │
 │  │  - /api/registrar                    │  │
 │  │  - /api/registros-humor              │  │
 │  │  - /api/pacientes                    │  │
 │  │  - /api/convites                     │  │
+│  │  - /api/usuarios/perfil/anonimizar   │  │
 │  └──────────────────────────────────────┘  │
 └────────┬───────────────────────────────────┘
          │
@@ -355,14 +468,15 @@ mindtrace/
 │   │   └── main.go                    # Entry point
 │   ├── interno/
 │   │   ├── dominio/                   # DOMAIN LAYER
-│   │   │   ├── usuario.go
-│   │   │   ├── registro_humor.go
+│   │   │   ├── usuario.go             # Usuario, Profissional, Paciente, RefreshToken
+│   │   │   ├── registro_humor.go      # RegistroHumor + IBG (CalcularIBG)
 │   │   │   ├── convite.go
 │   │   │   ├── relatorio.go           # DTO de saída (não persiste)
 │   │   │   ├── notificacao.go
-│   │   │   ├── instrumento.go         # ✨ NEW - Questionários padronizados
-│   │   │   ├── atribuicao.go          # ✨ NEW - Atribuições
-│   │   │   ├── resposta.go            # ✨ NEW - Respostas (JSONB)
+│   │   │   ├── instrumento.go         # Questionários padronizados
+│   │   │   ├── atribuicao.go          # Atribuições
+│   │   │   ├── resposta.go            # Respostas (JSONB)
+│   │   │   ├── psicometria.go         # ✨ Avaliadores Clínicos (PHQ-9, GAD-7, WHO-5, WHOQOL)
 │   │   │   └── tests/                 # ✅ TESTES DE DOMÍNIO
 │   │   │       ├── usuario_test.go         (62 testes)
 │   │   │       ├── registro_humor_test.go  (45 testes)
@@ -407,7 +521,8 @@ mindtrace/
 │   │   │   │       └── utils_test.go       (23 testes)
 │   │   │   └── middlewares/
 │   │   │       ├── aut_middleware.go
-│   │   │       └── cors_middleware.go
+│   │   │       ├── cors_middleware.go
+│   │   │       └── rate_limit_middleware.go  # ✨ Rate limiting por IP (Token Bucket)
 │   │   └── persistencia/              # PERSISTENCE LAYER
 │   │       ├── repositorios/
 │   │       │   └── repositorios.go    # Interfaces
@@ -512,78 +627,104 @@ mindtrace/
 ### 4.1 Padrões de Projeto Utilizados
 
 #### Repository Pattern
+
 - **Onde:** Camada de persistência
 - **Por quê:** Abstrai acesso a dados, facilita testes
 - **Exemplo:** `IUsuarioRepositorio` interface → `UsuarioRepositorioPostgreSQL` implementação
 
 #### Service Layer Pattern
+
 - **Onde:** Camada de aplicação
 - **Por quê:** Encapsula lógica de negócio, orquestra repositórios
 - **Exemplo:** `UsuarioServico` coordena `UsuarioRepositorio` + `ProfissionalRepositorio`
 
 #### DTO (Data Transfer Object)
+
 - **Onde:** Camada de aplicação (controllers)
 - **Por quê:** Desacopla API de entidades de domínio
 - **Exemplo:** `CriarUsuarioDTO` para cadastro
 
 #### Middleware Chain
+
 - **Onde:** API (Gin framework)
 - **Por quê:** Separação de concerns (CORS, auth, logging)
 - **Exemplo:** `AuthMiddleware` valida JWT antes de executar handler
 
 #### Domain-Driven Design (DDD)
+
 - **Onde:** Camada de domínio
 - **Por quê:** Modelagem rica, validações no domínio
 - **Exemplo:** `Usuario.Validar()` encapsula regras de validação
 
 #### Strategy Pattern
-- **Onde:** Sistema de questionários (algoritmos de pontuação)
-- **Por quê:** Diferentes instrumentos têm diferentes algoritmos de cálculo
+
+- **Onde:** Sistema de questionários (algoritmos de pontuação) e avaliadores clínicos
+- **Por quê:** Diferentes instrumentos têm diferentes algoritmos de cálculo e classificação
 - **Exemplo:** Campo `AlgoritmoPontuacao` (`phq_9`, `gad_7`, `whoqol_bref`, `who_5`) permite extensibilidade
+- **Exemplo:** Interface `AvaliadorClinico` com factory `ObterAvaliador(codigo)` despacha para avaliadores específicos
+
+#### Token Bucket (Rate Limiting)
+
+- **Onde:** Middleware de rate limiting (`rate_limit_middleware.go`)
+- **Por quê:** Proteção contra abuso em rotas públicas sem dependências externas
+- **Exemplo:** `IPRateLimiter` com goroutine de limpeza automática e tokens por IP
 
 ### 4.2 Princípios SOLID Aplicados
 
 **Single Responsibility Principle (SRP):**
+
 - Cada serviço tem uma única responsabilidade
 - Controllers apenas tratam HTTP, não contêm lógica de negócio
 
 **Open/Closed Principle (OCP):**
+
 - Interfaces de repositórios abertas para extensão (novos DBs)
 - Fechadas para modificação (domínio estável)
 
 **Liskov Substitution Principle (LSP):**
+
 - `Profissional` e `Paciente` são substituíveis por `Usuario` base
 
 **Interface Segregation Principle (ISP):**
+
 - Interfaces específicas (`IUsuarioRepositorio`) ao invés de uma interface gigante
 
 **Dependency Inversion Principle (DIP):**
+
 - Domínio não depende de infraestrutura
 - Application depende de interfaces, não implementações
 
 ### 4.3 Boas Práticas Implementadas
 
 ✅ **Validação em Múltiplas Camadas:**
+
 - Frontend: UX responsiva
 - Backend (Controllers): DTOs com validação
 - Domínio: Métodos `Validar()`
 - Banco de Dados: Constraints
 
 ✅ **Segurança:**
+
 - Senhas com bcrypt (hash + salt)
-- JWT para autenticação stateless
+- JWT com refresh token rotation (detecção de roubo)
+- Rate limiting por IP em rotas públicas (Token Bucket)
 - CORS configurado
 - Soft delete para auditoria
+- Anonimização de perfil para conformidade LGPD (direito ao esquecimento)
+- Aceite de termos de uso com versionamento
 
 ✅ **Configuração Externalizada:**
+
 - Variáveis de ambiente (.env)
 - Não commit de segredos no Git
 
 ✅ **Logging:**
+
 - Middleware de logging em todas as requisições
 - Erros estruturados
 
 ✅ **Testes Automatizados:**
+
 - 281 testes unitários (domínio, serviços, mappers)
 - Table-driven tests para cobertura extensiva
 - Mocks com testify para isolamento
@@ -591,12 +732,14 @@ mindtrace/
 - Integração contínua via Git
 
 ✅ **Organização de Código:**
+
 - Testes organizados em subdiretórios `/tests`
 - Separação clara entre produção e testes
 - Nomenclatura consistente (`*_test.go`)
 - Documentação inline dos testes
 
 ✅ **Armazenamento Híbrido (Questionários):**
+
 - Instrumentos padronizados imutáveis (relacional)
 - Respostas flexíveis com JSONB (PostgreSQL)
 - Validações em múltiplas camadas (domínio + banco)
@@ -613,6 +756,7 @@ mindtrace/
 **Solução:** Clean Architecture separa concerns, isola domínio.
 
 **Benefícios:**
+
 - ✅ Testabilidade: Domínio 100% testável sem banco de dados
 - ✅ Independência: Trocar GORM por outro ORM não afeta domínio
 - ✅ Clareza: Desenvolvedores encontram código facilmente
@@ -625,6 +769,7 @@ mindtrace/
 **Solução:** Go oferece goroutines, performance nativa, compilação estática.
 
 **Benefícios:**
+
 - ✅ Performance: ~10x mais rápido que Python/Node.js
 - ✅ Concorrência: Goroutines para processamento paralelo
 - ✅ Deploy: Binário único, sem runtime
@@ -637,6 +782,7 @@ mindtrace/
 **Solução:** Vue 3 com Composition API e Tailwind CSS.
 
 **Benefícios:**
+
 - ✅ Reatividade: Atualizações automáticas de UI
 - ✅ Componentes: Reutilização de código
 - ✅ Performance: Virtual DOM otimizado
@@ -649,6 +795,7 @@ mindtrace/
 **Solução:** PostgreSQL com constraints e transações.
 
 **Benefícios:**
+
 - ✅ ACID: Garantia de consistência
 - ✅ Constraints: Validações no banco
 - ✅ JSONB: Suporte nativo para dados semiestruturados (respostas de questionários)
@@ -661,6 +808,7 @@ mindtrace/
 **Solução:** ApexCharts com vue3-apexcharts para integração Vue 3.
 
 **Benefícios:**
+
 - ✅ Interatividade: Gráficos responsivos com zoom, pan, tooltips
 - ✅ Variedade: Line, bar, radar, heatmap charts
 - ✅ Performance: Renderização otimizada para grandes datasets
@@ -670,16 +818,17 @@ mindtrace/
 
 ## 6. Atributos de Qualidade Atendidos
 
-| Atributo | Como a Arquitetura Atende |
-|----------|---------------------------|
-| **Segurança** | JWT, bcrypt, soft delete, validações multicamadas |
-| **Desempenho** | Go (performance nativa), PostgreSQL (índices), SPA (carregamento único) |
-| **Disponibilidade** | Docker (isolamento), Nginx (proxy), possibilidade de load balancing |
-| **Manutenibilidade** | Clean Architecture, SOLID, separação de concerns |
-| **Testabilidade** | ✅ **281 testes unitários**, interfaces, DIP, domínio isolado, coverage > 85% |
-| **Escalabilidade** | Stateless JWT, camadas independentes, horizontal scaling possível |
-| **Usabilidade** | SPA reativo, Tailwind CSS responsivo |
-| **Qualidade de Código** | ✅ **Testes automatizados**, validações em múltiplas camadas, type safety |
+| Atributo                | Como a Arquitetura Atende                                                                                |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Segurança**           | JWT + Refresh Tokens (rotação), bcrypt, rate limiting por IP, anonimização LGPD, validações multicamadas |
+| **Privacidade (LGPD)**  | Anonimização de perfil (direito ao esquecimento), soft delete, aceite de termos versionado               |
+| **Desempenho**          | Go (performance nativa), PostgreSQL (índices), SPA (carregamento único), IBG persistido                  |
+| **Disponibilidade**     | Docker (isolamento), Nginx (proxy), rate limiting, possibilidade de load balancing                       |
+| **Manutenibilidade**    | Clean Architecture, SOLID, separação de concerns, Strategy Pattern (avaliadores)                         |
+| **Testabilidade**       | ✅ **281 testes unitários**, interfaces, DIP, domínio isolado, coverage > 85%                            |
+| **Escalabilidade**      | Stateless JWT, camadas independentes, horizontal scaling possível                                        |
+| **Usabilidade**         | SPA reativo, Tailwind CSS responsivo                                                                     |
+| **Qualidade de Código** | ✅ **Testes automatizados**, validações em múltiplas camadas, type safety                                |
 
 ---
 
@@ -690,12 +839,14 @@ mindtrace/
 O projeto conta com **281 testes unitários** distribuídos em três camadas:
 
 **Camada de Domínio (184 testes):**
+
 - `usuario_test.go` (62 testes): Validações de Usuario, Profissional, Paciente
 - `registro_humor_test.go` (45 testes): Validações de RegistroHumor
 - `convite_test.go` (35 testes): Validações de Convite e estados
 - Outros (42 testes): Testes adicionais de domínio
 
 **Camada de Aplicação - Serviços (74 testes):**
+
 - `usuario_servico_test.go` (28 testes): Registro, login, perfil, alteração de senha
 - `relatorio_servico_test.go` (17 testes): Geração de relatórios e cálculos de médias
 - `registro_humor_servico_test.go` (13 testes): Criação de registros de humor
@@ -703,11 +854,13 @@ O projeto conta com **281 testes unitários** distribuídos em três camadas:
 - Outros (3 testes): Testes adicionais de serviços
 
 **Camada de Aplicação - Mappers (23 testes):**
+
 - `utils_test.go` (23 testes): Conversões entre DTOs e Entidades
 
 ### 7.2 Padrões de Teste Utilizados
 
 **Table-Driven Tests:**
+
 ```go
 tests := []struct {
     name    string
@@ -720,28 +873,31 @@ tests := []struct {
 ```
 
 **Mocks com Testify:**
+
 - Todos os repositórios possuem mocks
 - Testes de serviços isolados da camada de persistência
 
 **Banco de Dados em Memória:**
+
 - SQLite `:memory:` para testes de integração
 - Transações isoladas entre testes
 
 ### 7.3 Cobertura de Testes
 
-| Camada | Módulo | Testes | Status |
-|--------|--------|--------|--------|
-| Domínio | Usuario | 62 | ✅ 100% |
-| Domínio | RegistroHumor | 45 | ✅ 100% |
-| Domínio | Convite | 35 | ✅ 100% |
-| Serviços | UsuarioServico | 28 | ✅ Completo |
-| Serviços | RelatorioServico | 17 | ✅ Completo |
-| Serviços | RegistroHumorServico | 13 | ✅ Completo |
-| Serviços | ConviteServico | 13 | ✅ Completo |
-| Mappers | Utils | 23 | ✅ Completo |
-| **TOTAL** | **8 módulos** | **281** | ✅ **Todos passando** |
+| Camada    | Módulo               | Testes  | Status                |
+| --------- | -------------------- | ------- | --------------------- |
+| Domínio   | Usuario              | 62      | ✅ 100%               |
+| Domínio   | RegistroHumor        | 45      | ✅ 100%               |
+| Domínio   | Convite              | 35      | ✅ 100%               |
+| Serviços  | UsuarioServico       | 28      | ✅ Completo           |
+| Serviços  | RelatorioServico     | 17      | ✅ Completo           |
+| Serviços  | RegistroHumorServico | 13      | ✅ Completo           |
+| Serviços  | ConviteServico       | 13      | ✅ Completo           |
+| Mappers   | Utils                | 23      | ✅ Completo           |
+| **TOTAL** | **8 módulos**        | **281** | ✅ **Todos passando** |
 
 **Execução dos Testes:**
+
 ```bash
 go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/aplicacao/mappers/tests
 ```
@@ -752,28 +908,29 @@ go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/apl
 
 ## 8. Débitos Técnicos Identificados
 
-| Débito | Impacto | Prioridade | Resolução Planejada |
-|--------|---------|------------|---------------------|
-| ~~Falta de testes automatizados~~ | ~~Alto~~ | ~~Alta~~ | ✅ **CONCLUÍDO** - 281 testes implementados |
-| Testes unitários para EmailServico ausentes | Médio | Média | Criar mocks de SMTP e testar renderização de templates |
-| Log de auditoria não implementado | Médio | Média | Criar tabela `audit_log` e middleware |
-| Backup não automatizado | Alto | Alta | Script cron para backup PostgreSQL |
-| Swagger/OpenAPI incompleto | Baixo | Baixa | Completar anotações Swagger |
-| 2FA não implementado | Médio | Baixa | Implementar TOTP (Google Authenticator) |
-| Monitoramento/APM ausente | Médio | Média | Integrar Prometheus + Grafana |
-| Testes de integração (API) ausentes | Médio | Média | Implementar testes end-to-end com HTTP |
+| Débito                                      | Impacto  | Prioridade | Resolução Planejada                                    |
+| ------------------------------------------- | -------- | ---------- | ------------------------------------------------------ |
+| ~~Falta de testes automatizados~~           | ~~Alto~~ | ~~Alta~~   | ✅ **CONCLUÍDO** - 281 testes implementados            |
+| Testes unitários para EmailServico ausentes | Médio    | Média      | Criar mocks de SMTP e testar renderização de templates |
+| Log de auditoria não implementado           | Médio    | Média      | Criar tabela `audit_log` e middleware                  |
+| Backup não automatizado                     | Alto     | Alta       | Script cron para backup PostgreSQL                     |
+| Swagger/OpenAPI incompleto                  | Baixo    | Baixa      | Completar anotações Swagger                            |
+| 2FA não implementado                        | Médio    | Baixa      | Implementar TOTP (Google Authenticator)                |
+| Monitoramento/APM ausente                   | Médio    | Média      | Integrar Prometheus + Grafana                          |
+| Testes de integração (API) ausentes         | Médio    | Média      | Implementar testes end-to-end com HTTP                 |
 
 ---
 
 ## 9. Histórico de Atualizações
 
-| Data | Versão | Alterações |
-|------|--------|------------|
-| 26/10/2025 | 1.0 | Documento inicial de arquitetura |
-| 28/10/2025 | 1.1 | ✅ Adição da seção de Infraestrutura de Testes (281 testes unitários)<br>✅ Atualização de Débitos Técnicos (testes concluídos)<br>✅ Atualização de Atributos de Qualidade (testabilidade comprovada)<br>✅ Expansão da estrutura de código com diretórios /tests<br>✅ Atualização de Boas Práticas (testes automatizados) |
-| 09/12/2025 | 1.2 | ✅ **Sistema de Questionários/Escalas Psicométricas** (5 novas entidades)<br>✅ Adição de `Instrumento`, `Pergunta`, `OpcaoEscala`, `Atribuicao`, `Resposta`<br>✅ Decisão Arquitetural D6: Armazenamento Híbrido (Relacional + JSONB)<br>✅ Novo serviço: `AnaliseServico` (analytics avançados)<br>✅ Novo controlador: `InstrumentoControlador` (6 endpoints)<br>✅ Stack tecnológico: ApexCharts, GORM Datatypes (JSONB)<br>✅ Atualização de diagramas ASCII (Visão Lógica, Database Layer)<br>✅ Estrutura de código: novos arquivos domínio/serviços/controladores<br>✅ Frontend: 4 novas views (AtribuirQuestionario, ResponderQuestionario, etc)<br>✅ Strategy Pattern para algoritmos de pontuação (PHQ-9, GAD-7, WHOQOL-BREF, WHO-5)<br>✅ 5 novas tabelas: instrumentos, perguntas, opcoes_escala, atribuicoes, respostas |
-| 09/12/2025 | 1.3 | ✅ **Revisão e Atualização Completa da Documentação**<br>✅ Estrutura de código detalhada refletindo organização atual<br>✅ Frontend: adição de diretórios `composables/`, `utils/`, `types/`, `constants/`<br>✅ Componentes organizados em `layout/` e `ui/`<br>✅ Backend: adição de `helpers/pdf.go` e `alerta_servico.go`<br>✅ Seção de seeders documentada (`seeders/` directory)<br>✅ Views detalhadas por tipo de usuário (paciente/profissional/shared)<br>✅ Confirmação de conformidade com Clean Architecture<br>✅ Atualização de marcadores "✨ NEW" para descrições funcionais |
-| 28/01/2026 | 1.4 | ✅ **Sistema de Notificações por Email e Monitoramento Ativo**<br>✅ Implementação do `EmailServico` com `net/smtp`<br>✅ Integração de templates HTML via `embed`<br>✅ Implementação lógica do `AnaliseServico` para detecção de riscos<br>✅ Alertas automáticos para profissionais (Status PREOCUPANTE)<br>✅ 4 novos templates de email: Ativação, Convite, Atribuição e Alerta<br>✅ Fluxo de análise histórica para gráficos (substituindo relatórios simples) |
+| Data       | Versão | Alterações                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 26/10/2025 | 1.0    | Documento inicial de arquitetura                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 28/10/2025 | 1.1    | ✅ Adição da seção de Infraestrutura de Testes (281 testes unitários)<br>✅ Atualização de Débitos Técnicos (testes concluídos)<br>✅ Atualização de Atributos de Qualidade (testabilidade comprovada)<br>✅ Expansão da estrutura de código com diretórios /tests<br>✅ Atualização de Boas Práticas (testes automatizados)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 09/12/2025 | 1.2    | ✅ **Sistema de Questionários/Escalas Psicométricas** (5 novas entidades)<br>✅ Adição de `Instrumento`, `Pergunta`, `OpcaoEscala`, `Atribuicao`, `Resposta`<br>✅ Decisão Arquitetural D6: Armazenamento Híbrido (Relacional + JSONB)<br>✅ Novo serviço: `AnaliseServico` (analytics avançados)<br>✅ Novo controlador: `InstrumentoControlador` (6 endpoints)<br>✅ Stack tecnológico: ApexCharts, GORM Datatypes (JSONB)<br>✅ Atualização de diagramas ASCII (Visão Lógica, Database Layer)<br>✅ Estrutura de código: novos arquivos domínio/serviços/controladores<br>✅ Frontend: 4 novas views (AtribuirQuestionario, ResponderQuestionario, etc)<br>✅ Strategy Pattern para algoritmos de pontuação (PHQ-9, GAD-7, WHOQOL-BREF, WHO-5)<br>✅ 5 novas tabelas: instrumentos, perguntas, opcoes_escala, atribuicoes, respostas                                                                                                                                                                                             |
+| 09/12/2025 | 1.3    | ✅ **Revisão e Atualização Completa da Documentação**<br>✅ Estrutura de código detalhada refletindo organização atual<br>✅ Frontend: adição de diretórios `composables/`, `utils/`, `types/`, `constants/`<br>✅ Componentes organizados em `layout/` e `ui/`<br>✅ Backend: adição de `helpers/pdf.go` e `alerta_servico.go`<br>✅ Seção de seeders documentada (`seeders/` directory)<br>✅ Views detalhadas por tipo de usuário (paciente/profissional/shared)<br>✅ Confirmação de conformidade com Clean Architecture<br>✅ Atualização de marcadores "✨ NEW" para descrições funcionais                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 28/01/2026 | 1.4    | ✅ **Sistema de Notificações por Email e Monitoramento Ativo**<br>✅ Implementação do `EmailServico` com `net/smtp`<br>✅ Integração de templates HTML via `embed`<br>✅ Implementação lógica do `AnaliseServico` para detecção de riscos<br>✅ Alertas automáticos para profissionais (Status PREOCUPANTE)<br>✅ 4 novos templates de email: Ativação, Convite, Atribuição e Alerta<br>✅ Fluxo de análise histórica para gráficos (substituindo relatórios simples)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 07/02/2026 | 1.5    | ✅ **Refresh Tokens, Rate Limiting, LGPD e IBG**<br>✅ Suporte a Refresh Tokens com rotação e detecção de roubo (`RefreshToken` entity + `/entrar/refresh`)<br>✅ Rate Limiting por IP com Token Bucket em rotas públicas (`rate_limit_middleware.go`)<br>✅ Anonimização de perfil para conformidade LGPD (`DELETE /usuarios/perfil/anonimizar`)<br>✅ Aceite de termos de uso com versionamento (`TermosAceitosEm`, `VersaoTermos`)<br>✅ Índice de Bem-Estar Geral (IBG) persistido no `RegistroHumor` (fórmula ponderada 0–1)<br>✅ Decisões Arquiteturais D7 (Rate Limiting), D8 (IBG), D9 (Avaliadores Clínicos)<br>✅ Avaliadores clínicos via Strategy Pattern (`AvaliadorPHQ9`, `AvaliadorGAD7`, `AvaliadorWHO5`, `AvaliadorWHOQOL`)<br>✅ DTOs expandidos: `TokenDTOOut`, `RefreshTokenDTOIn`, IBG em análise, pontuação em atribuições<br>✅ Nova tabela `refresh_tokens` + campo `indice_bem_estar_geral` em `registros_humor`<br>✅ Atualização de D4 (JWT → JWT + Refresh Tokens) e D5 (Soft Delete → + Anonimização) |
 
 ---
 
@@ -781,4 +938,4 @@ go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/apl
 **Orientadora:** Profa. Dra. Adicinéia A. de Oliveira  
 **Disciplina:** ESII/2025-2  
 **Primeira versão:** 26/10/2025  
-**Última atualização:** 28/01/2026 (v1.4 - Monitoramento e Emails)
+**Última atualização:** 07/02/2026 (v1.5 - Refresh Tokens, Rate Limiting, LGPD e IBG)
