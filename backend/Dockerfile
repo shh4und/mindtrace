@@ -21,7 +21,7 @@ COPY . .
 # Compila a aplicação.
 # CGO_ENABLED=0 cria um binário estático, necessário para rodar numa imagem base mínima sem libs C.
 # -o /app/main cria o arquivo executável 'main' no diretório /app
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main ./cmd/api/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /app/main ./cmd/api/main.go
 
 # --- Estágio 2: Produção ---
 # Começamos uma nova imagem, muito menor, pois não precisamos mais do compilador do Go.

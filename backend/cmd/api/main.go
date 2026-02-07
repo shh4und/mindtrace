@@ -58,8 +58,10 @@ func main() {
 
 		// Instrumentos imutaveis seedados
 		seeds.ExecutarSeeds(db)
-		// Dados mock para ambiente de desenvolvimento
-		seeds.ExecutarSeedsMock(db)
+		// Dados mock apenas em ambiente de desenvolvimento
+		if os.Getenv("GO_ENV") == "dev" {
+			seeds.ExecutarSeedsMock(db)
+		}
 	}
 
 	var usuarioRepo repositorios.UsuarioRepositorio
@@ -97,7 +99,8 @@ func main() {
 
 	// Configura roteador http com middlewares e grupos de rotas
 	roteador := gin.Default()
-	roteador.SetTrustedProxies([]string{"127.0.0.1"})
+	// Confia no proxy Nginx (Docker network) para headers X-Real-IP / X-Forwarded-For
+	roteador.SetTrustedProxies([]string{"127.0.0.1", "172.16.0.0/12", "10.0.0.0/8", "192.168.0.0/16"})
 	// Inclui middleware cors padrao aceitando chamadas do frontend
 	roteador.Use(middlewares.CORSMiddleware())
 	/*
@@ -192,7 +195,9 @@ func main() {
 			}
 		}
 	}
-	fmt.Printf("\n%s\n"+`Acesso com dados mockados:
+	goEnv := os.Getenv("GO_ENV")
+	if goEnv == "dev" {
+		fmt.Printf("\n%s\n"+`Acesso com dados mockados:
 - Profissional: 
 	joao.silva@mindtrace.dev
 - Pacientes:
@@ -201,7 +206,13 @@ func main() {
 	ano.costo@mindtrace.dev <- precisa ativar conta
 - Senha:
 	Password123!`+"\n%s\n", strings.Repeat("#", 50), strings.Repeat("#", 50))
-	log.Println("servidor iniciado na porta 9090")
-	roteador.Run(":9090")
+	}
+
+	porta := os.Getenv("PORT")
+	if porta == "" {
+		porta = "8080"
+	}
+	log.Printf("servidor iniciado na porta %s (GO_ENV=%s)", porta, goEnv)
+	roteador.Run(":" + porta)
 
 }
