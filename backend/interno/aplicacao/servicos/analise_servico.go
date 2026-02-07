@@ -146,8 +146,13 @@ func (s *analiseServico) ExecutarMonitoramento(pacienteID uint) error {
 		if err == nil && paciente != nil {
 			for _, prof := range paciente.Profissionais {
 				if prof.Usuario.Email != "" {
-					// Envia email de alerta (assincrono/goroutine opcional, mas aqui vou chamar direto para simplicidade ou dentro de go func)
+					// Envia email de alerta (assincrono/goroutine opcional)
 					go func(emailProf, nomeProf, nomePac, st string) {
+						defer func() {
+							if r := recover(); r != nil {
+								log.Printf("ERRO CRITICO: Panic recuperado ao enviar email de alerta: %v", r)
+							}
+						}()
 						s.emailServico.EnviarEmailAlertaMonitoramento(emailProf, nomeProf, nomePac, st)
 					}(prof.Usuario.Email, prof.Usuario.Nome, paciente.Usuario.Nome, status)
 				}
@@ -155,8 +160,8 @@ func (s *analiseServico) ExecutarMonitoramento(pacienteID uint) error {
 		}
 	}
 	log.Printf(
-		"Monitoramento realizado as: %v\nPaciente ID: %d\nDados:\n mediaHumor: %.2f, mediaStress: %.2f, mediaSono: %.2f, mediaEnergia: %.2f\nStatus: %s",
-		time.Now(), pacienteID, mediaHumor, mediaStress, mediaSono, mediaEnergia, status)
+		"Monitoramento realizado as: %v\nPaciente ID: %d\nStatus Calculado: %s",
+		time.Now(), pacienteID, status)
 	return nil
 }
 

@@ -1,6 +1,6 @@
-import { ref, computed } from 'vue';
-import { useToast } from 'vue-toastification';
-import api from '@/services/api';
+import { ref, computed } from "vue";
+import { useToast } from "vue-toastification";
+import api from "@/services/api";
 import {
   MOOD_OPTIONS,
   MOOD_LEVEL_MAPPING,
@@ -9,7 +9,7 @@ import {
   generateSteps,
   formatSleepLabel,
   clampValue,
-} from '@/constants/mood.js';
+} from "@/constants/mood.js";
 
 /**
  * Composable para gerenciamento do formulário de registro de humor
@@ -19,13 +19,13 @@ export function useMoodForm() {
   const toast = useToast();
 
   // Estado do formulário
-  const selectedMood = ref('');
+  const selectedMood = ref("");
   const sleepHours = ref(SLIDER_CONFIG.sleep.default);
   const energyLevel = ref(SLIDER_CONFIG.energy.default);
   const stressLevel = ref(SLIDER_CONFIG.stress.default);
   const selectedActivities = ref([]);
-  const otherActivity = ref('');
-  const notes = ref('');
+  const otherActivity = ref("");
+  const notes = ref("");
   const isSubmitting = ref(false);
 
   // Configurações expostas
@@ -41,13 +41,21 @@ export function useMoodForm() {
   const stressSteps = generateSteps(stressConfig.max - 1, 0);
 
   // Computed
-  const sleepLabel = computed(() => formatSleepLabel(sleepHours.value, sleepConfig.max));
+  const sleepLabel = computed(() =>
+    formatSleepLabel(sleepHours.value, sleepConfig.max)
+  );
 
   const today = new Date();
   const currentDate = computed(() =>
-    today.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' })
+    today.toLocaleDateString("pt-BR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
   );
-  const currentDay = computed(() => today.toLocaleDateString('pt-BR', { weekday: 'long' }));
+  const currentDay = computed(() =>
+    today.toLocaleDateString("pt-BR", { weekday: "long" })
+  );
 
   const isValid = computed(() => !!selectedMood.value);
 
@@ -63,8 +71,8 @@ export function useMoodForm() {
     }
 
     // Se "Nenhuma Atividade" foi selecionada, retorna apenas ela
-    if (activities.includes('Nenhuma Atividade')) {
-      return [];
+    if (activities.includes("Nenhuma Atividade")) {
+      return ["Nenhuma Atividade"];
     }
 
     return activities;
@@ -77,9 +85,21 @@ export function useMoodForm() {
   function buildSubmission() {
     return {
       nivel_humor: MOOD_LEVEL_MAPPING[selectedMood.value],
-      horas_sono: clampValue(sleepHours.value, sleepConfig.min, sleepConfig.max),
-      nivel_energia: clampValue(energyLevel.value, energyConfig.min, energyConfig.max),
-      nivel_stress: clampValue(stressLevel.value, stressConfig.min, stressConfig.max),
+      horas_sono: clampValue(
+        sleepHours.value,
+        sleepConfig.min,
+        sleepConfig.max
+      ),
+      nivel_energia: clampValue(
+        energyLevel.value,
+        energyConfig.min,
+        energyConfig.max
+      ),
+      nivel_stress: clampValue(
+        stressLevel.value,
+        stressConfig.min,
+        stressConfig.max
+      ),
       auto_cuidado: getProcessedActivities(),
       observacoes: notes.value,
       data_hora_registro: new Date().toISOString(),
@@ -94,7 +114,7 @@ export function useMoodForm() {
     if (!selectedMood.value) {
       return {
         valid: false,
-        message: 'Por favor, selecione seu humor principal antes de registrar.',
+        message: "Por favor, selecione seu humor principal antes de registrar.",
       };
     }
     return { valid: true };
@@ -117,13 +137,14 @@ export function useMoodForm() {
     try {
       const submission = buildSubmission();
       await api.registrarHumor(submission);
-      toast.success('Seu humor foi registrado com sucesso!');
+      toast.success("Seu humor foi registrado com sucesso!");
       reset();
       return true;
     } catch (error) {
-      const errorMsg = error.response?.data?.erro || 'Houve um erro ao registrar seu humor.';
+      const errorMsg =
+        error.response?.data?.erro || "Houve um erro ao registrar seu humor.";
       toast.error(errorMsg);
-      console.error('Erro ao registrar humor:', error);
+      console.error("Erro ao registrar humor:", error);
       return false;
     } finally {
       isSubmitting.value = false;
@@ -134,13 +155,13 @@ export function useMoodForm() {
    * Reseta o formulário para o estado inicial
    */
   function reset() {
-    selectedMood.value = '';
+    selectedMood.value = "";
     sleepHours.value = SLIDER_CONFIG.sleep.default;
     energyLevel.value = SLIDER_CONFIG.energy.default;
     stressLevel.value = SLIDER_CONFIG.stress.default;
     selectedActivities.value = [];
-    otherActivity.value = '';
-    notes.value = '';
+    otherActivity.value = "";
+    notes.value = "";
   }
 
   return {

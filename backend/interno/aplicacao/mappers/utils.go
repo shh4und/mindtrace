@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/dominio"
+	"time"
 )
 
 // ===== MAPEADORES PARA SAÍDA =====
@@ -178,11 +179,14 @@ func CriarRegistroRespostasDTOInParaEntidade(dto *dtos.RegistroRespostaDTOIn, at
 		return nil, err
 	}
 
+	agora := time.Now()
+
 	resposta := &dominio.Resposta{
 		AtribuicaoID:   atribuicaoID,
 		PontuacaoTotal: dto.PontuacaoTotal,
 		Classificacao:  classificacao,
 		DadosBrutos:    dadosBrutos,
+		DataResposta:   agora,
 	}
 
 	return resposta, nil
@@ -271,11 +275,37 @@ func AtribuicaoParaDTOOutProfissional(atrib *dominio.Atribuicao) *dtos.Atribuica
 	// Contar perguntas do instrumento
 	totalPerguntas := len(atrib.Instrumento.Perguntas)
 
+	var pontuacao *float64
+	var pontuacaoMaxima *float64
+
+	if atrib.Resposta != nil {
+		p := atrib.Resposta.PontuacaoTotal
+		pontuacao = &p
+	}
+
+	var maxScore float64
+	switch atrib.Instrumento.Codigo {
+	case "phq_9":
+		maxScore = 27
+	case "gad_7":
+		maxScore = 21
+	case "who_5":
+		maxScore = 25
+	case "whoqol_bref":
+		maxScore = 100
+	}
+
+	if maxScore > 0 {
+		pontuacaoMaxima = &maxScore
+	}
+
 	return &dtos.AtribuicaoDTOOut{
-		ID:             atrib.ID,
-		Status:         string(atrib.Status),
-		DataAtribuicao: atrib.CreatedAt,
-		DataResposta:   atrib.DataResposta,
+		ID:              atrib.ID,
+		Status:          string(atrib.Status),
+		DataAtribuicao:  atrib.CreatedAt,
+		DataResposta:    atrib.DataResposta,
+		Pontuacao:       pontuacao,
+		PontuacaoMaxima: pontuacaoMaxima,
 		Instrumento: dtos.InstrumentoCompletoDTOOut{
 			Codigo:         atrib.Instrumento.Codigo,
 			Nome:           atrib.Instrumento.Nome,

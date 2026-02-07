@@ -27,12 +27,35 @@ func (ac *AutControlador) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := ac.usuarioServico.Login(req.Email, req.Senha)
+	accessToken, refreshToken, err := ac.usuarioServico.Login(req.Email, req.Senha)
 	if err != nil {
 		// Retorna 401 para credenciais invalidas
 		c.JSON(http.StatusUnauthorized, gin.H{"erro": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, dtos.TokenDTOOut{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	})
+}
+
+// Refresh renova o access token usando um refresh token valido
+func (ac *AutControlador) Refresh(c *gin.Context) {
+	var req dtos.RefreshTokenDTOIn
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+		return
+	}
+
+	accessToken, refreshToken, err := ac.usuarioServico.RefreshAccessToken(req.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"erro": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dtos.TokenDTOOut{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	})
 }

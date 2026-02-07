@@ -10,14 +10,14 @@
  */
 export function parseJwt(token) {
   if (!token) return null;
-  
+
   try {
-    const base64Payload = token.split('.')[1];
+    const base64Payload = token.split(".")[1];
     if (!base64Payload) return null;
-    
+
     return JSON.parse(atob(base64Payload));
   } catch (error) {
-    console.error('Erro ao decodificar token JWT:', error);
+    console.error("Erro ao decodificar token JWT:", error);
     return null;
   }
 }
@@ -27,7 +27,16 @@ export function parseJwt(token) {
  * @returns {string|null} - Token ou null se não existir
  */
 export function getStoredToken() {
-  return localStorage.getItem('token');
+  return localStorage.getItem("access_token");
+}
+
+/**
+ * Obtém o refresh token armazenado no localStorage que será usado para
+ *  requerir um novo access token
+ * @returns {string|null} - Token ou null se não existir
+ */
+export function getRefreshToken() {
+  return localStorage.getItem("refresh_token");
 }
 
 /**
@@ -37,7 +46,7 @@ export function getStoredToken() {
 export function getUserRoleFromToken() {
   const token = getStoredToken();
   if (!token) return null;
-  
+
   const payload = parseJwt(token);
   return payload?.role || null;
 }
@@ -49,7 +58,7 @@ export function getUserRoleFromToken() {
 export function getUserIdFromToken() {
   const token = getStoredToken();
   if (!token) return null;
-  
+
   const payload = parseJwt(token);
   return payload?.sub || payload?.user_id || null;
 }
@@ -62,10 +71,10 @@ export function getUserIdFromToken() {
 export function isTokenExpired(token = null) {
   const targetToken = token || getStoredToken();
   if (!targetToken) return true;
-  
+
   const payload = parseJwt(targetToken);
   if (!payload?.exp) return true;
-  
+
   // exp é em segundos, Date.now() é em milissegundos
   return Date.now() >= payload.exp * 1000;
 }
@@ -83,13 +92,22 @@ export function isAuthenticated() {
  * Remove o token do localStorage
  */
 export function clearToken() {
-  localStorage.removeItem('token');
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
 }
 
 /**
- * Armazena um token no localStorage
- * @param {string} token - Token JWT a ser armazenado
+ * Armazena um access_token no localStorage
+ * @param {string} access_token - Token JWT a ser armazenado
  */
-export function setToken(token) {
-  localStorage.setItem('token', token);
+export function setAccessToken(access_token) {
+  localStorage.setItem("access_token", access_token);
+}
+
+/**
+ * Armazena um refresh_token no localStorage
+ * @param {string} refresh_token - Token a ser armazenado
+ */
+export function setRefreshToken(refresh_token) {
+  localStorage.setItem("refresh_token", refresh_token);
 }

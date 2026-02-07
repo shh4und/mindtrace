@@ -37,6 +37,11 @@ type UsuarioRepositorio interface {
 	DeletarUsuario(tx *gorm.DB, id uint) error
 	BuscarUsuarioPorTokenHash(tokenHash string) (*dominio.Usuario, error)
 	BuscarProfissionaisDoPaciente(tx *gorm.DB, pacienteID uint) (*dominio.Paciente, error)
+
+	// Refresh Token Management
+	SalvarRefreshToken(tx *gorm.DB, rt *dominio.RefreshToken) error
+	BuscarRefreshTokenPorHash(tx *gorm.DB, hash string) (*dominio.RefreshToken, error)
+	RevogarRefreshToken(tx *gorm.DB, id uint) error
 }
 
 type InstrumentoRepositorio interface {

@@ -39,6 +39,7 @@ type RegistrarProfissionalDTOIn struct {
 	RegistroProfissional string    `json:"registro_profissional" binding:"required"`
 	CPF                  string    `json:"cpf" binding:"required"`
 	Contato              string    `json:"contato"`
+	TermosAceitos        bool      `json:"termos_aceitos" binding:"required"`
 }
 
 // RegistrarPacienteDTOIn representa os dados para criar um paciente
@@ -54,6 +55,7 @@ type RegistrarPacienteDTOIn struct {
 	NomeResponsavel      string     `json:"nome_responsavel,omitempty"`
 	ContatoResponsavel   string     `json:"contato_responsavel,omitempty"`
 	Contato              string     `json:"contato"`
+	TermosAceitos        bool       `json:"termos_aceitos" binding:"required"`
 }
 
 // AtualizarPerfilDTOIn representa os dados para atualizar o perfil do usuario
@@ -95,6 +97,15 @@ type RegistroRespostaDTOIn struct {
 
 type ReenvioAtivacaoDTOIn struct {
 	Email string `json:"email" binding:"required,email"`
+}
+
+type RefreshTokenDTOIn struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+type TokenDTOOut struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 // PontoDeDadosDTOOut representa um ponto de dados para graficos
@@ -216,13 +227,15 @@ type InstrumentoCompletoDTOOut struct {
 
 // AtribuicaoDTOOut representa uma atribuição de instrumento para saída
 type AtribuicaoDTOOut struct {
-	ID             uint                        `json:"id"`
-	Status         string                      `json:"status"`
-	DataAtribuicao time.Time                   `json:"data_atribuicao"`
-	DataResposta   *time.Time                  `json:"data_resposta,omitempty"`
-	Instrumento    InstrumentoCompletoDTOOut   `json:"instrumento"`
-	Paciente       *PacienteResumidoDTOOut     `json:"paciente,omitempty"`     // Apenas para profissional
-	Profissional   *ProfissionalResumidoDTOOut `json:"profissional,omitempty"` // Apenas para paciente
+	ID              uint                        `json:"id"`
+	Status          string                      `json:"status"`
+	DataAtribuicao  time.Time                   `json:"data_atribuicao"`
+	DataResposta    *time.Time                  `json:"data_resposta,omitempty"`
+	Pontuacao       *float64                    `json:"pontuacao,omitempty"`
+	PontuacaoMaxima *float64                    `json:"pontuacao_maxima,omitempty"`
+	Instrumento     InstrumentoCompletoDTOOut   `json:"instrumento"`
+	Paciente        *PacienteResumidoDTOOut     `json:"paciente,omitempty"`     // Apenas para profissional
+	Profissional    *ProfissionalResumidoDTOOut `json:"profissional,omitempty"` // Apenas para paciente
 }
 
 type RespostaDetalhadaDTOOut struct {

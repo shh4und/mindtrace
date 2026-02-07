@@ -2,6 +2,7 @@ package servicos
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"mindtrace/backend/interno/aplicacao/dtos"
 	"mindtrace/backend/interno/aplicacao/mappers"
@@ -20,7 +21,8 @@ import (
 type UsuarioServico interface {
 	RegistrarProfissional(dtoIn *dtos.RegistrarProfissionalDTOIn) (*dtos.ProfissionalDTOOut, error)
 	RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (*dtos.PacienteDTOOut, error)
-	Login(email, senha string) (string, error)
+	Login(email, senha string) (string, string, error)
+	RefreshAccessToken(refreshToken string) (string, string, error)
 	BuscarUsuarioPorID(userID uint) (*dtos.UsuarioDTOOut, error)
 	ProprioPerfilPaciente(pacID uint) (*dtos.PacienteDTOOut, error)
 	ProprioPerfilProfissional(profID uint) (*dtos.ProfissionalDTOOut, error)
@@ -28,6 +30,7 @@ type UsuarioServico interface {
 	AtualizarPerfil(userID uint, dtoIn *dtos.AtualizarPerfilDTOIn) error
 	AlterarSenha(userID uint, dtoIn *dtos.AlterarSenhaDTOIn) error
 	DeletarPerfil(userID uint) error
+	AnonimizarPerfil(userID uint) error
 	ReenviarEmailAtivacao(email string) error
 	ListarProfissionaisDoPaciente(userID uint) ([]dtos.ProfissionalDTOOut, error)
 }
@@ -71,6 +74,15 @@ func (s *usuarioServico) RegistrarProfissional(dtoIn *dtos.RegistrarProfissional
 
 		// Usa o mapper para criar as entidades a partir do DTOIn
 		novoUsuario, novoProfissional := mappers.RegistrarProfissionalDTOInParaEntidade(dtoIn)
+
+		// LGPD: Valida termos
+		if !dtoIn.TermosAceitos {
+			return errors.New("é necessário aceitar os termos de uso e política de privacidade")
+		}
+		termosVersao := "v1.0"
+		agora := time.Now()
+		novoUsuario.TermosAceitosEm = &agora
+		novoUsuario.TermosVersao = &termosVersao
 
 		// Validar usuario
 		if err := novoUsuario.Validar(); err != nil {
@@ -163,6 +175,15 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 		// Usa o mapper para criar as entidades a partir do DTOIn
 		novoUsuario, novoPaciente := mappers.RegistrarPacienteDTOInParaEntidade(dtoIn)
 
+		// LGPD: Valida termos
+		if !dtoIn.TermosAceitos {
+			return errors.New("é necessário aceitar os termos de uso e política de privacidade")
+		}
+		termosVersao := "v1.0"
+		agora := time.Now()
+		novoUsuario.TermosAceitosEm = &agora
+		novoUsuario.TermosVersao = &termosVersao
+
 		// Validar usuario
 		if err := novoUsuario.Validar(); err != nil {
 			return err
@@ -227,43 +248,122 @@ func (s *usuarioServico) RegistrarPaciente(dtoIn *dtos.RegistrarPacienteDTOIn) (
 	return mappers.PacienteParaDTOOut(pacienteCompleto), err
 }
 
-// Login autentica o usuario e retorna um token JWT
-func (s *usuarioServico) Login(email, senha string) (string, error) {
+// Login autentica o usuario e retorna um token JWT e um Refresh Token
+func (s *usuarioServico) Login(email, senha string) (string, string, error) {
 	// Busca usuario pelo e-mail
 	usuario, err := s.repositorio.BuscarPorEmail(email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", dominio.ErrUsuarioNaoEncontrado
+			return "", "", dominio.ErrUsuarioNaoEncontrado
 		}
-		return "", err
+		return "", "", err
 	}
 
 	if !usuario.EstaAtivo {
-		return "", dominio.ErrUsuarioNaoAtivo
+		return "", "", dominio.ErrUsuarioNaoAtivo
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(usuario.Senha), []byte(senha))
 	if err != nil {
-		return "", dominio.ErrCrendenciaisInvalidas
+		return "", "", dominio.ErrCrendenciaisInvalidas
 	}
 
-	// Gera o token JWT
+	// Gera o token JWT (Access Token - 15 min)
+	accessToken, err := s.gerarJWT(usuario)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Gera Refresh Token (7 dias)
+	refreshToken, err := GenerateSecureToken()
+	if err != nil {
+		return "", "", err
+	}
+
+	rt := &dominio.RefreshToken{
+		UsuarioID: usuario.ID,
+		Hash:      refreshToken,
+		ExpiraEm:  time.Now().Add(7 * 24 * time.Hour),
+		Revogado:  false,
+	}
+
+	if err := s.db.Transaction(func(tx *gorm.DB) error {
+		return s.repositorio.SalvarRefreshToken(tx, rt)
+	}); err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+
+// RefreshAccessToken renova o par de chaves access e refresh
+func (s *usuarioServico) RefreshAccessToken(refreshToken string) (string, string, error) {
+	var novoAccess, novoRefresh string
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		// Busca token antigo
+		rt, err := s.repositorio.BuscarRefreshTokenPorHash(tx, refreshToken)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return dominio.ErrTokenInvalido
+			}
+			return err
+		}
+
+		// Validações
+		if rt.Revogado {
+			// ROTACAO DE TOKEN DETECTADA: Possivel roubo. Revogar TODOS os tokens do usuario?
+			// Por enquanto, apenas falha.
+			return dominio.ErrTokenInvalido
+		}
+		if time.Now().After(rt.ExpiraEm) {
+			return dominio.ErrTokenInvalido
+		}
+
+		// Revoga o usado (Rotação)
+		if err := s.repositorio.RevogarRefreshToken(tx, rt.ID); err != nil { // Salvar atualiza se ja tem ID
+			return err
+		}
+
+		usuario, err := s.repositorio.BuscarUsuarioPorID(rt.UsuarioID)
+		if err != nil {
+			return err
+		}
+
+		// Gera novos tokens
+		novoAccess, err = s.gerarJWT(usuario)
+		if err != nil {
+			return err
+		}
+
+		novoRefresh, err = GenerateSecureToken()
+		if err != nil {
+			return err
+		}
+
+		novoRt := &dominio.RefreshToken{
+			UsuarioID: usuario.ID,
+			Hash:      novoRefresh,
+			ExpiraEm:  time.Now().Add(24 * time.Hour),
+		}
+
+		return s.repositorio.SalvarRefreshToken(tx, novoRt)
+	})
+
+	return novoAccess, novoRefresh, err
+}
+
+func (s *usuarioServico) gerarJWT(usuario *dominio.Usuario) (string, error) {
 	claims := jwt.MapClaims{
-		"sub":  usuario.ID,                                         // Subject com o ID do usuario
-		"role": dominio.TipoUsuarioParaString(usuario.TipoUsuario), // Adiciona o tipo de usuario como role (string)
-		"iat":  time.Now().Unix(),                                  // Issued At indica quando o token foi criado
-		"exp":  time.Now().Add(time.Hour * 1).Unix(),               // Define expiracao do token em uma hora
+		"sub":  usuario.ID,
+		"role": dominio.TipoUsuarioParaString(usuario.TipoUsuario),
+		"iat":  time.Now().Unix(),
+		"exp":  time.Now().Add(time.Minute * 1).Unix(), // 1 minutos
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := token.SignedString([]byte(jwtSecret))
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
+	return token.SignedString([]byte(jwtSecret))
 }
 
 // BuscarUsuarioPorID busca um usuario pelo ID
@@ -474,6 +574,64 @@ func (s *usuarioServico) DeletarPerfil(userID uint) error {
 			return err
 		}
 		return s.repositorio.DeletarUsuario(tx, userID)
+	})
+}
+
+func (s *usuarioServico) AnonimizarPerfil(userID uint) error {
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		usuario, err := s.repositorio.BuscarUsuarioPorID(userID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return dominio.ErrUsuarioNaoEncontrado
+			}
+			return err
+		}
+
+		// Anonimizar Dados PII
+		randomSuffix, _ := GenerateSecureToken() // 64 chars hex
+		if len(randomSuffix) > 10 {
+			randomSuffix = randomSuffix[:8]
+		}
+
+		usuario.Nome = "Usuário Anônimo"
+		usuario.Email = fmt.Sprintf("deleted_%d_%s@mindtrace.anon", usuario.ID, randomSuffix)
+		usuario.CPF = fmt.Sprintf("000%s", randomSuffix) // Mock CPF unico
+		usuario.Contato = ""
+		usuario.Bio = "Perfil anonimizado a pedido do usuário."
+		usuario.EstaAtivo = false
+
+		// Invalidar Senha
+		usuario.Senha = "DISABLED_ACCOUNT"
+
+		if err := s.repositorio.Atualizar(tx, usuario); err != nil {
+			return err
+		}
+		if dominio.TipoUsuarioParaString(usuario.TipoUsuario) == "profissional" {
+			profissional, err := s.repositorio.BuscarProfissionalPorUsuarioID(tx, userID)
+			if err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return dominio.ErrUsuarioNaoEncontrado
+				}
+				return err
+			}
+			if err = tx.Delete(profissional).Error; err != nil {
+				return err
+			}
+		} else if dominio.TipoUsuarioParaString(usuario.TipoUsuario) == "paciente" {
+			paciente, err := s.repositorio.BuscarPacientePorUsuarioID(tx, userID)
+			if err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return dominio.ErrUsuarioNaoEncontrado
+				}
+				return err
+			}
+			if err = tx.Delete(paciente).Error; err != nil {
+				return err
+			}
+		}
+
+		// Soft Delete (mantendo dados estatisticos no banco, mas inacessíveis via API normal)
+		return tx.Delete(usuario).Error
 	})
 }
 

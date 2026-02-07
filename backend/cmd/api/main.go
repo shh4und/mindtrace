@@ -40,6 +40,7 @@ func main() {
 		// Executa migracoes automatizadas para alinhar esquema do banco
 		err = db.AutoMigrate(
 			&dominio.Usuario{},
+			&dominio.RefreshToken{},
 			&dominio.Profissional{},
 			&dominio.Paciente{},
 			&dominio.RegistroHumor{},
@@ -110,20 +111,27 @@ func main() {
 	api := roteador.Group("/api/v1")
 	{
 		// --- ROTAS PUBLICAS ---
+		// Middleware de Rate Limit: 0.5 tokens/s (1 a cada 2s), burst de 5
+		limiterPublico := middlewares.RateLimitMiddleware(0.5, 5)
+
 		auth := api.Group("/entrar")
+		auth.Use(limiterPublico)
 		{
 			auth.POST("/login", autCtrl.Login)
+			auth.POST("/refresh", autCtrl.Refresh)
 			auth.GET("/ativar", usuarioCtrl.AtivarConta)
 			auth.POST("/ativar/reenviar", usuarioCtrl.ReenviarAtivacao)
 		}
 
 		profissionais := api.Group("/profissionais")
+		profissionais.Use(limiterPublico)
 		{
 			// Registro de profissionais acessivel sem autenticacao
 			profissionais.POST("/registrar", profissionalCtrl.Registrar)
 		}
 
 		pacientes := api.Group("/pacientes")
+		pacientes.Use(limiterPublico)
 		{
 			// Registro de pacientes disponivel sem token
 			pacientes.POST("/registrar", pacienteCtrl.Registrar)
@@ -144,6 +152,7 @@ func main() {
 				usuarios.PUT("/perfil", usuarioCtrl.AtualizarPerfil)
 				usuarios.PUT("/perfil/alterar-senha", usuarioCtrl.AlterarSenha)
 				usuarios.DELETE("/perfil/apagar-conta", usuarioCtrl.DeletarPerfil)
+				usuarios.DELETE("/perfil/anonimizar", usuarioCtrl.AnonimizarPerfil)
 			}
 
 			registroHumor := protegido.Group("/registro-humor")
@@ -189,7 +198,7 @@ func main() {
 - Pacientes:
 	ana.costa@mindtrace.dev
 	bruno.lima@mindtrace.dev
-ano.costo@mindtrace.dev <- precisa ativar conta
+	ano.costo@mindtrace.dev <- precisa ativar conta
 - Senha:
 	Password123!`+"\n%s\n", strings.Repeat("#", 50), strings.Repeat("#", 50))
 	log.Println("servidor iniciado na porta 9090")

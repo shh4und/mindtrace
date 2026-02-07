@@ -1,8 +1,13 @@
-import { computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/store/user';
-import { TipoUsuario } from '@/types/usuario.js';
-import { getUserRoleFromToken, isAuthenticated, isTokenExpired } from '@/utils/jwt.js';
+import { computed } from "vue";
+import { useRouter } from "vue-router";
+import { useUserStore } from "@/store/user";
+import { TipoUsuario } from "@/types/usuario.js";
+import {
+  clearToken,
+  getUserRoleFromToken,
+  isAuthenticated,
+  isTokenExpired,
+} from "@/utils/jwt.js";
 
 /**
  * Composable para gerenciamento de autenticação
@@ -50,13 +55,13 @@ export function useAuth() {
    */
   function redirectToDashboard() {
     const role = getCurrentRole();
-    
+
     if (role === TipoUsuario.Profissional) {
-      router.push({ name: 'dashboard-profissional' });
+      router.push({ name: "dashboard-profissional" });
     } else if (role === TipoUsuario.Paciente) {
-      router.push({ name: 'dashboard-paciente' });
+      router.push({ name: "dashboard-paciente" });
     } else {
-      router.push({ name: 'login' });
+      router.push({ name: "login" });
     }
   }
 
@@ -71,8 +76,18 @@ export function useAuth() {
       redirectToDashboard();
       return true;
     } catch (error) {
-      console.error('Erro no login:', error);
+      console.error("Erro no login:", error);
       throw error;
+    }
+  }
+
+  async function refresh() {
+    try {
+      await userStore.refreshToken(); // async
+      return true;
+    } catch (error) {
+      console.error("Refresh falhou:", error);
+      return false;
     }
   }
 
@@ -94,7 +109,7 @@ export function useAuth() {
       await userStore.register(data, userType);
       return true;
     } catch (error) {
-      console.error('Erro no registro:', error);
+      console.error("Erro no registro:", error);
       throw error;
     }
   }
@@ -117,7 +132,7 @@ export function useAuth() {
     userType,
     isProfissional,
     isPaciente,
-    
+
     // Métodos
     getCurrentRole,
     hasRole,
@@ -126,6 +141,7 @@ export function useAuth() {
     login,
     logout,
     register,
-    fetchCurrentUser
+    fetchCurrentUser,
+    refresh,
   };
 }

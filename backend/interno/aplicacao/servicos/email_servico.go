@@ -4,12 +4,12 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"html/template"
 	"log"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
 	"net/smtp"
 	"os"
-	"text/template"
 	"time"
 
 	"gorm.io/gorm"
@@ -181,13 +181,23 @@ func (es *emailServico) EnviarEmail(toEmails []string, subject, body string) err
 
 	address := smtpHost + ":" + smtpPort
 
-	fmt.Println("message:", string(message))
-	err := smtp.SendMail(address, auth, fromEmail, toEmails, message)
-	if err != nil {
-		log.Printf("u.Sendmail() err: %v", err)
-		return err
+	// Channel to capture the result of the potentially blocking SendMail
+	errCh := make(chan error, 1)
+
+	go func() {
+		errCh <- smtp.SendMail(address, auth, fromEmail, toEmails, message)
+	}()
+
+	select {
+	case err := <-errCh:
+		if err != nil {
+			log.Printf("u.Sendmail() err: %v", err)
+			return err
+		}
+		return nil
+	case <-time.After(10 * time.Second):
+		return fmt.Errorf("timeout ao enviar email para %v", toEmails)
 	}
-	return nil
 }
 
 func (es *emailServico) VerificarHashToken(tokenHash string) error {

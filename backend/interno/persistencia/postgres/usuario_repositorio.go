@@ -119,3 +119,21 @@ func (r *gormUsuarioRepositorio) BuscarUsuarioPorTokenHash(tokenHash string) (*d
 	}
 	return &usuario, nil
 }
+
+func (r *gormUsuarioRepositorio) SalvarRefreshToken(tx *gorm.DB, rt *dominio.RefreshToken) error {
+	return tx.Create(rt).Error
+}
+
+func (r *gormUsuarioRepositorio) BuscarRefreshTokenPorHash(tx *gorm.DB, hash string) (*dominio.RefreshToken, error) {
+	var rt dominio.RefreshToken
+	// Busca token nao revogado e nao expirado (logica de expiracao tambem pode ser feita no servico)
+	// Aqui buscamos qualquer token pelo hash para validacao completa no servico
+	if err := tx.Where("hash = ?", hash).First(&rt).Error; err != nil {
+		return nil, err
+	}
+	return &rt, nil
+}
+
+func (r *gormUsuarioRepositorio) RevogarRefreshToken(tx *gorm.DB, id uint) error {
+	return tx.Model(&dominio.RefreshToken{}).Where("id = ?", id).Update("revogado", true).Error
+}
