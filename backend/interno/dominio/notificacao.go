@@ -29,7 +29,7 @@ type Notificacao struct {
 	Usuario   Usuario   `gorm:"foreignKey:UsuarioID;constraint:OnDelete:CASCADE"`
 	AlertaID  *uint     // Ponteiro para permitir valor NULL
 	Conteudo  string    `gorm:"type:text;not null"`
-	Status    string    `gorm:"type:varchar(50);not null;default:'NAOLIDA'"`
+	Status    string    `gorm:"type:text;not null;default:'NAOLIDA';check:status IN ('NAOLIDA', 'LIDA', 'ARQUIVADA')"`
 	DataEnvio time.Time `gorm:"not null;default:CURRENT_TIMESTAMP"`
 }
 

@@ -26,24 +26,44 @@ var (
 	ErrUsuarioNaoAtivo       = errors.New("Usuário não verificado no sistema")
 	ErrTokenExpirado         = errors.New("token de verificacao expirado")
 	ErrUsuarioJaAtivo        = errors.New("este usuário já está ativado")
+	ErrTokenInvalido         = errors.New("token invalido ou expirado")
 )
+
+// RefreshToken representa o token de atualizacao de sessao
+type RefreshToken struct {
+	ID        uint      `gorm:"primaryKey"`
+	UsuarioID uint      `gorm:"index;not null"`
+	Hash      string    `gorm:"uniqueIndex;type:varchar(64);not null"`
+	ExpiraEm  time.Time `gorm:"not null"`
+	Revogado  bool      `gorm:"default:false;not null"`
+	CreatedAt time.Time
+}
+
+func (RefreshToken) TableName() string {
+	return "refresh_tokens"
+}
 
 // Usuario e a base para todos os tipos de usuarios.
 type Usuario struct {
-	ID                  uint   `gorm:"primaryKey"`
-	TipoUsuario         uint8  `gorm:"type:smallint;not null;check:tipo_usuario >= 1"`
-	Nome                string `gorm:"type:varchar(255);not null"`
-	Email               string `gorm:"type:varchar(255);unique;not null"`
-	Senha               string `gorm:"type:text;not null"`
-	Contato             string `gorm:"type:varchar(11)"`
-	Bio                 string `gorm:"type:text"`
-	CPF                 string `gorm:"type:varchar(11);unique"`
-	EstaAtivo           bool   `gorm:"type:boolean;default:false"`
+	ID                  uint           `gorm:"primaryKey"`
+	TipoUsuario         uint8          `gorm:"type:smallint;not null;check:tipo_usuario >= 1"`
+	Nome                string         `gorm:"type:varchar(255);not null"`
+	Email               string         `gorm:"type:varchar(255);unique;not null"`
+	Senha               string         `gorm:"type:text;not null"`
+	Contato             string         `gorm:"type:varchar(11)"`
+	Bio                 string         `gorm:"type:text"`
+	CPF                 string         `gorm:"type:varchar(11);unique"`
+	EstaAtivo           bool           `gorm:"type:boolean;default:false"`
 	EmailVerifExpiracao *time.Time
-	EmailVerifToken     *string `gorm:"type:varchar(64)"`
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
-	DeletedAt           gorm.DeletedAt `gorm:"index"`
+	EmailVerifToken     *string        `gorm:"type:varchar(64)"`
+	RefreshTokens       []RefreshToken `gorm:"foreignKey:UsuarioID;constraint:OnDelete:CASCADE;"`
+	// LGPD
+	TermosAceitosEm *time.Time
+	TermosVersao    *string `gorm:"type:varchar(20)"`
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func (Usuario) TableName() string {

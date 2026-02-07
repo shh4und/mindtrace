@@ -64,7 +64,11 @@ func (m *MockUsuarioRepositorioConvite) CriarPaciente(tx *gorm.DB, paciente *dom
 }
 
 func (m *MockUsuarioRepositorioConvite) BuscarPorEmail(email string) (*dominio.Usuario, error) {
-	return nil, nil
+	args := m.Called(email)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*dominio.Usuario), args.Error(1)
 }
 
 func (m *MockUsuarioRepositorioConvite) BuscarUsuarioPorID(id uint) (*dominio.Usuario, error) {
@@ -99,6 +103,14 @@ func (m *MockUsuarioRepositorioConvite) BuscarPacientesDoProfissional(tx *gorm.D
 	return nil, nil
 }
 
+func (m *MockUsuarioRepositorioConvite) BuscarProfissionaisDoPaciente(tx *gorm.DB, pacienteID uint) (*dominio.Paciente, error) {
+	args := m.Called(tx, pacienteID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*dominio.Paciente), args.Error(1)
+}
+
 func (m *MockUsuarioRepositorioConvite) Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error {
 	return nil
 }
@@ -109,6 +121,10 @@ func (m *MockUsuarioRepositorioConvite) AtualizarProfissional(tx *gorm.DB, profi
 
 func (m *MockUsuarioRepositorioConvite) AtualizarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error {
 	return nil
+}
+
+func (m *MockUsuarioRepositorioConvite) BuscarUsuarioPorTokenHash(tokenHash string) (*dominio.Usuario, error) {
+	return nil, nil
 }
 
 func (m *MockUsuarioRepositorioConvite) DeletarUsuario(tx *gorm.DB, id uint) error {
@@ -137,8 +153,9 @@ func TestConviteServico_GerarConvite_Sucesso(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	profissionalExistente := &dominio.Profissional{
 		ID:        1,
@@ -148,7 +165,7 @@ func TestConviteServico_GerarConvite_Sucesso(t *testing.T) {
 	mockUsuarioRepo.On("BuscarProfissionalPorUsuarioID", mock.Anything, uint(10)).Return(profissionalExistente, nil)
 	mockConviteRepo.On("CriarConvite", mock.Anything, mock.AnythingOfType("*dominio.Convite")).Return(nil)
 
-	resultado, err := servico.GerarConvite(10)
+	resultado, err := servico.GerarConvite(10, "") // Email vazio nao envia email
 
 	assert.NoError(t, err)
 	assert.NotNil(t, resultado)
@@ -159,16 +176,48 @@ func TestConviteServico_GerarConvite_Sucesso(t *testing.T) {
 	mockConviteRepo.AssertExpectations(t)
 }
 
+func TestConviteServico_GerarConvite_ComEmail_Sucesso(t *testing.T) {
+	db := setupTestDBConvite(t)
+	mockConviteRepo := new(MockConviteRepositorio)
+	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
+
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
+
+	profissionalExistente := &dominio.Profissional{
+		ID:        1,
+		UsuarioID: 10,
+	}
+	emailPac := "paciente@example.com"
+	usuarioPaciente := &dominio.Usuario{ID: 20, Email: emailPac}
+	paciente := &dominio.Paciente{ID: 5, UsuarioID: 20}
+
+	mockUsuarioRepo.On("BuscarProfissionalPorUsuarioID", mock.Anything, uint(10)).Return(profissionalExistente, nil)
+	mockUsuarioRepo.On("BuscarPorEmail", emailPac).Return(usuarioPaciente, nil)
+	mockUsuarioRepo.On("BuscarPacientePorUsuarioID", mock.Anything, uint(20)).Return(paciente, nil)
+
+	mockConviteRepo.On("CriarConvite", mock.Anything, mock.AnythingOfType("*dominio.Convite")).Return(nil)
+	mockEmail.On("EnviarEmailConvite", emailPac, mock.AnythingOfType("string")).Return(nil).Maybe()
+
+	resultado, err := servico.GerarConvite(10, emailPac)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, resultado)
+	mockUsuarioRepo.AssertExpectations(t)
+	mockConviteRepo.AssertExpectations(t)
+}
+
 func TestConviteServico_GerarConvite_ProfissionalNaoEncontrado(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	mockUsuarioRepo.On("BuscarProfissionalPorUsuarioID", mock.Anything, uint(999)).Return(nil, gorm.ErrRecordNotFound)
 
-	resultado, err := servico.GerarConvite(999)
+	resultado, err := servico.GerarConvite(999, "")
 
 	assert.Error(t, err)
 	assert.Equal(t, dominio.ErrUsuarioNaoEncontrado, err)
@@ -181,13 +230,14 @@ func TestConviteServico_GerarConvite_ErroAoBuscarProfissional(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	erroGenerico := errors.New("erro de conexão com banco de dados")
 	mockUsuarioRepo.On("BuscarProfissionalPorUsuarioID", mock.Anything, uint(10)).Return(nil, erroGenerico)
 
-	resultado, err := servico.GerarConvite(10)
+	resultado, err := servico.GerarConvite(10, "")
 
 	assert.Error(t, err)
 	assert.Equal(t, erroGenerico, err)
@@ -200,8 +250,9 @@ func TestConviteServico_GerarConvite_ErroAoCriarConvite(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	profissionalExistente := &dominio.Profissional{
 		ID:        1,
@@ -212,7 +263,7 @@ func TestConviteServico_GerarConvite_ErroAoCriarConvite(t *testing.T) {
 	mockUsuarioRepo.On("BuscarProfissionalPorUsuarioID", mock.Anything, uint(10)).Return(profissionalExistente, nil)
 	mockConviteRepo.On("CriarConvite", mock.Anything, mock.AnythingOfType("*dominio.Convite")).Return(erroGenerico)
 
-	resultado, err := servico.GerarConvite(10)
+	resultado, err := servico.GerarConvite(10, "")
 
 	assert.Error(t, err)
 	assert.Equal(t, erroGenerico, err)
@@ -225,8 +276,9 @@ func TestConviteServico_GerarConvite_TokenAleatorio(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	profissionalExistente := &dominio.Profissional{
 		ID:        1,
@@ -240,7 +292,7 @@ func TestConviteServico_GerarConvite_TokenAleatorio(t *testing.T) {
 	tokens := make(map[string]bool)
 
 	for i := 0; i < 3; i++ {
-		resultado, err := servico.GerarConvite(10)
+		resultado, err := servico.GerarConvite(10, "")
 		assert.NoError(t, err)
 		assert.NotNil(t, resultado)
 		assert.NotEmpty(t, resultado.Token)
@@ -259,6 +311,7 @@ func TestConviteServico_VincularPaciente_Sucesso(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
 	// Criar tabela de associação many-to-many
 	db.Exec(`CREATE TABLE IF NOT EXISTS profissionais_pacientes (
@@ -267,7 +320,7 @@ func TestConviteServico_VincularPaciente_Sucesso(t *testing.T) {
 		PRIMARY KEY (profissional_id, paciente_id)
 	)`)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	conviteValido := &dominio.Convite{
 		ID:             1,
@@ -297,8 +350,9 @@ func TestConviteServico_VincularPaciente_TokenNaoEncontrado(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	mockConviteRepo.On("BuscarConvitePorToken", mock.Anything, "token-invalido").Return(nil, gorm.ErrRecordNotFound)
 
@@ -314,8 +368,9 @@ func TestConviteServico_VincularPaciente_ConviteExpirado(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	conviteExpirado := &dominio.Convite{
 		ID:             1,
@@ -339,8 +394,9 @@ func TestConviteServico_VincularPaciente_ConviteJaUtilizado(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	pacienteIDExistente := uint(99)
 	conviteUsado := &dominio.Convite{
@@ -366,8 +422,9 @@ func TestConviteServico_VincularPaciente_PacienteNaoEncontrado(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	conviteValido := &dominio.Convite{
 		ID:             1,
@@ -392,8 +449,9 @@ func TestConviteServico_VincularPaciente_ErroAoBuscarPaciente(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	conviteValido := &dominio.Convite{
 		ID:             1,
@@ -419,6 +477,7 @@ func TestConviteServico_VincularPaciente_ErroAoMarcarComoUsado(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
 	// Criar tabela de associação many-to-many
 	db.Exec(`CREATE TABLE IF NOT EXISTS profissionais_pacientes (
@@ -427,7 +486,7 @@ func TestConviteServico_VincularPaciente_ErroAoMarcarComoUsado(t *testing.T) {
 		PRIMARY KEY (profissional_id, paciente_id)
 	)`)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	conviteValido := &dominio.Convite{
 		ID:             1,
@@ -459,8 +518,9 @@ func TestConviteServico_VincularPaciente_ConviteExpiraEmSegundos(t *testing.T) {
 	db := setupTestDBConvite(t)
 	mockConviteRepo := new(MockConviteRepositorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioConvite)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo)
+	servico := servicos.NovoConviteServico(db, mockConviteRepo, mockUsuarioRepo, mockEmail)
 
 	// Convite que expira em poucos segundos (ainda válido)
 	conviteQuaseExpirando := &dominio.Convite{

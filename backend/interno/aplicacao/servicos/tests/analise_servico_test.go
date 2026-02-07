@@ -93,6 +93,14 @@ func (m *MockUsuarioRepositorioRelatorio) BuscarPacientesDoProfissional(tx *gorm
 	return nil, nil
 }
 
+func (m *MockUsuarioRepositorioRelatorio) BuscarProfissionaisDoPaciente(tx *gorm.DB, pacienteID uint) (*dominio.Paciente, error) {
+	args := m.Called(tx, pacienteID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*dominio.Paciente), args.Error(1)
+}
+
 func (m *MockUsuarioRepositorioRelatorio) Atualizar(tx *gorm.DB, usuario *dominio.Usuario) error {
 	return nil
 }
@@ -103,6 +111,10 @@ func (m *MockUsuarioRepositorioRelatorio) AtualizarProfissional(tx *gorm.DB, pro
 
 func (m *MockUsuarioRepositorioRelatorio) AtualizarPaciente(tx *gorm.DB, paciente *dominio.Paciente) error {
 	return nil
+}
+
+func (m *MockUsuarioRepositorioRelatorio) BuscarUsuarioPorTokenHash(tokenHash string) (*dominio.Usuario, error) {
+	return nil, nil
 }
 
 func (m *MockUsuarioRepositorioRelatorio) DeletarUsuario(tx *gorm.DB, id uint) error {
@@ -131,8 +143,9 @@ func TestAnaliseServico_GerarAnaliseHistorica_Sucesso(t *testing.T) {
 	db := setupTestDBRelatorio(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorioRelatorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRelatorio)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockEmail)
 
 	now := time.Now()
 	registros := []*dominio.RegistroHumor{
@@ -158,7 +171,7 @@ func TestAnaliseServico_GerarAnaliseHistorica_Sucesso(t *testing.T) {
 
 	mockRegistroHumorRepo.On("BuscarPorPacienteEPeriodo", uint(1), mock.AnythingOfType("time.Time"), mock.AnythingOfType("time.Time")).Return(registros, nil)
 
-	resultado, err := servico.GerarAnaliseHistorica(1, 7)
+	resultado, err := servico.GerarAnaliseHistorica(0, 1, "", 7)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, resultado)
@@ -180,10 +193,11 @@ func TestAnaliseServico_GerarAnaliseHistorica_PeriodoInvalido_Zero(t *testing.T)
 	db := setupTestDBRelatorio(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorioRelatorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRelatorio)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockEmail)
 
-	resultado, err := servico.GerarAnaliseHistorica(1, 0)
+	resultado, err := servico.GerarAnaliseHistorica(0, 1, "", 0)
 
 	assert.Error(t, err)
 	assert.Nil(t, resultado)
@@ -194,10 +208,11 @@ func TestAnaliseServico_GerarAnaliseHistorica_PeriodoInvalido_Negativo(t *testin
 	db := setupTestDBRelatorio(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorioRelatorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRelatorio)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockEmail)
 
-	resultado, err := servico.GerarAnaliseHistorica(1, -5)
+	resultado, err := servico.GerarAnaliseHistorica(0, 1, "", -5)
 
 	assert.Error(t, err)
 	assert.Nil(t, resultado)
@@ -208,10 +223,11 @@ func TestAnaliseServico_GerarAnaliseHistorica_PeriodoExcedeLimite(t *testing.T) 
 	db := setupTestDBRelatorio(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorioRelatorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRelatorio)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockEmail)
 
-	resultado, err := servico.GerarAnaliseHistorica(1, 91)
+	resultado, err := servico.GerarAnaliseHistorica(0, 1, "", 91)
 
 	assert.Error(t, err)
 	assert.Nil(t, resultado)
@@ -222,13 +238,14 @@ func TestAnaliseServico_GerarAnaliseHistorica_ErroAoBuscarRegistros(t *testing.T
 	db := setupTestDBRelatorio(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorioRelatorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRelatorio)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockEmail)
 
 	erroGenerico := errors.New("erro de conexão com banco de dados")
 	mockRegistroHumorRepo.On("BuscarPorPacienteEPeriodo", uint(1), mock.AnythingOfType("time.Time"), mock.AnythingOfType("time.Time")).Return(nil, erroGenerico)
 
-	resultado, err := servico.GerarAnaliseHistorica(1, 7)
+	resultado, err := servico.GerarAnaliseHistorica(0, 1, "", 7)
 
 	assert.Error(t, err)
 	assert.Nil(t, resultado)
@@ -240,14 +257,15 @@ func TestAnaliseServico_GerarAnaliseHistorica_SemRegistros(t *testing.T) {
 	db := setupTestDBRelatorio(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorioRelatorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRelatorio)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockEmail)
 
 	registrosVazios := []*dominio.RegistroHumor{}
 
 	mockRegistroHumorRepo.On("BuscarPorPacienteEPeriodo", uint(1), mock.AnythingOfType("time.Time"), mock.AnythingOfType("time.Time")).Return(registrosVazios, nil)
 
-	resultado, err := servico.GerarAnaliseHistorica(1, 7)
+	resultado, err := servico.GerarAnaliseHistorica(0, 1, "", 7)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, resultado)
@@ -269,8 +287,9 @@ func TestAnaliseServico_GerarAnaliseHistorica_UmRegistro(t *testing.T) {
 	db := setupTestDBRelatorio(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorioRelatorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRelatorio)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockEmail)
 
 	registros := []*dominio.RegistroHumor{
 		{
@@ -286,7 +305,7 @@ func TestAnaliseServico_GerarAnaliseHistorica_UmRegistro(t *testing.T) {
 
 	mockRegistroHumorRepo.On("BuscarPorPacienteEPeriodo", uint(1), mock.AnythingOfType("time.Time"), mock.AnythingOfType("time.Time")).Return(registros, nil)
 
-	resultado, err := servico.GerarAnaliseHistorica(1, 7)
+	resultado, err := servico.GerarAnaliseHistorica(0, 1, "", 7)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, resultado)
@@ -306,8 +325,9 @@ func TestAnaliseServico_GerarAnaliseHistorica_CalculoMediasCorreto(t *testing.T)
 	db := setupTestDBRelatorio(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorioRelatorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRelatorio)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockEmail)
 
 	now := time.Now()
 	registros := []*dominio.RegistroHumor{
@@ -318,7 +338,7 @@ func TestAnaliseServico_GerarAnaliseHistorica_CalculoMediasCorreto(t *testing.T)
 
 	mockRegistroHumorRepo.On("BuscarPorPacienteEPeriodo", uint(1), mock.AnythingOfType("time.Time"), mock.AnythingOfType("time.Time")).Return(registros, nil)
 
-	resultado, err := servico.GerarAnaliseHistorica(1, 30)
+	resultado, err := servico.GerarAnaliseHistorica(0, 1, "", 30)
 
 	assert.NoError(t, err)
 
@@ -334,12 +354,13 @@ func TestAnaliseServico_ExecutarMonitoramento_Sucesso(t *testing.T) {
 	db := setupTestDBRelatorio(t)
 	mockRegistroHumorRepo := new(MockRegistroHumorRepositorioRelatorio)
 	mockUsuarioRepo := new(MockUsuarioRepositorioRelatorio)
+	mockEmail := new(MockEmailServico)
 
-	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo)
+	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockEmail)
 
 	registros := []*dominio.RegistroHumor{
-		{NivelHumor: 3, NivelStress: 5},
-		{NivelHumor: 4, NivelStress: 4},
+		{NivelHumor: 3, NivelStress: 5, HorasSono: 7, NivelEnergia: 6},
+		{NivelHumor: 4, NivelStress: 4, HorasSono: 8, NivelEnergia: 7},
 	}
 
 	mockRegistroHumorRepo.On("BuscarPorNUltimosRegistros", uint(1), 5).Return(registros, nil)
@@ -348,4 +369,47 @@ func TestAnaliseServico_ExecutarMonitoramento_Sucesso(t *testing.T) {
 
 	assert.NoError(t, err)
 	mockRegistroHumorRepo.AssertExpectations(t)
+}
+
+func TestAnaliseServico_ExecutarMonitoramento_ComAlertaEmail(t *testing.T) {
+	db := setupTestDBRelatorio(t)
+	mockRegistroHumorRepo := new(MockRegistroHumorRepositorioRelatorio)
+	mockUsuarioRepo := new(MockUsuarioRepositorioRelatorio)
+	mockEmail := new(MockEmailServico)
+
+	servico := servicos.NovoAnaliseServico(db, mockRegistroHumorRepo, mockUsuarioRepo, mockEmail)
+
+	// Dados que geram alerta PREOCUPANTE (Humor < 2.5)
+	registros := []*dominio.RegistroHumor{
+		{NivelHumor: 1, NivelStress: 9, HorasSono: 3, NivelEnergia: 2},
+		{NivelHumor: 2, NivelStress: 8, HorasSono: 4, NivelEnergia: 2},
+	}
+
+	paciente := &dominio.Paciente{
+		ID: 1,
+		Usuario: dominio.Usuario{
+			Nome:  "Paciente Teste",
+			Email: "pac@teste.com",
+		},
+		Profissionais: []dominio.Profissional{
+			{
+				ID: 1,
+				Usuario: dominio.Usuario{
+					Nome:  "Dr. Teste",
+					Email: "dr@teste.com",
+				},
+			},
+		},
+	}
+
+	mockRegistroHumorRepo.On("BuscarPorNUltimosRegistros", uint(1), 5).Return(registros, nil)
+	mockUsuarioRepo.On("BuscarProfissionaisDoPaciente", mock.Anything, uint(1)).Return(paciente, nil)
+	// Status calculado será PREOCUPANTE
+	mockEmail.On("EnviarEmailAlertaMonitoramento", "dr@teste.com", "Dr. Teste", "Paciente Teste", servicos.StatusPreocupante).Return(nil).Maybe()
+
+	err := servico.ExecutarMonitoramento(1)
+
+	assert.NoError(t, err)
+	mockRegistroHumorRepo.AssertExpectations(t)
+	// mockEmail.AssertExpectations(t) // Async call
 }

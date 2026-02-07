@@ -97,7 +97,8 @@ func (s *analiseServico) GerarAnaliseHistorica(usuarioID, pacienteID uint, tipoU
 		analise.MediaHumor = float64(somaHumor) / count
 
 		// Recalcula o status baseado nos dados carregados
-		analise.StatusAtual = s.calcularStatus(analise.MediaSono, analise.MediaHumor, analise.MediaStress, analise.MediaEnergia)
+		analise.ValorIBG = s.calcularIBG(analise.MediaSono, analise.MediaHumor, analise.MediaStress, analise.MediaEnergia)
+		analise.StatusAtual = s.calcularStatus(analise.ValorIBG)
 	}
 
 	return analise, nil
@@ -128,8 +129,8 @@ func (s *analiseServico) ExecutarMonitoramento(pacienteID uint) error {
 	mediaEnergia := float64(somaEnergia) / float64(len(registros))
 
 	// 3. Verifica Padrão
-	status := s.calcularStatus(mediaSono, mediaHumor, mediaStress, mediaEnergia) // Simplificado para exemplo
-
+	ibg := s.calcularIBG(mediaSono, mediaHumor, mediaStress, mediaEnergia) // Simplificado para exemplo
+	status := s.calcularStatus(ibg)
 	if status == StatusPreocupante {
 		// Busca paciente e seus profissionais para notificar
 		var paciente *dominio.Paciente
@@ -137,8 +138,13 @@ func (s *analiseServico) ExecutarMonitoramento(pacienteID uint) error {
 		if err == nil && paciente != nil {
 			for _, prof := range paciente.Profissionais {
 				if prof.Usuario.Email != "" {
-					// Envia email de alerta (assincrono/goroutine opcional, mas aqui vou chamar direto para simplicidade ou dentro de go func)
+					// Envia email de alerta (assincrono/goroutine opcional)
 					go func(emailProf, nomeProf, nomePac, st string) {
+						defer func() {
+							if r := recover(); r != nil {
+								log.Printf("ERRO CRITICO: Panic recuperado ao enviar email de alerta: %v", r)
+							}
+						}()
 						s.emailServico.EnviarEmailAlertaMonitoramento(emailProf, nomeProf, nomePac, st)
 					}(prof.Usuario.Email, prof.Usuario.Nome, paciente.Usuario.Nome, status)
 				}
@@ -146,17 +152,29 @@ func (s *analiseServico) ExecutarMonitoramento(pacienteID uint) error {
 		}
 	}
 	log.Printf(
-		"Monitoramento realizado as: %v\nPaciente ID: %d\nDados:\n mediaHumor: %.2f, mediaStress: %.2f, mediaSono: %.2f, mediaEnergia: %.2f\nStatus: %s",
-		time.Now(), pacienteID, mediaHumor, mediaStress, mediaSono, mediaEnergia, status)
+		"Monitoramento realizado as: %v\nPaciente ID: %d\nStatus Calculado: %s",
+		time.Now(), pacienteID, status)
 	return nil
 }
 
-func (s *analiseServico) calcularStatus(sono, humor, stress, energia float64) string {
-	if humor < 2.5 || stress > 8.0 || (sono < 4.0 || sono > 11.0) || energia < 2.5 {
-		return StatusPreocupante
+func (s *analiseServico) calcularStatus(ibg float64) string {
+	switch {
+	case ibg >= 0.70:
+		return StatusRegular // Verde (> 70%)
+	case ibg >= 0.40:
+		return StatusAtencao // Amarelo (40% - 69%)
+	default:
+		return StatusPreocupante // Vermelho (< 40%)
 	}
-	if humor < 3.5 || stress > 6.0 || (sono < 5.0 || sono > 10.0) || energia < 4.0 {
-		return StatusAtencao
+}
+
+func (s *analiseServico) calcularIBG(sono, humor, stress, energia float64) float64 {
+	// Delega ao metodo do dominio para manter logica centralizada
+	rh := &dominio.RegistroHumor{
+		NivelHumor:   int16(humor),
+		HorasSono:    int16(sono),
+		NivelStress:  int16(stress),
+		NivelEnergia: int16(energia),
 	}
-	return StatusRegular
+	return rh.CalcularIBG()
 }

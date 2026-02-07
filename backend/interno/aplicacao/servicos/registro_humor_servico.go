@@ -6,6 +6,7 @@ import (
 	"mindtrace/backend/interno/aplicacao/mappers"
 	"mindtrace/backend/interno/dominio"
 	"mindtrace/backend/interno/persistencia/repositorios"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -41,6 +42,22 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto *dtos.CriarRegistroHumor
 			return err
 		}
 
+		// Validação de taxa: Verificar último registro
+		ultimoRegistro, err := rhs.repositorio.BuscarUltimoRegistroDePaciente(paciente.ID)
+		if err == nil && ultimoRegistro != nil {
+			// Se encontrou um registro anterior
+			agora := time.Now()
+			// Diferença de tempo
+			diff := agora.Sub(ultimoRegistro.DataHoraRegistro)
+			// Se for menor que 60 segundos (simulação de 1 dia)
+			if diff < 60*time.Second {
+				return dominio.ErrRegistroHumorMuitoRecente
+			}
+		} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			// Se houve erro de banco que não seja "não encontrado", retorna erro
+			return err
+		}
+
 		novoRegistroHumor, err := mappers.CriarRegistroHumorDTOInParaEntidade(dto, paciente.ID)
 		if err != nil {
 			return err
@@ -49,6 +66,9 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto *dtos.CriarRegistroHumor
 		if err := novoRegistroHumor.Validar(); err != nil {
 			return err
 		}
+
+		// Calcula o IBG antes de persistir
+		novoRegistroHumor.IndiceBemEstarGeral = novoRegistroHumor.CalcularIBG()
 
 		if err := rhs.repositorio.CriarRegistroHumor(tx, novoRegistroHumor); err != nil {
 			return err

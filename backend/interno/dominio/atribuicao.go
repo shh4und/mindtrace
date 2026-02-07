@@ -28,7 +28,7 @@ type Atribuicao struct {
 	Instrumento    Instrumento  `gorm:"foreignKey:InstrumentoID"`
 	ProfissionalID uint         `gorm:"not null;index;column:profissional_id"`
 	Profissional   Profissional `gorm:"foreignKey:ProfissionalID"`
-	Status         string       `gorm:"default:'PENDENTE';index;column:status"`
+	Status         string       `gorm:"default:'PENDENTE';index;column:status;check:status IN ('PENDENTE', 'RESPONDIDO', 'EXPIRADO')"`
 	DataAtribuicao time.Time    `gorm:"autoCreateTime;column:data_atribuicao"`
 	DataResposta   *time.Time   `gorm:"column:data_resposta"`
 
