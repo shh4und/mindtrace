@@ -23,7 +23,7 @@ services:
     image: shh4und/mindtrace-backend:latest
     container_name: mindtrace-backend
     ports:
-      - "9090:9090"
+      - "8080:8080"
     environment:
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}

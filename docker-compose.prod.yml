@@ -17,6 +17,15 @@ services:
     # Não expor porta 5432 externamente em produção
 
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mindtrace-mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"  # Web UI para visualizar emails
+    expose:
+      - "1025"       # SMTP interno
+
   backend:
     image: ${DOCKER_HUB_USERNAME:-shh4und}/mindtrace-backend:latest
     container_name: mindtrace-backend
@@ -27,12 +36,23 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       DB_DRIVER: postgres
+      GO_ENV: production
       JWT_SECRET: ${JWT_SECRET}
       FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:5173}
       SKIP_DB_INIT: ${SKIP_DB_INIT:-false}
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/api/v1/entrar/login"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
     expose:
       - "8080"  # interno apenas, acessível via nginx proxy
@@ -41,7 +61,8 @@ services:
     image: ${DOCKER_HUB_USERNAME:-shh4und}/mindtrace-frontend:latest
     container_name: mindtrace-frontend
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
     ports:
       - "80:80"  # ÚNICA porta pública (HTTP)

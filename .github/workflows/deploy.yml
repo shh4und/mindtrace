@@ -23,6 +23,10 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      - name: Run backend tests
+        working-directory: ./backend
+        run: go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/aplicacao/mappers/tests -v
+
       - name: Build & Push backend
         uses: docker/build-push-action@v6
         with:
@@ -70,8 +74,11 @@ jobs:
               echo "  POSTGRES_PASSWORD=sua_senha_segura"
               echo "  POSTGRES_DB=mindtrace"
               echo "  JWT_SECRET=seu_jwt_secret"
-              echo "  FRONTEND_ORIGINS=http://localhost:5173"
+              echo "  FRONTEND_ORIGINS=http://IP_PUBLICO_EC2"
               echo "  SKIP_DB_INIT=false"
+              echo ""
+              echo "  # SMTP via Mailpit (embutido no docker-compose)"
+              echo "  # Emails capturados em http://IP_PUBLICO_EC2:8025"
               exit 1
             fi
             
