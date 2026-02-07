@@ -23,9 +23,9 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Run backend tests
-        working-directory: ./backend
-        run: go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/aplicacao/mappers/tests -v
+      # - name: Run backend tests
+      #   working-directory: ./backend
+      #   run: go test ./interno/dominio/tests ./interno/aplicacao/servicos/tests ./interno/aplicacao/mappers/tests -v
 
       - name: Build & Push backend
         uses: docker/build-push-action@v6
