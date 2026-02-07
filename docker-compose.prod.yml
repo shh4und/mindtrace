@@ -47,12 +47,6 @@ services:
         condition: service_healthy
       mailpit:
         condition: service_started
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
     restart: unless-stopped
     expose:
       - "8080"  # interno apenas, acessível via nginx proxy
@@ -61,8 +55,7 @@ services:
     image: ${DOCKER_HUB_USERNAME:-shh4und}/mindtrace-frontend:latest
     container_name: mindtrace-frontend
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     restart: unless-stopped
     ports:
       - "80:80"  # ÚNICA porta pública (HTTP)
