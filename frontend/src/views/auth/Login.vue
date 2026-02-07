@@ -47,12 +47,12 @@
             >
               Criar conta
             </router-link>
-            <router-link
+            <!-- <router-link
               to="/recuperar-senha"
               class="block text-sm text-gray-600 hover:text-emerald-600 transition-colors underline"
             >
               Esqueceu sua senha?
-            </router-link>
+            </router-link> -->
             <span class="text-sm text-pretty text-gray-600"
               >Ainda não ativou sua conta?</span
             >

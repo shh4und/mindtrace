@@ -11,7 +11,7 @@ import { useAuth } from "@/composables";
 const Landpage = () => import("@/views/Landpage.vue");
 const Login = () => import("@/views/auth/Login.vue");
 const Cadastro = () => import("@/views/auth/Cadastro.vue");
-const ForgotPassword = () => import("@/views/auth/ForgotPassword.vue");
+// const ForgotPassword = () => import("@/views/auth/ForgotPassword.vue");
 const Ativacao = () => import("@/views/auth/Ativacao.vue");
 const ReenvioAtivacao = () => import("@/views/auth/ReenvioAtivacao.vue");
 
@@ -73,11 +73,11 @@ const router = createRouter({
       name: "cadastro",
       component: Cadastro,
     },
-    {
-      path: "/recuperar-senha",
-      name: "forgot-password",
-      component: ForgotPassword,
-    },
+    // {
+    //   path: "/recuperar-senha",
+    //   name: "forgot-password",
+    //   component: ForgotPassword,
+    // },
     {
       path: "/ativacao",
       name: "ativacao",
