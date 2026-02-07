@@ -67,6 +67,9 @@ func (rhs *registroHumorServico) CriarRegistroHumor(dto *dtos.CriarRegistroHumor
 			return err
 		}
 
+		// Calcula o IBG antes de persistir
+		novoRegistroHumor.IndiceBemEstarGeral = novoRegistroHumor.CalcularIBG()
+
 		if err := rhs.repositorio.CriarRegistroHumor(tx, novoRegistroHumor); err != nil {
 			return err
 		}

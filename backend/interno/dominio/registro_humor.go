@@ -2,6 +2,7 @@ package dominio
 
 import (
 	"errors"
+	"math"
 	"time"
 )
 
@@ -27,7 +28,7 @@ type RegistroHumor struct {
 	HorasSono           int16     `gorm:"not null;check:horas_sono >= 0 AND horas_sono <= 12;"`
 	NivelEnergia        int16     `gorm:"not null;check:nivel_energia >= 1 and nivel_energia <= 10;"`
 	NivelStress         int16     `gorm:"not null;check:nivel_stress >= 1 and nivel_stress <= 10;"`
-	IndiceBemEstarGeral float64   `gorm:"not null;check:indice_bem_estar_geral >= 0 and indice_bem_estar_geral <= 1"`
+	IndiceBemEstarGeral float64   `gorm:"not null;default:0;check:indice_bem_estar_geral >= 0 and indice_bem_estar_geral <= 1"`
 	AutoCuidado         string    `gorm:"type:jsonb;default:'[]';not null;"`
 	Observacoes         string    `gorm:"type:text;"`
 	DataHoraRegistro    time.Time `gorm:"not null;default:CURRENT_TIMESTAMP;index:idx_paciente_data"`
@@ -82,6 +83,33 @@ func (rh *RegistroHumor) ValidarDataHoraRegistro() error {
 		return ErrDataHoraRegistroNoFuturo
 	}
 	return nil
+}
+
+// Pesos do IBG
+const (
+	PesoSono    = 0.4
+	PesoHumor   = 0.2
+	PesoStress  = 0.2
+	PesoEnergia = 0.2
+)
+
+// CalcularIBG calcula o Indice de Bem-Estar Geral a partir dos campos do registro
+func (rh *RegistroHumor) CalcularIBG() float64 {
+	normHumor := (float64(rh.NivelHumor) - 1.0) / 4.0
+	if normHumor < 0 {
+		normHumor = 0
+	}
+	normEnergia := (float64(rh.NivelEnergia) - 1.0) / 9.0
+	normStress := 1.0 - ((float64(rh.NivelStress) - 1.0) / 9.0)
+	distancia := math.Abs(float64(rh.HorasSono) - 8.0)
+	normSono := 1.0 - (distancia / 4.0)
+	if normSono < 0 {
+		normSono = 0
+	}
+	return (normHumor * PesoHumor) +
+		(normStress * PesoStress) +
+		(normSono * PesoSono) +
+		(normEnergia * PesoEnergia)
 }
 
 // Validacao completa do RegistroHumor
