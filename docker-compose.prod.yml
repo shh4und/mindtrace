@@ -38,7 +38,7 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       DB_DRIVER: postgres
-      GO_ENV: production
+      GO_ENV: ${GO_ENV}
       JWT_SECRET: ${JWT_SECRET}
       FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:5173}
       SKIP_DB_INIT: ${SKIP_DB_INIT:-false}
